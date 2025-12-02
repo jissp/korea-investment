@@ -1,10 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { RedisConfig, RedisModule } from '@modules/redis';
+import configuration from './configuration';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+    imports: [
+        ConfigModule.forRoot({
+            load: [configuration],
+        }),
+        RedisModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (
+                configService: ConfigService,
+            ): Promise<RedisConfig> => {
+                return configService.get<RedisConfig>('redis')!;
+            },
+        }),
+    ],
 })
 export class AppModule {}
