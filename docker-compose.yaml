@@ -1,0 +1,25 @@
+services:
+  backend-korea-investment:
+    container_name: korea-investment-api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - NODE_ENV=local
+        - APP_NAME=backend-korea-investment
+    networks:
+      - korea-investment-network
+  redis:
+    image: redis:7.0.12-alpine
+    container_name: korea-investment-redis
+    ports:
+      - '6379:6379'
+    networks:
+      - korea-investment-network
+volumes:
+  mysql_volume_data2:
+    driver: local
+
+networks:
+  korea-investment-network:
+    driver: bridge
