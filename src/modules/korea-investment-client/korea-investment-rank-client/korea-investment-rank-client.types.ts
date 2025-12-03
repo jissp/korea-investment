@@ -20,39 +20,179 @@ export interface BaseResponse<T> {
 }
 
 export interface DomesticStockQuotationVolumeRankParam {
-    FID_COND_MRKT_DIV_CODE: MarketDivCode; // 조건 시장 분류 코드 J:KRX, NX:NXT
-    FID_COND_SCR_DIV_CODE?: string; // 조건 화면 분류 코드 20171
-    FID_INPUT_ISCD?: string; // 입력 종목코드 0000(전체) 기타(업종코드)
-    FID_DIV_CLS_CODE?: string; // 분류 구분 코드 0(전체) 1(보통주) 2(우선주)
-    FID_BLNG_CLS_CODE: string; // 소속 구분 코드 0:평균거래량 1:거래증가율 2:평균거래회전율 3:거래금액순 4:평균거래금액회전율
-    FID_TRGT_CLS_CODE: string; // 대상 구분 코드 1 or 0 9자리 (차례대로 증거금 30% 40% 50% 60% 100% 신용보증금 30% 40% 50% 60%) ex) "111111111"
-    FID_TRGT_EXLS_CLS_CODE: string; // 대상 제외 구분 코드 1 or 0 10자리 (차례대로 투자위험/경고/주의 관리종목 정리매매 불성실공시 우선주 거래정지 ETF ETN 신용주문불가 SPAC) ex) "0000000000"
-    FID_INPUT_PRICE_1?: string; // 입력 가격1 가격 ~ ex) "0" 전체 가격 대상 조회 시 FID_INPUT_PRICE_1, FID_INPUT_PRICE_2 모두 ""(공란) 입력
-    FID_INPUT_PRICE_2?: string; // 입력 가격2 ~ 가격 ex) "1000000" 전체 가격 대상 조회 시 FID_INPUT_PRICE_1, FID_INPUT_PRICE_2 모두 ""(공란) 입력
-    FID_VOL_CNT?: string; // 거래량 수 거래량 ~ ex) "100000" 전체 거래량 대상 조회 시 FID_VOL_CNT ""(공란) 입력
-    FID_INPUT_DATE_1?: string; // 입력 날짜1 ""(공란) 입력
+    /**
+     * 조건 시장 분류 코드
+     * J:KRX
+     * NX:NXT
+     */
+    FID_COND_MRKT_DIV_CODE: MarketDivCode;
+
+    /**
+     * 조건 화면 분류 코드 20171
+     */
+    FID_COND_SCR_DIV_CODE?: string;
+
+    /**
+     * 입력 종목코드
+     * 0000(전체)
+     * 기타(업종코드)
+     */
+    FID_INPUT_ISCD?: string;
+
+    /**
+     * 분류 구분 코드
+     * 0(전체)
+     * 1(보통주)
+     * 2(우선주)
+     */
+    FID_DIV_CLS_CODE?: string;
+
+    /**
+     * 소속 구분 코드
+     * 0:평균거래량
+     * 1:거래증가율
+     * 2:평균거래회전율
+     * 3:거래금액순
+     * 4:평균거래금액회전율
+     */
+    FID_BLNG_CLS_CODE: string;
+
+    /**
+     * 대상 구분 코드
+     * 1 or 0 9자리
+     * (차례대로 증거금 30% 40% 50% 60% 100% 신용보증금 30% 40% 50% 60%)
+     * ex) "111111111"
+     */
+    FID_TRGT_CLS_CODE: string;
+
+    /**
+     * 대상 제외 구분 코드
+     * 1 or 0 10자리
+     * (차례대로 투자위험/경고/주의 관리종목 정리매매 불성실공시 우선주 거래정지 ETF ETN 신용주문불가 SPAC)
+     * ex) "0000000000"
+     */
+    FID_TRGT_EXLS_CLS_CODE: string;
+
+    /**
+     * 입력 가격1 가격 ~
+     * ex) "0" 전체 가격 대상 조회 시 FID_INPUT_PRICE_1, FID_INPUT_PRICE_2 모두 ""(공란) 입력
+     */
+    FID_INPUT_PRICE_1?: string;
+
+    /**
+     * 입력 가격2 ~ 가격
+     * ex) "1000000" 전체 가격 대상 조회 시 FID_INPUT_PRICE_1, FID_INPUT_PRICE_2 모두 ""(공란) 입력
+     */
+    FID_INPUT_PRICE_2?: string;
+
+    /**
+     * 거래량 수 거래량 ~
+     * ex) "100000" 전체 거래량 대상 조회 시 FID_VOL_CNT ""(공란) 입력
+     */
+    FID_VOL_CNT?: string;
+
+    /**
+     * 입력 날짜1
+     * ""(공란) 입력
+     */
+    FID_INPUT_DATE_1?: string;
 }
 
 export interface DomesticStockQuotationVolumeRankOutput {
-    hts_kor_isnm: string; // HTS 한글 종목명
-    mksc_shrn_iscd: string; // 유가증권 단축 종목코드
-    data_rank: string; // 데이터 순위
-    stck_prpr: string; // 주식 현재가
-    prdy_vrss_sign: string; // 전일 대비 부호
-    prdy_vrss: string; // 전일 대비
-    prdy_ctrt: string; // 전일 대비율
-    acml_vol: string; // 누적 거래량
-    prdy_vol: string; // 전일 거래량
-    lstn_stcn: string; // 상장 주수
-    avrg_vol: string; // 평균 거래량
-    n_befr_clpr_vrss_prpr_rate: string; // N일전종가대비현재가대비율
-    vol_inrt: string; // 거래량증가율
-    vol_tnrt: string; // 거래량 회전율
-    nday_vol_tnrt: string; // N일 거래량 회전율
-    avrg_tr_pbmn: string; // 평균 거래 대금
-    tr_pbmn_tnrt: string; // 거래대금회전율
-    nday_tr_pbmn_tnrt: string; // N일 거래대금 회전율
-    acml_tr_pbmn: string; // 누적 거래 대금
+    /**
+     * HTS 한글 종목명
+     */
+    hts_kor_isnm: string;
+
+    /**
+     * 유가증권 단축 종목코드
+     */
+    mksc_shrn_iscd: string;
+
+    /**
+     * 데이터 순위
+     */
+    data_rank: string;
+
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 전일 거래량
+     */
+    prdy_vol: string;
+
+    /**
+     * 상장 주수
+     */
+    lstn_stcn: string;
+
+    /**
+     * 평균 거래량
+     */
+    avrg_vol: string;
+
+    /**
+     * N일전종가대비현재가대비율
+     */
+    n_befr_clpr_vrss_prpr_rate: string;
+
+    /**
+     * 거래량증가율
+     */
+    vol_inrt: string;
+
+    /**
+     * 거래량 회전율
+     */
+    vol_tnrt: string;
+
+    /**
+     * N일 거래량 회전율
+     */
+    nday_vol_tnrt: string;
+
+    /**
+     * 평균 거래 대금
+     */
+    avrg_tr_pbmn: string;
+
+    /**
+     * 거래대금회전율
+     */
+    tr_pbmn_tnrt: string;
+
+    /**
+     * N일 거래대금 회전율
+     */
+    nday_tr_pbmn_tnrt: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
 }
 
 export interface DomesticStockRankingFluctuationParam {

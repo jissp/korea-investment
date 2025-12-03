@@ -8,6 +8,12 @@ import {
     DomesticStockQuotationInquirePrice2Output,
 } from './korea-investment-quotation-client.types';
 
+interface QuotationRequestConfig {
+    tradeId: string;
+    url: string;
+    params: Record<string, string>;
+}
+
 @Injectable()
 export class KoreaInvestmentQuotationClient {
     constructor(private readonly helper: KoreaInvestmentHelperService) {}
@@ -21,21 +27,14 @@ export class KoreaInvestmentQuotationClient {
         marketDivCode: MarketDivCode,
         iscd: string,
     ): Promise<R> {
-        const headers = await this.helper.buildHeaders('FHPST01010000');
-
-        const response = await this.helper.request<null, BaseResponse<R>>({
-            method: 'GET',
-            headers: {
-                ...headers,
-            },
+        return this.makeQuotationRequest<R>({
+            tradeId: 'FHPST01010000',
             url: '/uapi/domestic-stock/v1/quotations/inquire-price-2',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDivCode,
                 FID_INPUT_ISCD: iscd,
             },
         });
-
-        return response.output;
     }
 
     /**
@@ -47,21 +46,14 @@ export class KoreaInvestmentQuotationClient {
         marketDivCode: MarketDivCode,
         iscd: string,
     ): Promise<R> {
-        const headers = await this.helper.buildHeaders('FHPST01710000');
-
-        const response = await this.helper.request<null, BaseResponse<R>>({
-            method: 'GET',
-            headers: {
-                ...headers,
-            },
+        return this.makeQuotationRequest<R>({
+            tradeId: 'FHPST01710000',
             url: '/uapi/domestic-stock/v1/quotations/inquire-ccnl',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDivCode,
                 FID_INPUT_ISCD: iscd,
             },
         });
-
-        return response.output;
     }
 
     /**
@@ -71,20 +63,30 @@ export class KoreaInvestmentQuotationClient {
     public async inquireIndexPrice<
         R = DomesticStockQuotationInquireIndexPriceOutput,
     >(iscd: string): Promise<R> {
-        const headers = await this.helper.buildHeaders('FHPUP02100000');
-
-        const response = await this.helper.request<null, BaseResponse<R>>({
-            method: 'GET',
-            headers: {
-                ...headers,
-            },
+        return this.makeQuotationRequest<R>({
+            tradeId: 'FHPUP02100000',
             url: '/uapi/domestic-stock/v1/quotations/inquire-index-price',
             params: {
                 FID_COND_MRKT_DIV_CODE: 'U',
                 FID_INPUT_ISCD: iscd,
             },
         });
+    }
 
+    /**
+     * 공통 시세 조회 요청 처리
+     * @private
+     */
+    private async makeQuotationRequest<R>(
+        config: QuotationRequestConfig,
+    ): Promise<R> {
+        const headers = await this.helper.buildHeaders(config.tradeId);
+        const response = await this.helper.request<null, BaseResponse<R>>({
+            method: 'GET',
+            headers,
+            url: config.url,
+            params: config.params,
+        });
         return response.output;
     }
 }

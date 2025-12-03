@@ -1,20 +1,29 @@
 import { Axios, AxiosRequestConfig } from 'axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { getRedisKey, RedisService } from '@modules/redis';
+import {
+    CustomerType,
+    KoreaInvestmentBaseHeader,
+} from '@modules/korea-investment-client/common';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment-client/korea-investment-config';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment-client/korea-investment-oauth-client';
-import { KoreaInvestmentBaseHeader } from '@modules/korea-investment-client/common';
-import { CustomerType } from '@modules/korea-investment-client/korea-investment-quotation-client';
 
 @Injectable()
 export class KoreaInvestmentHelperService {
     constructor(
-        private readonly configService: KoreaInvestmentConfigService,
         @Inject('Client') private readonly client: Axios,
-        private readonly oAuthClient: KoreaInvestmentOauthClient,
         private readonly redisService: RedisService,
+        private readonly configService: KoreaInvestmentConfigService,
+        private readonly oAuthClient: KoreaInvestmentOauthClient,
     ) {}
 
+    /**
+     * @param method
+     * @param url
+     * @param payload
+     * @param params
+     * @param headers
+     */
     public async request<T, R>({
         method,
         url,
@@ -53,7 +62,7 @@ export class KoreaInvestmentHelperService {
             appkey: credential.appkey,
             appsecret: credential.appsecret,
             authorization: `Bearer ${token}`,
-            custtype: CustomerType.개인,
+            custtype: CustomerType.Personal,
             tr_id: tradeId,
         };
     }
@@ -74,10 +83,8 @@ export class KoreaInvestmentHelperService {
                 this.configService.getCredentials(),
             );
 
-        const expireSeconds = Math.round(
-            (new Date(access_token_token_expired).getTime() -
-                new Date().getTime()) /
-                1000,
+        const expireSeconds = this.calculateTokenExpireSeconds(
+            access_token_token_expired,
         );
 
         await this.redisService.set(redisKey, access_token, {
@@ -85,6 +92,17 @@ export class KoreaInvestmentHelperService {
         });
 
         return access_token;
+    }
+
+    /**
+     * @param expirationDateString
+     * @private
+     */
+    private calculateTokenExpireSeconds(expirationDateString: string): number {
+        const expirationTime = new Date(expirationDateString).getTime();
+        const currentTime = new Date().getTime();
+
+        return Math.round((expirationTime - currentTime) / 1000);
     }
 
     public getCredential() {

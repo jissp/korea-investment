@@ -1,9 +1,12 @@
-import { CustomerType } from '@modules/korea-investment-client/korea-investment-quotation-client';
-
 export enum MarketDivCode {
     KRX = 'J',
     NXT = 'NX',
     통합 = 'UN',
+}
+
+export enum CustomerType {
+    Corporation = 'B',
+    Personal = 'P',
 }
 
 export interface AppCredentials {
@@ -12,6 +15,7 @@ export interface AppCredentials {
      * 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.)
      */
     appkey: string;
+
     /**
      * 앱시크릿키
      * 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.)
@@ -20,6 +24,8 @@ export interface AppCredentials {
 }
 
 export interface KoreaInvestmentBaseHeader extends AppCredentials {
+    [key: string]: string | undefined;
+
     /**
      * 컨텐츠타입
      * application/json; charset=utf-8
@@ -73,7 +79,8 @@ export interface KoreaInvestmentBaseHeader extends AppCredentials {
 
     /**
      * 핸드폰번호
-     * [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원) 핸드폰번호ex) 01011112222 (하이픈 등 구분값 제거)
+     * [법인 필수] 제휴사APP을 사용하는 경우 사용자(회원)
+     * 핸드폰번호ex) 01011112222 (하이픈 등 구분값 제거)
      */
     phone_number?: string;
 
