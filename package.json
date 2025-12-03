@@ -16,7 +16,7 @@
         "test:watch": "jest --watch",
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-        "test:e2e": "jest --config ./test/jest-e2e.json"
+        "test:e2e": "jest --config ./jest-e2e.json"
     },
     "dependencies": {
         "@nestjs/common": "^11.0.1",
@@ -24,7 +24,6 @@
         "@nestjs/core": "^11.0.1",
         "@nestjs/platform-express": "^11.0.1",
         "@toss/nestjs-aop": "^2.1.7",
-        "@types/axios": "^0.9.36",
         "axios": "^1.13.2",
         "dotenv-cli": "^11.0.0",
         "iconv-lite": "^0.7.0",
@@ -77,6 +76,10 @@
         "testEnvironment": "node",
         "setupFiles": [
             "dotenv/config"
-        ]
+        ],
+        "moduleNameMapper": {
+            "^@app/(.*)$": "<rootDir>/app/$1",
+            "^@modules/(.*)$": "<rootDir>/modules/$1"
+        }
     }
 }

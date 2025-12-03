@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import { StockParser } from './stock-parser';
+import { Parser } from './parser';
 
 interface StockCode {
     shortCode: string;
@@ -8,13 +8,9 @@ interface StockCode {
 }
 
 async function main() {
-    const parser = new StockParser();
+    const parser = new Parser();
 
     const mstFileNames = [
-        'kosdaq_code',
-        'kospi_code',
-        'nxt_kosdaq_code',
-        'nxt_kospi_code',
         'idxcode',
     ];
 
