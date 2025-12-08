@@ -1,7 +1,10 @@
 import { Axios } from 'axios';
 import { Inject, Injectable } from '@nestjs/common';
-import { AppCredentials } from '@modules/korea-investment-client/common';
+import { AppCredentials } from '@modules/korea-investment/common';
 import {
+    Oauth2WebSocketTokenRequestBody,
+    Oauth2WebsocketTokenResponse,
+    RequestBodyOauth2TokenP,
     ResponseOauth2RevokeTokenP,
     ResponseOauth2TokenP,
 } from './korea-investment-oauth-client.types';
@@ -23,7 +26,7 @@ export class KoreaInvestmentOauthClient {
             data: {
                 ...credential,
                 grant_type: 'client_credentials',
-            },
+            } as RequestBodyOauth2TokenP,
         });
 
         return response.data;
@@ -49,6 +52,27 @@ export class KoreaInvestmentOauthClient {
                 token,
             },
         });
+
+        return response.data;
+    }
+
+    /**
+     * 실시간(웹소켓) 접속 키 발급
+     * @param credential
+     */
+    public async getWebSocketToken(
+        credential: AppCredentials,
+    ): Promise<Oauth2WebsocketTokenResponse> {
+        const response =
+            await this.client.request<Oauth2WebsocketTokenResponse>({
+                method: 'POST',
+                url: '/oauth2/Approval',
+                data: {
+                    appkey: credential.appkey,
+                    secretkey: credential.appsecret,
+                    grant_type: 'client_credentials',
+                } as Oauth2WebSocketTokenRequestBody,
+            });
 
         return response.data;
     }

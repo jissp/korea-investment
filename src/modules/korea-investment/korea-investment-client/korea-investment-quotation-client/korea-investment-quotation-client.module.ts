@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { KoreaInvestmentHelperModule } from '@modules/korea-investment-client/korea-investment-helper';
+import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentQuotationClient } from './korea-investment-quotation.client';
 
 @Module({

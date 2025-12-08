@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import {
     KoreaInvestmentConfigModule,
     KoreaInvestmentConfigService,
-} from '@modules/korea-investment-client/korea-investment-config';
+} from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentOauthClient } from './korea-investment-oauth.client';
 
 @Module({

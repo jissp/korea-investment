@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment-client/korea-investment-helper';
-import { MarketDivCode } from '@modules/korea-investment-client/common';
+import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
+import { MarketDivCode } from '@modules/korea-investment/common';
 import {
     BaseResponse,
     DomesticStockQuotationInquireCcnlOutput,

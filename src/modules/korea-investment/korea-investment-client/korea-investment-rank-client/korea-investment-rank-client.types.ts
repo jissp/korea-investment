@@ -1,4 +1,4 @@
-import { MarketDivCode } from '@modules/korea-investment-client/common';
+import { MarketDivCode } from '@modules/korea-investment/common';
 
 export interface BaseResponse<T> {
     /**

@@ -1,4 +1,4 @@
-import { AppCredentials } from '../common/base.types';
+import { AppCredentials } from '@modules/korea-investment/common/base.types';
 
 export interface RequestBodyOauth2TokenP extends AppCredentials {
     grant_type: string;
@@ -41,4 +41,24 @@ export interface ResponseOauth2RevokeTokenP {
      * 응답메세지
      */
     message?: string;
+}
+
+export type Oauth2WebSocketTokenRequestBody = Pick<AppCredentials, 'appkey'> & {
+    /**
+     * 권한부여타입
+     */
+    grant_type: string;
+
+    /**
+     * 한국투자증권 홈페이지에서 발급받은 appsecret (절대 노출되지 않도록 주의해주세요.)
+     * 주의 : appsecret와 secretkey는 동일하오니 착오없으시기 바랍니다. (용어가 다른점 양해 부탁드립니다.)
+     */
+    secretkey: string;
+};
+
+export interface Oauth2WebsocketTokenResponse {
+    /**
+     * 웹소켓 이용 시 발급받은 웹소켓 접속키를 appkey와 appsecret 대신 헤더에 넣어 API 호출합니다.
+     */
+    approval_key: string;
 }

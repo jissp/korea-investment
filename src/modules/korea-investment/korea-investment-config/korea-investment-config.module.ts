@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { IConfiguration } from '@app/configuration';
+import { KoreaInvestmentConfig } from './korea-investment-config.types';
 import { KoreaInvestmentConfigService } from './korea-investment-config.service';
 
 @Module({
@@ -11,8 +11,8 @@ import { KoreaInvestmentConfigService } from './korea-investment-config.service'
             inject: [ConfigService],
             useFactory: (
                 configService: ConfigService,
-            ): IConfiguration['koreaInvestment'] => {
-                return configService.get<IConfiguration['koreaInvestment']>(
+            ): KoreaInvestmentConfig => {
+                return configService.get<KoreaInvestmentConfig>(
                     'koreaInvestment',
                 )!;
             },

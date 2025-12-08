@@ -4,12 +4,15 @@ import { getRedisKey, RedisService } from '@modules/redis';
 import {
     CustomerType,
     KoreaInvestmentBaseHeader,
-} from '@modules/korea-investment-client/common';
-import { KoreaInvestmentConfigService } from '@modules/korea-investment-client/korea-investment-config';
-import { KoreaInvestmentOauthClient } from '@modules/korea-investment-client/korea-investment-oauth-client';
+} from '@modules/korea-investment/common';
+import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
+import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
 
 @Injectable()
 export class KoreaInvestmentHelperService {
+    private readonly WEBSOCKET_TOKEN_TTL = 86400;
+    private readonly WEBSOCKET_TOKEN_TTL_BUFFER = 3600; //
+
     constructor(
         @Inject('Client') private readonly client: Axios,
         private readonly redisService: RedisService,
@@ -92,6 +95,28 @@ export class KoreaInvestmentHelperService {
         });
 
         return access_token;
+    }
+
+    /**
+     * 실시간 (웹소켓) 접속키를 응답합니다.
+     */
+    public async getWebSocketToken() {
+        const redisKey = getRedisKey('korea-investment', 'websocket-token');
+
+        const token = await this.redisService.get(redisKey);
+        if (token) {
+            return token;
+        }
+
+        const { approval_key } = await this.oAuthClient.getWebSocketToken(
+            this.configService.getCredentials(),
+        );
+
+        await this.redisService.set(redisKey, approval_key, {
+            seconds: this.WEBSOCKET_TOKEN_TTL - this.WEBSOCKET_TOKEN_TTL_BUFFER,
+        });
+
+        return approval_key;
     }
 
     /**

@@ -4,8 +4,8 @@ import { RedisModule } from '@modules/redis';
 import {
     KoreaInvestmentConfigModule,
     KoreaInvestmentConfigService,
-} from '@modules/korea-investment-client/korea-investment-config';
-import { KoreaInvestmentOauthClientModule } from '@modules/korea-investment-client/korea-investment-oauth-client';
+} from '@modules/korea-investment/korea-investment-config';
+import { KoreaInvestmentOauthClientModule } from '@modules/korea-investment/korea-investment-oauth-client';
 import { KoreaInvestmentHelperService } from './korea-investment-helper.service';
 
 @Module({
