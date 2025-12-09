@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisConfig, RedisModule } from '@modules/redis';
+import { KoreaInvestmentWebSocketModule } from '@modules/korea-investment/korea-investment-web-socket';
 import configuration from './configuration';
 
 @Module({
@@ -17,6 +18,7 @@ import configuration from './configuration';
                 return configService.get<RedisConfig>('redis')!;
             },
         }),
+        KoreaInvestmentWebSocketModule,
     ],
 })
 export class AppModule {}
