@@ -1,25 +1,45 @@
+import { Nullable } from '@common/types';
+
 export interface IConfiguration {
     koreaInvestment: {
-        host: string;
-        key: string;
-        secret: string;
+        api: {
+            host: string;
+            key: string;
+            secret: string;
+        };
+        webSocket: {
+            host: string;
+        };
     };
     redis: {
         mode?: 'cluster' | 'single';
         host: string;
-        port: string | number;
+        port: string;
     };
 }
 
 export default (): IConfiguration => ({
     koreaInvestment: {
-        host: process.env['KOREA_INVESTMENT_HOST'] as string,
-        key: process.env['KOREA_INVESTMENT_APP_KEY'] as string,
-        secret: process.env['KOREA_INVESTMENT_APP_SECRET'] as string,
+        api: {
+            host: getEnv('KOREA_INVESTMENT_HOST'),
+            key: getEnv('KOREA_INVESTMENT_APP_KEY'),
+            secret: getEnv('KOREA_INVESTMENT_APP_SECRET'),
+        },
+        webSocket: {
+            host: getEnv('KOREA_INVESTMENT_WEBSOCKET_HOST'),
+        },
     },
     redis: {
-        mode: process.env['REDIS_MODE'] as IConfiguration['redis']['mode'],
-        host: process.env['REDIS_HOST'] as string,
-        port: process.env['REDIS_PORT'] as string | number,
+        mode: getEnv('REDIS_MODE') === 'cluster' ? 'cluster' : 'single',
+        host: getEnv('REDIS_HOST'),
+        port: getEnv('REDIS_PORT'),
     },
 });
+
+function getEnv(key: string): string {
+    if (!process.env[key]) {
+        throw new Error(`Missing required environment variable: ${key}`);
+    }
+
+    return process.env[key] as string;
+}
