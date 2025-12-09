@@ -1,18 +1,50 @@
-export interface BaseResponse<T> {
+export interface BaseResponse<R> {
     /**
      * 	성공 실패여부
      */
     rt_cd: string;
+
     /**
      * 	응답코드
      */
     msg_cd: string;
+
     /**
      * 	응답메세지
      */
     msg1: string;
 
-    output: T;
+    /**
+     * 응답상세
+     */
+    output: R;
+}
+
+export interface BaseMultiResponse<R, R2 = null> {
+    /**
+     * 	성공 실패여부
+     */
+    rt_cd: string;
+
+    /**
+     * 	응답코드
+     */
+    msg_cd: string;
+
+    /**
+     * 	응답메세지
+     */
+    msg1: string;
+
+    /**
+     * 응답상세
+     */
+    output1: R;
+
+    /**
+     * 응답상세
+     */
+    output2: R2;
 }
 
 export interface DomesticStockQuotationInquirePriceOutput {
@@ -916,4 +948,126 @@ export interface DomesticStockQuotationInquireIndexPriceOutput {
      * 순매수 잔량
      */
     ntby_rsqn: string;
+}
+
+export interface DomesticStockQuotationsInquireTimeItemChartPriceOutput {
+    /**
+     * 전일 대비
+     * 전일 대비 변동 (+-변동차이)
+     */
+    prdy_vrss: string;
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+    /**
+     * 전일 대비율
+     * 소수점 두자리까지 제공
+     */
+    prdy_ctrt: string;
+    /**
+     * 전일대비 종가
+     */
+    stck_prdy_clpr: string;
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+    /**
+     * 누적 거래대금
+     */
+    acml_tr_pbmn: string;
+    /**
+     * 한글 종목명
+     * 한글 종목명 (HTS 기준)
+     */
+    hts_kor_isnm: string;
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+}
+
+export interface DomesticStockQuotationsInquireTimeItemChartPriceOutput2 {
+    /**
+     * 주식 영업일자
+     */
+    stck_bsop_date: string;
+
+    /**
+     * 주식 체결시간
+     */
+    stck_cntg_hour: string;
+
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+
+    /**
+     * 주식 시가
+     */
+    stck_oprc: string;
+
+    /**
+     * 주식 최고가
+     */
+    stck_hgpr: string;
+
+    /**
+     * 주식 최저가
+     */
+    stck_lwpr: string;
+
+    /**
+     * 체결 거래량
+     */
+    cntg_vol: string;
+
+    /**
+     * 누적 거래대금
+     */
+    acml_tr_pbmn: string;
+}
+
+export interface DomesticStockQuotationsInquireIndexTimePrice {
+    /**
+     * 영업 시간
+     */
+    bsop_hour: string;
+
+    /**
+     * 업종 지수 현재가
+     */
+    bstp_nmix_prpr: string;
+
+    /**
+     * 업종 지수 전일 대비
+     */
+    bstp_nmix_prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 업종 지수 전일 대비율
+     */
+    bstp_nmix_prdy_ctrt: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 체결 거래량
+     */
+    cntg_vol: string;
 }
