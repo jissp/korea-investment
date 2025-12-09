@@ -5,7 +5,6 @@ import {
     koreaInvestmentWebSocketPipeMap,
     koreaInvestmentWebSocketPipeMapProvider,
 } from './korea-investment-web-socket.config';
-import { KoreaInvestmentWebSocketGateway } from './korea-investment-web-socket.gateway';
 import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-socket.helper.service';
 import { KoreaInvestmentWebSocketPipe } from './korea-investment-web-socket.pipe';
 import { KoreaInvestmentWsFactory } from './korea-investment-ws.factory';
@@ -24,7 +23,11 @@ import { KoreaInvestmentWsFactory } from './korea-investment-ws.factory';
         KoreaInvestmentWsFactory,
         KoreaInvestmentWebSocketHelperService,
         KoreaInvestmentWebSocketPipe,
-        KoreaInvestmentWebSocketGateway,
+    ],
+    exports: [
+        KoreaInvestmentWsFactory,
+        KoreaInvestmentWebSocketHelperService,
+        KoreaInvestmentWebSocketPipe,
     ],
 })
 export class KoreaInvestmentWebSocketModule {}
