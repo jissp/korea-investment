@@ -1,5 +1,3 @@
-import { Nullable } from '@common/types';
-
 export interface IConfiguration {
     koreaInvestment: {
         api: {
