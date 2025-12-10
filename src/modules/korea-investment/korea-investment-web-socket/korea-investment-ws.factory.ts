@@ -4,7 +4,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
     BasePingPongMessage,
     BaseResponse,
+    TransformResult,
 } from './korea-investment-web-socket.types';
+import { KoreaInvestmentWebSocketPipe } from './korea-investment-web-socket.pipe';
 import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-socket.helper.service';
 
 @Injectable()
@@ -12,13 +14,14 @@ export class KoreaInvestmentWsFactory {
     constructor(
         private readonly logger: Logger,
         private readonly webSocketHelper: KoreaInvestmentWebSocketHelperService,
+        private readonly pipe: KoreaInvestmentWebSocketPipe,
     ) {}
 
     public create() {
         const url = this.webSocketHelper.getWebSocketUrl();
         const koreaInvestmentWs = new ws(url);
 
-        const messageSubject = new Subject<string>();
+        const messageSubject = new Subject<TransformResult>();
         this.setUpWebsocketEvents(koreaInvestmentWs, messageSubject);
 
         return {
@@ -29,7 +32,7 @@ export class KoreaInvestmentWsFactory {
 
     private setUpWebsocketEvents(
         webSocket: ws,
-        messageSubject: Subject<string>,
+        messageSubject: Subject<TransformResult>,
     ) {
         const onMessage = (message: ws.Data) => {
             const encodedMessage = message.toString('utf-8');
@@ -49,7 +52,12 @@ export class KoreaInvestmentWsFactory {
                 return;
             }
 
-            messageSubject.next(encodedMessage);
+            try {
+                const transformedData = this.pipe.transform(encodedMessage);
+                messageSubject.next(transformedData);
+            } catch (error) {
+                this.logger.error('Failed to transform message:', error);
+            }
         };
 
         const onClose = () => {

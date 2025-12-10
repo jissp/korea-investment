@@ -133,4 +133,31 @@ export class KoreaInvestmentHelperService {
     public getCredential() {
         return this.configService.getCredentials();
     }
+
+    /**
+     * 숫자를 2자리 문자열로 패딩
+     */
+    private formatTwoDigits(num: number): string {
+        return num.toString().padStart(2, '0');
+    }
+
+    /**
+     * Date 객체를 YYYYMMDD 형식으로 변환
+     */
+    public formatDateParam(date: Date): string {
+        const year = date.getFullYear();
+        const month = this.formatTwoDigits(date.getMonth() + 1);
+        const day = this.formatTwoDigits(date.getDate());
+        return `${year}${month}${day}`;
+    }
+
+    /**
+     * Date 객체를 HHMMSS 형식으로 변환
+     */
+    public formatTimeParam(date: Date): string {
+        const hour = this.formatTwoDigits(date.getHours());
+        const minute = this.formatTwoDigits(date.getMinutes());
+        const seconds = this.formatTwoDigits(date.getSeconds());
+        return `${hour}${minute}${seconds}`;
+    }
 }

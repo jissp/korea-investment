@@ -1,17 +1,13 @@
 import * as _ from 'lodash';
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { Nullable } from '@common/types';
+import { TransformResult } from './korea-investment-web-socket.types';
 
 interface SplitFieldsResult {
     isEncrypted: boolean;
     tradeId: string;
     dataLength: number;
     dataContent: string;
-}
-
-interface TransformResult {
-    tradeId: string;
-    records: string[][];
 }
 
 /**

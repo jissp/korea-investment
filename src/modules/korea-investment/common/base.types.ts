@@ -96,3 +96,52 @@ export interface KoreaInvestmentBaseHeader extends AppCredentials {
      */
     gt_uid?: string;
 }
+
+export interface BaseResponse<R> {
+    /**
+     * 	성공 실패여부
+     */
+    rt_cd: string;
+
+    /**
+     * 	응답코드
+     */
+    msg_cd: string;
+
+    /**
+     * 	응답메세지
+     */
+    msg1: string;
+
+    /**
+     * 응답상세
+     */
+    output: R;
+}
+
+export interface BaseMultiResponse<R, R2 = null> {
+    /**
+     * 	성공 실패여부
+     */
+    rt_cd: string;
+
+    /**
+     * 	응답코드
+     */
+    msg_cd: string;
+
+    /**
+     * 	응답메세지
+     */
+    msg1: string;
+
+    /**
+     * 응답상세
+     */
+    output1: R;
+
+    /**
+     * 응답상세
+     */
+    output2: R2;
+}

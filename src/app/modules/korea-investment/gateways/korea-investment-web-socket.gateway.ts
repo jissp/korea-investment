@@ -1,7 +1,6 @@
-import { Server, Socket } from 'socket.io';
 import * as ws from 'ws';
+import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { isNil } from '@nestjs/common/utils/shared.utils';
 import {
     OnGatewayConnection,
     OnGatewayDisconnect,
@@ -10,16 +9,20 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets';
 import { PreventConcurrentExecution } from '@common/decorators';
-import { CustomerType } from '@modules/korea-investment/common';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
+    disconnect,
+    isConnected,
+    isEmptyConnectedSocket,
+} from '@common/domains';
+import { CustomerType } from '@modules/korea-investment/common';
+import {
+    KoreaInvestmentWebSocketHelperService,
+    KoreaInvestmentWsFactory,
     SubscribeRequest,
     SubscribeType,
+    TransformResult,
     WebSocketHeader,
-} from './korea-investment-web-socket.types';
-import { KoreaInvestmentWsFactory } from './korea-investment-ws.factory';
-import { KoreaInvestmentWebSocketPipe } from './korea-investment-web-socket.pipe';
-import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-socket.helper.service';
+} from '@modules/korea-investment/korea-investment-web-socket';
 
 @WebSocketGateway({
     cors: { origin: '*' },
@@ -29,16 +32,15 @@ import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-so
 export class KoreaInvestmentWebSocketGateway
     implements OnGatewayConnection, OnGatewayDisconnect
 {
+    private readonly logger = new Logger(KoreaInvestmentWebSocketGateway.name);
+
     @WebSocketServer()
     protected server: Server;
 
-    private pipe = new KoreaInvestmentWebSocketPipe();
     protected koreaInvestmentWs: ws | null = null;
 
     constructor(
-        private readonly logger: Logger,
-        private readonly helperService: KoreaInvestmentHelperService,
-        private readonly webSocketHelperService: KoreaInvestmentWebSocketHelperService,
+        private readonly helperService: KoreaInvestmentWebSocketHelperService,
         private readonly webSocketFactory: KoreaInvestmentWsFactory,
     ) {}
 
@@ -46,7 +48,7 @@ export class KoreaInvestmentWebSocketGateway
      * @param client
      */
     async handleConnection(client: Socket) {
-        if (this.isConnected()) {
+        if (isConnected(this.koreaInvestmentWs)) {
             return;
         }
 
@@ -57,11 +59,15 @@ export class KoreaInvestmentWebSocketGateway
      *
      */
     handleDisconnect() {
-        if (!this.isConnected() || !this.isEmptyConnectedSocket()) {
+        if (
+            !isConnected(this.koreaInvestmentWs) ||
+            !isEmptyConnectedSocket(this.server)
+        ) {
             return;
         }
 
-        this.disconnectWs();
+        disconnect(this.koreaInvestmentWs);
+        this.koreaInvestmentWs = null;
     }
 
     @SubscribeMessage('subscribe')
@@ -99,36 +105,6 @@ export class KoreaInvestmentWebSocketGateway
     }
 
     /**
-     * @private
-     */
-    private disconnectWs() {
-        if (!this.koreaInvestmentWs) {
-            return;
-        }
-
-        this.koreaInvestmentWs.removeAllListeners();
-        this.koreaInvestmentWs.close();
-        this.koreaInvestmentWs = null;
-    }
-
-    /**
-     * @private
-     */
-    private isConnected(): this is { koreaInvestmentWs: ws } {
-        return (
-            !isNil(this.koreaInvestmentWs) &&
-            this.koreaInvestmentWs.readyState === WebSocket.OPEN
-        );
-    }
-
-    /**
-     * @private
-     */
-    private isEmptyConnectedSocket() {
-        return this.server.sockets.sockets?.size === 0;
-    }
-
-    /**
      * @param client
      * @param requestType
      * @param payload
@@ -140,7 +116,7 @@ export class KoreaInvestmentWebSocketGateway
         payload: SubscribeRequest,
     ) {
         try {
-            if (!this.isConnected()) {
+            if (!isConnected(this.koreaInvestmentWs)) {
                 throw new Error('Korea Investment WebSocket is not connected');
             }
 
@@ -181,17 +157,17 @@ export class KoreaInvestmentWebSocketGateway
     }
 
     /**
-     * @param message
+     * @param tradeId
+     * @param records
      * @private
      */
-    private handleOnMessage(message: string) {
-        if (!this.isConnected()) {
+    private handleOnMessage({ tradeId, records }: TransformResult) {
+        if (!isConnected(this.koreaInvestmentWs)) {
             return;
         }
 
-        const { tradeId, records } = this.pipe.transform(message);
         for (const record of records) {
-            const pipe = this.webSocketHelperService.getPipe(tradeId);
+            const pipe = this.helperService.getPipe(tradeId);
             const realtimeData = pipe.transform(record);
 
             this.server.emit('realtime-data', realtimeData);

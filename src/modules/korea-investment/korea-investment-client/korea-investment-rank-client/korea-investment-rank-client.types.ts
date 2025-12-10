@@ -1,24 +1,5 @@
 import { MarketDivCode } from '@modules/korea-investment/common';
 
-export interface BaseResponse<T> {
-    /**
-     * 	성공 실패여부
-     */
-    rt_cd: string;
-
-    /**
-     * 	응답코드
-     */
-    msg_cd: string;
-
-    /**
-     * 	응답메세지
-     */
-    msg1: string;
-
-    output: T;
-}
-
 export interface DomesticStockQuotationVolumeRankParam {
     /**
      * 조건 시장 분류 코드
@@ -404,4 +385,17 @@ export interface DomesticStockRankingFluctuationOutput {
      * 기간 등락 비율
      */
     prd_rsfl_rate: string;
+}
+
+export interface DomesticStockRankingHtsTopViewOutput {
+    /**
+     * 시장구분
+     * J : 코스피, Q : 코스닥
+     */
+    mrkt_div_cls_code: 'J' | 'Q';
+
+    /**
+     * 종목코드 종목코드
+     */
+    mksc_shrn_iscd: string;
 }

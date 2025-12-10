@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import { MarketDivCode } from '@modules/korea-investment/common';
 import {
     BaseMultiResponse,
     BaseResponse,
+    MarketDivCode,
+} from '@modules/korea-investment/common';
+import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
+import {
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
@@ -26,12 +28,13 @@ export class KoreaInvestmentQuotationClient {
      * 주식현재가 시세
      * @param marketDivCode
      * @param iscd 종목코드의 shortCode. 예) 삼성전자: 005930
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-price-2
      */
-    public async inquirePrice<R = DomesticStockQuotationInquirePrice2Output>(
-        marketDivCode: MarketDivCode,
-        iscd: string,
-    ): Promise<R> {
-        return this.makeQuotationRequest<R>({
+    public async inquirePrice(marketDivCode: MarketDivCode, iscd: string) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationInquirePrice2Output>
+        >({
             tradeId: 'FHPST01010000',
             url: '/uapi/domestic-stock/v1/quotations/inquire-price-2',
             params: {
@@ -39,35 +42,42 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_ISCD: iscd,
             },
         });
+
+        return response.output;
     }
 
     /**
      * 주식현재가 체결
      * @param marketDivCode
      * @param iscd
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-ccnl
      */
-    public async inquireCcnl<R = DomesticStockQuotationInquireCcnlOutput>(
-        marketDivCode: MarketDivCode,
-        iscd: string,
-    ): Promise<R> {
-        return this.makeQuotationRequest<R>({
-            tradeId: 'FHPST01710000',
+    public async inquireCcnl(marketDivCode: MarketDivCode, iscd: string) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationInquireCcnlOutput>
+        >({
+            tradeId: 'FHKST01010300',
             url: '/uapi/domestic-stock/v1/quotations/inquire-ccnl',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDivCode,
                 FID_INPUT_ISCD: iscd,
             },
         });
+
+        return response.output;
     }
 
     /**
      * 국내업종 현재지수
      * @param iscd 업종 코드 (idxcode.json)
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-price
      */
-    public async inquireIndexPrice<
-        R = DomesticStockQuotationInquireIndexPriceOutput,
-    >(iscd: string): Promise<R> {
-        return this.makeQuotationRequest<R>({
+    public async inquireIndexPrice(iscd: string) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationInquireIndexPriceOutput>
+        >({
             tradeId: 'FHPUP02100000',
             url: '/uapi/domestic-stock/v1/quotations/inquire-index-price',
             params: {
@@ -75,84 +85,96 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_ISCD: iscd,
             },
         });
+
+        return response.output;
     }
 
     /**
      * 주식당일분봉조회
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice
      */
-    public async inQuireTimeItemChartPrice<
-        R = BaseMultiResponse<
-            DomesticStockQuotationsInquireTimeItemChartPriceOutput,
-            DomesticStockQuotationsInquireTimeItemChartPriceOutput2
-        >,
-    >(
+    public async inQuireTimeItemChartPrice(
         marketDiveCode: MarketDivCode,
         iscd: string,
         date: Date,
         isIncludeOldData: boolean = false,
     ) {
-        const hour = date.getHours().toString().padStart(2, '0');
-        const minute = date.getMinutes().toString().padStart(2, '0');
-        const seconds = date.getSeconds().toString().padStart(2, '0');
+        const hourParam = this.helper.formatTimeParam(date);
 
-        return this.makeQuotationRequest<R>({
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockQuotationsInquireTimeItemChartPriceOutput,
+                DomesticStockQuotationsInquireTimeItemChartPriceOutput2
+            >
+        >({
             tradeId: 'FHKST03010200',
             url: '/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDiveCode,
                 FID_INPUT_ISCD: iscd,
-                FID_INPUT_HOUR_1: `${hour}${minute}${seconds}`,
+                FID_INPUT_HOUR_1: hourParam,
                 FID_PW_DATA_INCU_YN: isIncludeOldData ? 'Y' : 'N',
                 FID_ETC_CLS_CODE: '',
             },
         });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
     }
 
     /**
      * 주식일별분봉조회
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice
      */
-    public async inQuireTimeDailyChartPrice<
-        R = BaseMultiResponse<
-            DomesticStockQuotationsInquireTimeItemChartPriceOutput,
-            DomesticStockQuotationsInquireTimeItemChartPriceOutput2
-        >,
-    >(
-        marketDiveCode: MarketDivCode,
+    public async inQuireTimeDailyChartPrice(
+        marketDivCode: MarketDivCode,
         iscd: string,
         date: Date,
         isIncludeOldData: boolean = false,
     ) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const hour = date.getHours().toString().padStart(2, '0');
-        const minute = date.getMinutes().toString().padStart(2, '0');
-        const seconds = date.getSeconds().toString().padStart(2, '0');
+        const dateParam = this.helper.formatDateParam(date);
+        const hourParam = this.helper.formatTimeParam(date);
 
-        return this.makeQuotationRequest<R>({
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockQuotationsInquireTimeItemChartPriceOutput,
+                DomesticStockQuotationsInquireTimeItemChartPriceOutput2
+            >
+        >({
             tradeId: 'FHKST03010230',
             url: '/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice',
             params: {
-                FID_COND_MRKT_DIV_CODE: marketDiveCode,
+                FID_COND_MRKT_DIV_CODE: marketDivCode,
                 FID_INPUT_ISCD: iscd,
-                FID_INPUT_DATE_1: `${year}${month}${day}`,
-                FID_INPUT_HOUR_1: `${hour}${minute}${seconds}`,
+                FID_INPUT_DATE_1: dateParam,
+                FID_INPUT_HOUR_1: hourParam,
                 FID_PW_DATA_INCU_YN: isIncludeOldData ? 'Y' : 'N',
                 FID_FAKE_TICK_INCU_YN: '',
             },
         });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
     }
 
     /**
      * 국내업종 시간별지수
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-timeprice
      */
     public async inQuireIndexTimePrice<
-        R = BaseResponse<DomesticStockQuotationsInquireIndexTimePrice>,
+        R = DomesticStockQuotationsInquireIndexTimePrice,
     >(
         iscd: '0001' | '1001' | '2001' | '3003',
         timeframe: '1' | '5' | '15' | '30' | '60' | '300' | '600',
     ) {
-        return this.makeQuotationRequest<R>({
+        const response = await this.makeQuotationRequest<BaseResponse<R>>({
             tradeId: 'FHPUP02110200',
             url: '/uapi/domestic-stock/v1/quotations/inquire-index-timeprice',
             params: {
@@ -161,6 +183,8 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_HOUR_1: timeframe,
             },
         });
+
+        return response.output;
     }
 
     /**
@@ -171,12 +195,12 @@ export class KoreaInvestmentQuotationClient {
         config: QuotationRequestConfig,
     ): Promise<R> {
         const headers = await this.helper.buildHeaders(config.tradeId);
-        const response = await this.helper.request<null, BaseResponse<R>>({
+
+        return this.helper.request<null, R>({
             method: 'GET',
             headers,
             url: config.url,
             params: config.params,
         });
-        return response.output;
     }
 }
