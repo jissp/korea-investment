@@ -1,24 +1,5 @@
 import { MarketDivCode } from '@modules/korea-investment/common';
 
-export interface BaseResponse<T> {
-    /**
-     * 	성공 실패여부
-     */
-    rt_cd: string;
-
-    /**
-     * 	응답코드
-     */
-    msg_cd: string;
-
-    /**
-     * 	응답메세지
-     */
-    msg1: string;
-
-    output: T;
-}
-
 export interface DomesticStockQuotationVolumeRankParam {
     /**
      * 조건 시장 분류 코드
