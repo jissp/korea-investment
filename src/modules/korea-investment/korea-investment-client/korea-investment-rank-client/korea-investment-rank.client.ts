@@ -1,17 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import {
+    BaseMultiResponse,
+    BaseResponse,
+} from '@modules/korea-investment/common';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
-    BaseResponse,
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockQuotationVolumeRankParam,
     DomesticStockRankingFluctuationOutput,
     DomesticStockRankingFluctuationParam,
+    DomesticStockRankingHtsTopViewOutput,
 } from './korea-investment-rank-client.types';
 
 interface RankRequestConfig {
     tradeId: string;
     url: string;
-    params: Record<string, string>;
+    params?: Record<string, string>;
 }
 
 @Injectable()
@@ -21,29 +25,57 @@ export class KoreaInvestmentRankClient {
     /**
      * 거래량순위
      * @param params
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/volume-rank
      */
-    public async inquireVolumeRank<
-        R = DomesticStockQuotationVolumeRankOutput[],
-    >(params: DomesticStockQuotationVolumeRankParam): Promise<R> {
-        return this.makeRankRequest<R>({
+    public async inquireVolumeRank(
+        params: DomesticStockQuotationVolumeRankParam,
+    ) {
+        const response = await this.makeRankRequest<
+            BaseResponse<DomesticStockQuotationVolumeRankOutput[]>
+        >({
             tradeId: 'FHPST01710000',
             url: '/uapi/domestic-stock/v1/quotations/volume-rank',
             params: this.buildVolumeRankParams(params),
         });
+
+        return response.output;
     }
 
     /**
      * 국내주식 등락률 순위
      * @param params
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/ranking/fluctuation
      */
-    public async inquireFluctuationRank<
-        R = DomesticStockRankingFluctuationOutput[],
-    >(params: DomesticStockRankingFluctuationParam): Promise<R> {
-        return this.makeRankRequest<R>({
+    public async inquireFluctuationRank(
+        params: DomesticStockRankingFluctuationParam,
+    ) {
+        const response = await this.makeRankRequest<
+            BaseResponse<DomesticStockRankingFluctuationOutput[]>
+        >({
             tradeId: 'FHPST01700000',
             url: '/uapi/domestic-stock/v1/ranking/fluctuation',
             params: this.buildFluctuationParams(params),
         });
+
+        return response.output;
+    }
+
+    /**
+     * HTS조회상위20종목
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/ranking/hts-top-view
+     */
+    public async getHtsTopList() {
+        const response = await this.makeRankRequest<
+            BaseMultiResponse<DomesticStockRankingHtsTopViewOutput[]>
+        >({
+            tradeId: 'HHMCM000100C0',
+            url: '/uapi/domestic-stock/v1/ranking/hts-top-view',
+        });
+
+        return response.output1;
     }
 
     /**
@@ -52,13 +84,13 @@ export class KoreaInvestmentRankClient {
      */
     private async makeRankRequest<R>(config: RankRequestConfig): Promise<R> {
         const headers = await this.helper.buildHeaders(config.tradeId);
-        const response = await this.helper.request<null, BaseResponse<R>>({
+
+        return this.helper.request<null, R>({
             method: 'GET',
             headers,
             url: config.url,
             params: config.params,
         });
-        return response.output;
     }
 
     /**

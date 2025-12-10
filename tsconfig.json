@@ -17,8 +17,10 @@
         "noImplicitAny": false,
         "strictBindCallApply": false,
         "noFallthroughCasesInSwitch": false,
+        "resolveJsonModule": true,
         "paths": {
             "@app/*": ["src/app/*"],
+            "@assets/*": ["src/assets/*"],
             "@common/*": ["src/common/*"],
             "@modules/*": ["src/modules/*"]
         }

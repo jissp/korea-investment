@@ -405,3 +405,16 @@ export interface DomesticStockRankingFluctuationOutput {
      */
     prd_rsfl_rate: string;
 }
+
+export interface DomesticStockRankingHtsTopViewOutput {
+    /**
+     * 시장구분
+     * J : 코스피, Q : 코스닥
+     */
+    mrkt_div_cls_code: 'J' | 'Q';
+
+    /**
+     * 종목코드 종목코드
+     */
+    mksc_shrn_iscd: string;
+}

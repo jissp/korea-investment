@@ -86,6 +86,14 @@ describe('KoreaInvestmentOauthClient e2e 테스트', () => {
 
                 expect(response).toBeDefined();
             });
+
+            it('HTS조회상위20종목', async () => {
+                const response = await rankClient.getHtsTopList();
+
+                console.log(response);
+
+                expect(response).toBeDefined();
+            });
         });
     });
 });

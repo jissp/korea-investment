@@ -1,5 +1,5 @@
-import { Server, Socket } from 'socket.io';
 import * as ws from 'ws';
+import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import {
     OnGatewayConnection,
@@ -9,7 +9,11 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets';
 import { PreventConcurrentExecution } from '@common/decorators';
-import { disconnect, isConnected, isEmptyConnectedSocket } from '@common/domains';
+import {
+    disconnect,
+    isConnected,
+    isEmptyConnectedSocket,
+} from '@common/domains';
 import { CustomerType } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentWebSocketHelperService,
@@ -28,13 +32,14 @@ import {
 export class KoreaInvestmentWebSocketGateway
     implements OnGatewayConnection, OnGatewayDisconnect
 {
+    private readonly logger = new Logger(KoreaInvestmentWebSocketGateway.name);
+
     @WebSocketServer()
     protected server: Server;
 
     protected koreaInvestmentWs: ws | null = null;
 
     constructor(
-        private readonly logger: Logger,
         private readonly helperService: KoreaInvestmentWebSocketHelperService,
         private readonly webSocketFactory: KoreaInvestmentWsFactory,
     ) {}
