@@ -1,6 +1,7 @@
-import { MarketDivCode } from '@modules/korea-investment/common';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsBooleanString, IsEnum, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MarketDivCode } from '@modules/korea-investment/common';
 
 export class DomesticStockQuotationsInquireTimeItemChartPriceQuery {
     @ApiProperty({
@@ -21,7 +22,8 @@ export class DomesticStockQuotationsInquireTimeItemChartPriceQuery {
     @ApiPropertyOptional({
         type: () => Boolean,
         description: '',
+        default: 'true',
     })
     @IsBooleanString()
-    isIncludeOldData: boolean;
+    isIncludeOldData: boolean = true;
 }

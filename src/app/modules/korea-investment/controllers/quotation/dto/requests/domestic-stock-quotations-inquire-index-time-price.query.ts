@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class DomesticStockQuotationsInquireIndexTimePriceQuery {
     @ApiProperty({
@@ -11,10 +12,12 @@ export class DomesticStockQuotationsInquireIndexTimePriceQuery {
     @IsEnum(['0001', '1001', '2001', '3003'])
     iscd: '0001' | '1001' | '2001' | '3003';
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         type: String,
         description: '',
+        default: '60',
     })
     @IsString()
-    timeframe: '1' | '5' | '15' | '30' | '60' | '300' | '600';
+    @IsOptional()
+    timeframe: '1' | '5' | '15' | '30' | '60' | '300' | '600' = '60';
 }

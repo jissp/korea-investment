@@ -1,6 +1,5 @@
-import { MarketDivCode } from '@modules/korea-investment/common';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
 
 export class DomesticStockQuotationsInquireIndexPriceQuery {
     @ApiProperty({

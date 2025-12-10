@@ -17,7 +17,9 @@ async function bootstrap() {
     });
 
     // Class Validator 적용
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe({
+        transform: true,
+    }));
 
     await app.listen(appPort);
 

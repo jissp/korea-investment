@@ -25,16 +25,16 @@ export class RankController {
     ) {
         return this.rankClient.inquireVolumeRank({
             FID_COND_MRKT_DIV_CODE: query.fidCondMrktDivCode,
-            FID_COND_SCR_DIV_CODE: query.fidCondScrDivCode ?? '20171',
-            FID_INPUT_ISCD: query.fidInputIscd ?? '0000',
-            FID_DIV_CLS_CODE: query.fidDivClsCode ?? '0',
+            FID_COND_SCR_DIV_CODE: query.fidCondScrDivCode,
+            FID_INPUT_ISCD: query.fidInputIscd,
+            FID_DIV_CLS_CODE: query.fidDivClsCode,
             FID_BLNG_CLS_CODE: query.fidBlngClsCode,
-            FID_TRGT_CLS_CODE: query.fidTrgtClsCode ?? '000000000',
-            FID_TRGT_EXLS_CLS_CODE: query.fidTrgtExlsClsCode ?? '000000000',
-            FID_INPUT_PRICE_1: query.fidInputPrice1 ?? '',
-            FID_INPUT_PRICE_2: query.fidInputPrice2 ?? '',
-            FID_VOL_CNT: query.fidVolCnt ?? '',
-            FID_INPUT_DATE_1: query.fidInputDate1 ?? '',
+            FID_TRGT_CLS_CODE: query.fidTrgtClsCode,
+            FID_TRGT_EXLS_CLS_CODE: query.fidTrgtExlsClsCode,
+            FID_INPUT_PRICE_1: query.fidInputPrice1,
+            FID_INPUT_PRICE_2: query.fidInputPrice2,
+            FID_VOL_CNT: query.fidVolCnt,
+            FID_INPUT_DATE_1: query.fidInputDate1,
         });
     }
 
@@ -50,7 +50,7 @@ export class RankController {
     ) {
         return this.rankClient.inquireFluctuationRank({
             fid_cond_mrkt_div_code: query.fidCondMrktDivCode,
-            fid_cond_scr_div_code: query.fidCondScrDivCode ?? '20170',
+            fid_cond_scr_div_code: query.fidCondScrDivCode,
             fid_input_cnt_1: query.fidInputCnt1,
             fid_input_iscd: query.fidInputIscd,
             fid_input_price_1: query.fidInputPrice1,
@@ -58,11 +58,11 @@ export class RankController {
             fid_rsfl_rate1: query.fidRsflRate1,
             fid_rsfl_rate2: query.fidRsflRate2,
             fid_vol_cnt: query.fidVolCnt,
-            fid_rank_sort_cls_code: query.fidRankSortClsCode ?? '0',
-            fid_prc_cls_code: query.fidPrcClsCode ?? '0',
-            fid_div_cls_code: query.fidDivClsCode ?? '0',
-            fid_trgt_cls_code: query.fidTrgtClsCode ?? '0',
-            fid_trgt_exls_cls_code: query.fidTrgtExlsClsCode ?? '0',
+            fid_rank_sort_cls_code: query.fidRankSortClsCode,
+            fid_prc_cls_code: query.fidPrcClsCode,
+            fid_div_cls_code: query.fidDivClsCode,
+            fid_trgt_cls_code: query.fidTrgtClsCode,
+            fid_trgt_exls_cls_code: query.fidTrgtExlsClsCode,
         });
     }
 
