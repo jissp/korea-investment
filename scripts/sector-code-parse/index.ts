@@ -16,6 +16,8 @@ async function main() {
 
     for (const fileName of mstFileNames) {
         const filePath = `${__dirname}/asserts/${fileName}.mst`;
+
+        console.log(filePath);
         const codes = await parser.parse(filePath);
 
         const codeJson = codes.map(([shortCode, code, name]): StockCode => {

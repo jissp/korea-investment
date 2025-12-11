@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DomesticStockRankingFluctuationOutput } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
 
-export class DomesticStockRankingFluctuationResponse implements DomesticStockRankingFluctuationOutput {
+class DomesticStockRankingFluctuation implements DomesticStockRankingFluctuationOutput {
     @ApiProperty({
         type: String,
         description: '주식 단축 종목코드',
@@ -145,4 +145,11 @@ export class DomesticStockRankingFluctuationResponse implements DomesticStockRan
         description: '기간 등락 비율',
     })
     prd_rsfl_rate: string;
+}
+export class DomesticStockRankingFluctuationResponse {
+    @ApiProperty({
+        type: DomesticStockRankingFluctuation,
+        isArray: true,
+    })
+    data: DomesticStockRankingFluctuation[];
 }

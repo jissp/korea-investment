@@ -1,415 +1,3 @@
-export interface DomesticStockQuotationInquirePriceOutput {
-    /**
-     * 종목 상태 구분 코드
-     */
-    iscd_stat_cls_code: string;
-
-    /**
-     * 증거금 비율
-     */
-    marg_rate: string;
-
-    /**
-     * 대표 시장 한글 명
-     */
-    rprs_mrkt_kor_name: string;
-
-    /**
-     * 신 고가 저가 구분 코드
-     */
-    new_hgpr_lwpr_cls_code: string;
-
-    /**
-     * 업종 한글 종목명
-     */
-    bstp_kor_isnm: string;
-
-    /**
-     * 임시 정지 여부
-     */
-    temp_stop_yn: string;
-
-    /**
-     * 시가 범위 연장 여부
-     */
-    oprc_rang_cont_yn: string;
-
-    /**
-     * 종가 범위 연장 여부
-     */
-    clpr_rang_cont_yn: string;
-
-    /**
-     * 신용 가능 여부
-     */
-    crdt_able_yn: string;
-
-    /**
-     * 보증금 비율 구분 코드
-     */
-    grmn_rate_cls_code: string;
-
-    /**
-     * ELW 발행 여부
-     */
-    elw_pblc_yn: string;
-
-    /**
-     * 주식 현재가
-     */
-    stck_prpr: string;
-
-    /**
-     * 전일 대비
-     */
-    prdy_vrss: string;
-
-    /**
-     * 전일 대비 부호
-     */
-    prdy_vrss_sign: string;
-
-    /**
-     * 전일 대비율
-     */
-    prdy_ctrt: string;
-
-    /**
-     * 누적 거래 대금
-     */
-    acml_tr_pbmn: string;
-
-    /**
-     * 누적 거래량
-     */
-    acml_vol: string;
-
-    /**
-     * 전일 대비 거래량 비율
-     */
-    prdy_vrss_vol_rate: string;
-
-    /**
-     * 주식 시가2
-     */
-    stck_oprc: string;
-
-    /**
-     * 주식 최고가
-     */
-    stck_hgpr: string;
-
-    /**
-     * 주식 최저가
-     */
-    stck_lwpr: string;
-
-    /**
-     * 주식 상한가
-     */
-    stck_mxpr: string;
-
-    /**
-     * 주식 하한가
-     */
-    stck_llam: string;
-
-    /**
-     * 주식 기준가
-     */
-    stck_sdpr: string;
-
-    /**
-     * 가중 평균 주식 가격
-     */
-    wghn_avrg_stck_prc: string;
-
-    /**
-     * HTS 외국인 소진율
-     */
-    hts_frgn_ehrt: string;
-
-    /**
-     * 외국인 순매수 수량
-     */
-    frgn_ntby_qty: string;
-
-    /**
-     * 프로그램매매 순매수 수량
-     */
-    pgtr_ntby_qty: string;
-
-    /**
-     * 피벗 2차 디저항 가격
-     */
-    pvt_scnd_dmrs_prc: string;
-
-    /**
-     * 피벗 1차 디저항 가격
-     */
-    pvt_frst_dmrs_prc: string;
-
-    /**
-     * 피벗 포인트 값
-     */
-    pvt_pont_val: string;
-
-    /**
-     * 피벗 1차 디지지 가격
-     */
-    pvt_frst_dmsp_prc: string;
-
-    /**
-     * 피벗 2차 디지지 가격
-     */
-    pvt_scnd_dmsp_prc: string;
-
-    /**
-     * 디저항 값
-     */
-    dmrs_val: string;
-
-    /**
-     * 디지지 값
-     */
-    dmsp_val: string;
-
-    /**
-     * 자본금
-     */
-    cpfn: string;
-
-    /**
-     * 제한 폭 가격
-     */
-    rstc_wdth_prc: string;
-
-    /**
-     * 주식 액면가
-     */
-    stck_fcam: string;
-
-    /**
-     * 주식 대용가
-     */
-    stck_sspr: string;
-
-    /**
-     * 호가단위
-     */
-    aspr_unit: string;
-
-    /**
-     * HTS 매매 수량 단위 값
-     */
-    hts_deal_qty_unit_val: string;
-
-    /**
-     * 상장 주수
-     */
-    lstn_stcn: string;
-
-    /**
-     * HTS 시가총액
-     */
-    hts_avls: string;
-
-    /**
-     * PER
-     */
-    per: string;
-
-    /**
-     * PBR
-     */
-    pbr: string;
-
-    /**
-     * 결산 월
-     */
-    stac_month: string;
-
-    /**
-     * 거래량 회전율
-     */
-    vol_tnrt: string;
-
-    /**
-     * EPS
-     */
-    eps: string;
-
-    /**
-     * BPS
-     */
-    bps: string;
-
-    /**
-     * 250일 최고가
-     */
-    d250_hgpr: string;
-
-    /**
-     * 250일 최고가 일자
-     */
-    d250_hgpr_date: string;
-
-    /**
-     * 250일 최고가 대비 현재가 비율
-     */
-    d250_hgpr_vrss_prpr_rate: string;
-
-    /**
-     * 250일 최저가
-     */
-    d250_lwpr: string;
-
-    /**
-     * 250일 최저가 일자
-     */
-    d250_lwpr_date: string;
-
-    /**
-     * 250일 최저가 대비 현재가 비율
-     */
-    d250_lwpr_vrss_prpr_rate: string;
-
-    /**
-     * 주식 연중 최고가
-     */
-    stck_dryy_hgpr: string;
-
-    /**
-     * 연중 최고가 대비 현재가 비율
-     */
-    dryy_hgpr_vrss_prpr_rate: string;
-
-    /**
-     * 연중 최고가 일자
-     */
-    dryy_hgpr_date: string;
-
-    /**
-     * 주식 연중 최저가
-     */
-    stck_dryy_lwpr: string;
-
-    /**
-     * 연중 최저가 대비 현재가 비율
-     */
-    dryy_lwpr_vrss_prpr_rate: string;
-
-    /**
-     * 연중 최저가 일자
-     */
-    dryy_lwpr_date: string;
-
-    /**
-     * 52주일 최고가
-     */
-    w52_hgpr: string;
-
-    /**
-     * 52주일 최고가 대비 현재가 대비
-     */
-    w52_hgpr_vrss_prpr_ctrt: string;
-
-    /**
-     * 52주일 최고가 일자
-     */
-    w52_hgpr_date: string;
-
-    /**
-     * 52주일 최저가
-     */
-    w52_lwpr: string;
-
-    /**
-     * 52주일 최저가 대비 현재가 대비
-     */
-    w52_lwpr_vrss_prpr_ctrt: string;
-
-    /**
-     * 52주일 최저가 일자
-     */
-    w52_lwpr_date: string;
-
-    /**
-     * 전체 융자 잔고 비율
-     */
-    whol_loan_rmnd_rate: string;
-
-    /**
-     * 공매도가능여부
-     */
-    ssts_yn: string;
-
-    /**
-     * 주식 단축 종목코드
-     */
-    stck_shrn_iscd: string;
-
-    /**
-     * 액면가 통화명
-     */
-    fcam_cnnm: string;
-
-    /**
-     * 자본금 통화명
-     */
-    cpfn_cnnm: string;
-
-    /**
-     * 접근도
-     */
-    apprch_rate: string;
-
-    /**
-     * 외국인 보유 수량
-     */
-    frgn_hldn_qty: string;
-
-    /**
-     * VI적용구분코드
-     */
-    vi_cls_code: string;
-
-    /**
-     * 시간외단일가VI적용구분코드
-     */
-    ovtm_vi_cls_code: string;
-
-    /**
-     * 최종 공매도 체결 수량
-     */
-    last_ssts_cntg_qty: string;
-
-    /**
-     * 투자유의여부
-     */
-    invt_caful_yn: string;
-
-    /**
-     * 시장경고코드
-     */
-    mrkt_warn_cls_code: string;
-
-    /**
-     * 단기과열여부
-     */
-    short_over_yn: string;
-
-    /**
-     * 정리매매여부
-     */
-    sltr_yn: string;
-
-    /**
-     * 관리종목여부
-     */
-    mang_issu_cls_code: string;
-}
-
 export interface DomesticStockQuotationInquirePrice2Output {
     /**
      * 대표 시장 한글 명
@@ -981,7 +569,7 @@ export interface DomesticStockQuotationsInquireTimeItemChartPriceOutput2 {
     acml_tr_pbmn: string;
 }
 
-export interface DomesticStockQuotationsInquireIndexTimePrice {
+export interface DomesticStockQuotationsInquireIndexTimePriceOutput {
     /**
      * 영업 시간
      */
@@ -1021,4 +609,637 @@ export interface DomesticStockQuotationsInquireIndexTimePrice {
      * 체결 거래량
      */
     cntg_vol: string;
+}
+
+export interface DomesticStockQuotationsInquireIndexDailyPriceParam {
+    /**
+     * FID 기간 분류 코드 - 일/주/월 구분코드 ( D:일별 , W:주별, M:월별 )
+     */
+    FID_PERIOD_DIV_CODE: string;
+
+    /**
+     * FID 조건 시장 분류 코드 - 시장구분코드 (업종 U)
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+
+    /**
+     * FID 입력 종목코드 - 코스피(0001), 코스닥(1001), 코스피200(2001) ... 포탈 (FAQ : 종목정보 다운로드(국내) - 업종코드 참조)
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * FID 입력 날짜1 - 입력 날짜(ex. 20240223)
+     */
+    FID_INPUT_DATE_1: string;
+}
+
+export interface DomesticStockQuotationsInquireIndexDailyPriceOutput {
+    /**
+     * 업종 지수 현재가
+     */
+    bstp_nmix_prpr: string;
+
+    /**
+     * 업종 지수 전일 대비
+     */
+    bstp_nmix_prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 업종 지수 전일 대비율
+     */
+    bstp_nmix_prdy_ctrt: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 업종 지수 시가2
+     */
+    bstp_nmix_oprc: string;
+
+    /**
+     * 업종 지수 최고가
+     */
+    bstp_nmix_hgpr: string;
+
+    /**
+     * 업종 지수 최저가
+     */
+    bstp_nmix_lwpr: string;
+
+    /**
+     * 전일 거래량
+     */
+    prdy_vol: string;
+
+    /**
+     * 상승 종목 수
+     */
+    ascn_issu_cnt: string;
+
+    /**
+     * 하락 종목 수
+     */
+    down_issu_cnt: string;
+
+    /**
+     * 보합 종목 수
+     */
+    stnr_issu_cnt: string;
+
+    /**
+     * 상한 종목 수
+     */
+    uplm_issu_cnt: string;
+
+    /**
+     * 하한 종목 수
+     */
+    lslm_issu_cnt: string;
+
+    /**
+     * 전일 거래 대금
+     */
+    prdy_tr_pbmn: string;
+
+    /**
+     * 연중업종지수최고가일자
+     */
+    dryy_bstp_nmix_hgpr_date: string;
+
+    /**
+     * 연중업종지수최고가
+     */
+    dryy_bstp_nmix_hgpr: string;
+
+    /**
+     * 연중업종지수최저가
+     */
+    dryy_bstp_nmix_lwpr: string;
+
+    /**
+     * 연중업종지수최저가일자
+     */
+    dryy_bstp_nmix_lwpr_date: string;
+}
+
+export interface DomesticStockQuotationsInquireIndexDailyPriceOutput2 {
+    /**
+     * 주식 영업 일자
+     */
+    stck_bsop_date: string;
+    /**
+     * 업종 지수 현재가
+     */
+    bstp_nmix_prpr: string;
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+    /**
+     * 업종 지수 전일 대비
+     */
+    bstp_nmix_prdy_vrss: string;
+    /**
+     * 업종 지수 전일 대비율
+     */
+    bstp_nmix_prdy_ctrt: string;
+    /**
+     * 업종 지수 시가2
+     */
+    bstp_nmix_oprc: string;
+    /**
+     * 업종 지수 최고가
+     */
+    bstp_nmix_hgpr: string;
+    /**
+     * 업종 지수 최저가
+     */
+    bstp_nmix_lwpr: string;
+    /**
+     * 누적 거래량 비중
+     */
+    acml_vol_rlim: string;
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+    /**
+     * 투자 신 심리도
+     */
+    invt_new_psdg: string;
+    /**
+     * 20일 이격도
+     */
+    d20_dsrt: string;
+}
+
+export interface DomesticStockQuotationsInquireMemberParam {
+    /**
+     * FID 조건 시장 분류 코드
+     * J:KRX, NX:NXT, UN:통합
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+    /**
+     * FID 입력 종목코드
+     * 종목번호 (6자리) ETN의 경우, Q로 시작 (EX. Q500001)
+     */
+    FID_INPUT_ISCD: string;
+}
+
+export interface DomesticStockQuotationsInquireMemberOutput {
+    /**
+     * 매도 회원사 번호1
+     */
+    seln_mbcr_no1: string;
+
+    /**
+     * 매도 회원사 번호2
+     */
+    seln_mbcr_no2: string;
+
+    /**
+     * 매도 회원사 번호3
+     */
+    seln_mbcr_no3: string;
+
+    /**
+     * 매도 회원사 번호4
+     */
+    seln_mbcr_no4: string;
+
+    /**
+     * 매도 회원사 번호5
+     */
+    seln_mbcr_no5: string;
+
+    /**
+     * 매도 회원사 명1
+     */
+    seln_mbcr_name1: string;
+
+    /**
+     * 매도 회원사 명2
+     */
+    seln_mbcr_name2: string;
+
+    /**
+     * 매도 회원사 명3
+     */
+    seln_mbcr_name3: string;
+
+    /**
+     * 매도 회원사 명4
+     */
+    seln_mbcr_name4: string;
+
+    /**
+     * 매도 회원사 명5
+     */
+    seln_mbcr_name5: string;
+
+    /**
+     * 총 매도 수량1
+     */
+    total_seln_qty1: string;
+
+    /**
+     * 총 매도 수량2
+     */
+    total_seln_qty2: string;
+
+    /**
+     * 총 매도 수량3
+     */
+    total_seln_qty3: string;
+
+    /**
+     * 총 매도 수량4
+     */
+    total_seln_qty4: string;
+
+    /**
+     * 총 매도 수량5
+     */
+    total_seln_qty5: string;
+
+    /**
+     * 매도 회원사 비중1
+     */
+    seln_mbcr_rlim1: string;
+
+    /**
+     * 매도 회원사 비중2
+     */
+    seln_mbcr_rlim2: string;
+
+    /**
+     * 매도 회원사 비중3
+     */
+    seln_mbcr_rlim3: string;
+
+    /**
+     * 매도 회원사 비중4
+     */
+    seln_mbcr_rlim4: string;
+
+    /**
+     * 매도 회원사 비중5
+     */
+    seln_mbcr_rlim5: string;
+
+    /**
+     * 매도 수량 증감1
+     */
+    seln_qty_icdc1: string;
+
+    /**
+     * 매도 수량 증감2
+     */
+    seln_qty_icdc2: string;
+
+    /**
+     * 매도 수량 증감3
+     */
+    seln_qty_icdc3: string;
+
+    /**
+     * 매도 수량 증감4
+     */
+    seln_qty_icdc4: string;
+
+    /**
+     * 매도 수량 증감5
+     */
+    seln_qty_icdc5: string;
+
+    /**
+     * 매수2 회원사 번호1
+     */
+    shnu_mbcr_no1: string;
+
+    /**
+     * 매수2 회원사 번호2
+     */
+    shnu_mbcr_no2: string;
+
+    /**
+     * 매수2 회원사 번호3
+     */
+    shnu_mbcr_no3: string;
+
+    /**
+     * 매수2 회원사 번호4
+     */
+    shnu_mbcr_no4: string;
+
+    /**
+     * 매수2 회원사 번호5
+     */
+    shnu_mbcr_no5: string;
+
+    /**
+     * 매수2 회원사 명1
+     */
+    shnu_mbcr_name1: string;
+
+    /**
+     * 매수2 회원사 명2
+     */
+    shnu_mbcr_name2: string;
+
+    /**
+     * 매수2 회원사 명3
+     */
+    shnu_mbcr_name3: string;
+
+    /**
+     * 매수2 회원사 명4
+     */
+    shnu_mbcr_name4: string;
+
+    /**
+     * 매수2 회원사 명5
+     */
+    shnu_mbcr_name5: string;
+
+    /**
+     * 총 매수2 수량1
+     */
+    total_shnu_qty1: string;
+
+    /**
+     * 총 매수2 수량2
+     */
+    total_shnu_qty2: string;
+
+    /**
+     * 총 매수2 수량3
+     */
+    total_shnu_qty3: string;
+
+    /**
+     * 총 매수2 수량4
+     */
+    total_shnu_qty4: string;
+
+    /**
+     * 총 매수2 수량5
+     */
+    total_shnu_qty5: string;
+
+    /**
+     * 매수2 회원사 비중1
+     */
+    shnu_mbcr_rlim1: string;
+
+    /**
+     * 매수2 회원사 비중2
+     */
+    shnu_mbcr_rlim2: string;
+
+    /**
+     * 매수2 회원사 비중3
+     */
+    shnu_mbcr_rlim3: string;
+
+    /**
+     * 매수2 회원사 비중4
+     */
+    shnu_mbcr_rlim4: string;
+
+    /**
+     * 매수2 회원사 비중5
+     */
+    shnu_mbcr_rlim5: string;
+
+    /**
+     * 매수2 수량 증감1
+     */
+    shnu_qty_icdc1: string;
+
+    /**
+     * 매수2 수량 증감2
+     */
+    shnu_qty_icdc2: string;
+
+    /**
+     * 매수2 수량 증감3
+     */
+    shnu_qty_icdc3: string;
+
+    /**
+     * 매수2 수량 증감4
+     */
+    shnu_qty_icdc4: string;
+
+    /**
+     * 매수2 수량 증감5
+     */
+    shnu_qty_icdc5: string;
+
+    /**
+     * 외국계 총 매도 수량
+     */
+    glob_total_seln_qty: string;
+
+    /**
+     * 외국계 매도 비중
+     */
+    glob_seln_rlim: string;
+
+    /**
+     * 외국계 순매수 수량
+     */
+    glob_ntby_qty: string;
+
+    /**
+     * 외국계 총 매수2 수량
+     */
+    glob_total_shnu_qty: string;
+
+    /**
+     * 외국계 매수2 비중
+     */
+    glob_shnu_rlim: string;
+
+    /**
+     * 매도 회원사 외국계 여부1
+     */
+    seln_mbcr_glob_yn_1: string;
+
+    /**
+     * 매도 회원사 외국계 여부2
+     */
+    seln_mbcr_glob_yn_2: string;
+
+    /**
+     * 매도 회원사 외국계 여부3
+     */
+    seln_mbcr_glob_yn_3: string;
+
+    /**
+     * 매도 회원사 외국계 여부4
+     */
+    seln_mbcr_glob_yn_4: string;
+
+    /**
+     * 매도 회원사 외국계 여부5
+     */
+    seln_mbcr_glob_yn_5: string;
+
+    /**
+     * 매수2 회원사 외국계 여부1
+     */
+    shnu_mbcr_glob_yn_1: string;
+
+    /**
+     * 매수2 회원사 외국계 여부2
+     */
+    shnu_mbcr_glob_yn_2: string;
+
+    /**
+     * 매수2 회원사 외국계 여부3
+     */
+    shnu_mbcr_glob_yn_3: string;
+
+    /**
+     * 매수2 회원사 외국계 여부4
+     */
+    shnu_mbcr_glob_yn_4: string;
+
+    /**
+     * 매수2 회원사 외국계 여부5
+     */
+    shnu_mbcr_glob_yn_5: string;
+
+    /**
+     * 외국계 총 매도 수량 증감
+     */
+    glob_total_seln_qty_icdc: string;
+
+    /**
+     * 외국계 총 매수2 수량 증감
+     */
+    glob_total_shnu_qty_icdc: string;
+}
+
+export interface DomesticStockQuotationsNewsTitleParam {
+    /**
+     * 뉴스 제공 업체 코드 공백 필수 입력
+     */
+    FID_NEWS_OFER_ENTP_CODE: string;
+
+    /**
+     * 조건 시장 구분 코드 공백 필수 입력
+     */
+    FID_COND_MRKT_CLS_CODE: string;
+
+    /**
+     * 입력 종목코드 공백: 전체, 종목코드 : 해당코드가 등록된 뉴스
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 제목 내용 공백 필수 입력
+     */
+    FID_TITL_CNTT: string;
+
+    /**
+     * 입력 날짜 공백: 현재기준, 조회일자(ex 00YYYYMMDD)
+     */
+    FID_INPUT_DATE_1: string;
+
+    /**
+     * 입력 시간 공백: 현재기준, 조회시간(ex 0000HHMMSS)
+     */
+    FID_INPUT_HOUR_1: string;
+
+    /**
+     * 순위 정렬 구분 코드 공백 필수 입력
+     */
+    FID_RANK_SORT_CLS_CODE: string;
+
+    /**
+     * 입력 일련번호 공백 필수 입력
+     */
+    FID_INPUT_SRNO: string;
+}
+
+export interface DomesticStockQuotationsNewsTitleOutput {
+    /**
+     * 내용 조회용 일련번호
+     */
+    cntt_usiq_srno: string;
+
+    /**
+     * 뉴스 제공 업체 코드
+     */
+    news_ofer_entp_code: string;
+
+    /**
+     * 작성일자
+     */
+    data_dt: string;
+
+    /**
+     * 작성시간
+     */
+    data_tm: string;
+
+    /**
+     * HTS 공시 제목 내용
+     */
+    hts_pbnt_titl_cntt: string;
+
+    /**
+     * 뉴스 대구분
+     */
+    news_lrdv_code: string;
+
+    /**
+     * 자료원
+     */
+    dorg: string;
+
+    /**
+     * 종목 코드1
+     */
+    iscd1: string;
+
+    /**
+     * 종목 코드2
+     */
+    iscd2: string;
+
+    /**
+     * 종목 코드3
+     */
+    iscd3: string;
+
+    /**
+     * 종목 코드4
+     */
+    iscd4: string;
+
+    /**
+     * 종목 코드5
+     */
+    iscd5: string;
 }

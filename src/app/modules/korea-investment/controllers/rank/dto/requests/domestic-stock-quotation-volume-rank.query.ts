@@ -18,7 +18,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidCondScrDivCode?: string;
+    fidCondScrDivCode: string = '20171';
 
     @ApiPropertyOptional({
         type: String,
@@ -27,7 +27,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputIscd?: string;
+    fidInputIscd: string = '0000';
 
     @ApiPropertyOptional({
         type: String,
@@ -36,7 +36,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidDivClsCode?: string;
+    fidDivClsCode: string = '0';
 
     @ApiProperty({
         type: String,
@@ -54,7 +54,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidTrgtClsCode?: string;
+    fidTrgtClsCode: string = '000000000';
 
     @ApiPropertyOptional({
         type: String,
@@ -64,7 +64,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidTrgtExlsClsCode?: string;
+    fidTrgtExlsClsCode: string = '0000000000';
 
     @ApiPropertyOptional({
         type: String,
@@ -73,7 +73,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputPrice1?: string;
+    fidInputPrice1: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -82,7 +82,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputPrice2?: string;
+    fidInputPrice2: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -91,7 +91,7 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidVolCnt?: string;
+    fidVolCnt: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -100,5 +100,5 @@ export class DomesticStockQuotationVolumeRankQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputDate1?: string;
+    fidInputDate1: string = '';
 }

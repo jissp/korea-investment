@@ -1,10 +1,7 @@
-import { MarketDivCode } from '@modules/korea-investment/common';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-    DomesticStockQuotationInquirePrice2Output
-} from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+import { DomesticStockQuotationInquirePrice2Output } from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
 
-export class DomesticStockQuotationsInquirePrice2Response implements DomesticStockQuotationInquirePrice2Output {
+class DomesticStockQuotationsInquirePrice2 implements DomesticStockQuotationInquirePrice2Output {
     @ApiProperty({
         type: String,
         description: '대표 시장 한글 명',
@@ -127,7 +124,8 @@ export class DomesticStockQuotationsInquirePrice2Response implements DomesticSto
 
     @ApiProperty({
         type: String,
-        description: '동시호가배분처리코드. 11:매수상한배분 12:매수하한배분 13: 매도상한배분 14:매도하한배분',
+        description:
+            '동시호가배분처리코드. 11:매수상한배분 12:매수하한배분 13: 매도상한배분 14:매도하한배분',
     })
     divi_app_cls_code: string;
 
@@ -139,7 +137,8 @@ export class DomesticStockQuotationsInquirePrice2Response implements DomesticSto
 
     @ApiProperty({
         type: String,
-        description: '시장경고코드. 00: 없음 01: 투자주의 02:투자경고 03:투자위험',
+        description:
+            '시장경고코드. 00: 없음 01: 투자주의 02:투자경고 03:투자위험',
     })
     mrkt_warn_cls_code: string;
 
@@ -211,7 +210,8 @@ export class DomesticStockQuotationsInquirePrice2Response implements DomesticSto
 
     @ApiProperty({
         type: String,
-        description: '시장 경고 구분 명.특정 경우에만 데이터 출력"투자환기" / "투자경고"',
+        description:
+            '시장 경고 구분 명.특정 경우에만 데이터 출력"투자환기" / "투자경고"',
     })
     mrkt_warn_cls_name: string;
 
@@ -289,7 +289,8 @@ export class DomesticStockQuotationsInquirePrice2Response implements DomesticSto
 
     @ApiProperty({
         type: String,
-        description: '업종 한글 종목명. ※ 거래소 정보로 특정 종목은 업종구분이 없어 데이터 미회신',
+        description:
+            '업종 한글 종목명. ※ 거래소 정보로 특정 종목은 업종구분이 없어 데이터 미회신',
     })
     bstp_kor_isnm: string;
 
@@ -328,4 +329,12 @@ export class DomesticStockQuotationsInquirePrice2Response implements DomesticSto
         description: '전일 거래량',
     })
     prdy_vol: string;
+}
+
+export class DomesticStockQuotationsInquirePrice2Response {
+    @ApiProperty({
+        type: DomesticStockQuotationsInquirePrice2,
+        description: '',
+    })
+    data: DomesticStockQuotationsInquirePrice2[];
 }

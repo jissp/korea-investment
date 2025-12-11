@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { KoreaInvestmentRankClient } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
 import {
@@ -7,7 +7,11 @@ import {
     DomesticStockRankingFluctuationQuery,
     DomesticStockRankingFluctuationResponse,
     DomesticStockRankingHtsTopViewResponse,
+    DomesticStockRankingShortSaleQuery,
 } from './dto';
+import {
+    DomesticStockRankingShortSaleResponse
+} from '@app/modules/korea-investment/controllers/rank/dto/responses/domestic-stock-ranking-short-sale.response';
 
 @Controller('v1/korea-investment/rank')
 export class RankController {
@@ -17,13 +21,14 @@ export class RankController {
         summary: '거래량순위',
     })
     @ApiResponse({
-        type: [DomesticStockQuotationVolumeRankResponse],
+        status: HttpStatus.OK,
+        type: DomesticStockQuotationVolumeRankResponse,
     })
     @Get('volume-rank')
     public async getVolumeRank(
         @Query() query: DomesticStockQuotationVolumeRankQuery,
-    ) {
-        return this.rankClient.inquireVolumeRank({
+    ): Promise<DomesticStockQuotationVolumeRankResponse> {
+        const response = await this.rankClient.inquireVolumeRank({
             FID_COND_MRKT_DIV_CODE: query.fidCondMrktDivCode,
             FID_COND_SCR_DIV_CODE: query.fidCondScrDivCode,
             FID_INPUT_ISCD: query.fidInputIscd,
@@ -36,19 +41,24 @@ export class RankController {
             FID_VOL_CNT: query.fidVolCnt,
             FID_INPUT_DATE_1: query.fidInputDate1,
         });
+
+        return {
+            data: response,
+        };
     }
 
     @ApiOperation({
         summary: '국내주식 등락률 순위',
     })
     @ApiResponse({
-        type: [DomesticStockRankingFluctuationResponse],
+        status: HttpStatus.OK,
+        type: DomesticStockRankingFluctuationResponse,
     })
     @Get('fluctuation')
     public async getFluctuationRank(
         @Query() query: DomesticStockRankingFluctuationQuery,
-    ) {
-        return this.rankClient.inquireFluctuationRank({
+    ): Promise<DomesticStockRankingFluctuationResponse> {
+        const response = await this.rankClient.inquireFluctuationRank({
             fid_cond_mrkt_div_code: query.fidCondMrktDivCode,
             fid_cond_scr_div_code: query.fidCondScrDivCode,
             fid_input_cnt_1: query.fidInputCnt1,
@@ -64,16 +74,43 @@ export class RankController {
             fid_trgt_cls_code: query.fidTrgtClsCode,
             fid_trgt_exls_cls_code: query.fidTrgtExlsClsCode,
         });
+
+        return {
+            data: response,
+        };
     }
 
     @ApiOperation({
         summary: 'HTS조회상위20종목',
     })
     @ApiResponse({
-        type: [DomesticStockRankingHtsTopViewResponse],
+        status: HttpStatus.OK,
+        type: DomesticStockRankingHtsTopViewResponse,
     })
     @Get('hts-top-view')
-    public async getHtsTopView() {
-        return this.rankClient.getHtsTopList();
+    public async getHtsTopView(): Promise<DomesticStockRankingHtsTopViewResponse> {
+        const response = await this.rankClient.getHtsTopList();
+
+        return {
+            data: response,
+        };
+    }
+
+    @ApiOperation({
+        summary: '공매도 상위 종목',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: DomesticStockRankingShortSaleResponse,
+    })
+    @Get('short-sale')
+    public async getShortSale(
+        @Query() query: DomesticStockRankingShortSaleQuery,
+    ): Promise<DomesticStockRankingShortSaleResponse> {
+        const response = await this.rankClient.getShortSale(query);
+
+        return {
+            data: response,
+        };
     }
 }
