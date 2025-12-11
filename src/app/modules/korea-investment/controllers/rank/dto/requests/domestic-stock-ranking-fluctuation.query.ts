@@ -18,7 +18,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidCondScrDivCode?: string;
+    fidCondScrDivCode: string = '20170';
 
     @ApiPropertyOptional({
         type: String,
@@ -28,7 +28,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputIscd?: string;
+    fidInputIscd: string = '0000';
 
     @ApiPropertyOptional({
         type: String,
@@ -38,7 +38,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidRankSortClsCode?: string;
+    fidRankSortClsCode: string = '0';
 
     @ApiPropertyOptional({
         type: String,
@@ -48,7 +48,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidPrcClsCode?: string;
+    fidPrcClsCode: string = '0';
 
     @ApiPropertyOptional({
         type: String,
@@ -57,7 +57,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputCnt1?: string;
+    fidInputCnt1: string = '0';
 
     @ApiPropertyOptional({
         type: String,
@@ -66,7 +66,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputPrice1?: string;
+    fidInputPrice1: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -75,7 +75,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidInputPrice2?: string;
+    fidInputPrice2: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -84,7 +84,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidRsflRate1?: string;
+    fidRsflRate1: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -93,7 +93,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidRsflRate2?: string;
+    fidRsflRate2: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -102,7 +102,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidVolCnt?: string;
+    fidVolCnt: string = '';
 
     @ApiPropertyOptional({
         type: String,
@@ -111,7 +111,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidTrgtClsCode?: string;
+    fidTrgtClsCode: string = '0';
 
     @ApiPropertyOptional({
         type: String,
@@ -120,7 +120,7 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidTrgtExlsClsCode?: string;
+    fidTrgtExlsClsCode: string = '0';
 
     @ApiPropertyOptional({
         type: String,
@@ -129,5 +129,5 @@ export class DomesticStockRankingFluctuationQuery {
     })
     @IsString()
     @IsOptional()
-    fidDivClsCode?: string;
+    fidDivClsCode: string = '0';
 }

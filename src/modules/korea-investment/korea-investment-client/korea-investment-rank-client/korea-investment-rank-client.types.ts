@@ -395,7 +395,146 @@ export interface DomesticStockRankingHtsTopViewOutput {
     mrkt_div_cls_code: 'J' | 'Q';
 
     /**
-     * 종목코드 종목코드
+     * 종목코드
      */
     mksc_shrn_iscd: string;
+}
+
+export interface DomesticStockRankingShortSaleParam {
+    /**
+     * FID 적용 범위 거래량
+     */
+    FID_APLY_RANG_VOL: string;
+
+    /**
+     * 조건 시장 분류 코드
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+
+    /**
+     * 조건 화면 분류 코드
+     */
+    FID_COND_SCR_DIV_CODE: string;
+
+    /**
+     * 입력 종목코드
+     * 0000: 전체
+     * 0001: 코스피
+     * 1001: 코스닥
+     * 2001: 코스피200
+     * 4001: KRX100
+     * 3003: 코스닥150
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 조회구분 (일/월)
+     * D: 일
+     * M:월
+     */
+    FID_PERIOD_DIV_CODE: string;
+
+    /**
+     * 조회가간(일수)
+     * 조회구분(D) 0:1일, 1:2일, 2:3일, 3:4일, 4:1주일, 9:2주일, 14:3주일,
+     * 조회구분(M) 1:1개월, 2:2개월, 3:3개월'
+     */
+    FID_INPUT_CNT_1: string;
+
+    /**
+     * 대상 제외 구분 코드
+     */
+    FID_TRGT_EXLS_CLS_CODE: string;
+
+    /**
+     * FID 대상 구분 코드
+     */
+    FID_TRGT_CLS_CODE: string;
+
+    /**
+     * FID 적용 범위 가격1
+     */
+    FID_APLY_RANG_PRC_1: string;
+
+    /**
+     * FID 적용 범위 가격2
+     */
+    FID_APLY_RANG_PRC_2: string;
+}
+
+export interface DomesticStockRankingShortSaleOutput {
+    /**
+     * 유가증권 단축 종목코드
+     */
+    mksc_shrn_iscd: string;
+
+    /**
+     * HTS 한글 종목명
+     */
+    hts_kor_isnm: string;
+
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 공매도 체결 수량
+     */
+    ssts_cntg_qty: string;
+
+    /**
+     * 공매도 거래량 비중
+     */
+    ssts_vol_rlim: string;
+
+    /**
+     * 공매도 거래 대금
+     */
+    ssts_tr_pbmn: string;
+
+    /**
+     * 공매도 거래대금 비중
+     */
+    ssts_tr_pbmn_rlim: string;
+
+    /**
+     * 기준 일자1
+     */
+    stnd_date1: string;
+
+    /**
+     * 기준 일자2
+     */
+    stnd_date2: string;
+
+    /**
+     * 평균가격
+     */
+    avrg_prc: string;
 }

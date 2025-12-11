@@ -9,15 +9,22 @@ import {
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
-    DomesticStockQuotationsInquireIndexTimePrice,
+    DomesticStockQuotationsInquireIndexDailyPriceOutput,
+    DomesticStockQuotationsInquireIndexDailyPriceOutput2,
+    DomesticStockQuotationsInquireIndexDailyPriceParam,
+    DomesticStockQuotationsInquireIndexTimePriceOutput,
+    DomesticStockQuotationsInquireMemberOutput,
+    DomesticStockQuotationsInquireMemberParam,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput2,
+    DomesticStockQuotationsNewsTitleOutput,
+    DomesticStockQuotationsNewsTitleParam,
 } from './korea-investment-quotation-client.types';
 
 interface QuotationRequestConfig {
     tradeId: string;
     url: string;
-    params: Record<string, string>;
+    params: Record<string, any>;
 }
 
 @Injectable()
@@ -105,7 +112,7 @@ export class KoreaInvestmentQuotationClient {
         const response = await this.makeQuotationRequest<
             BaseMultiResponse<
                 DomesticStockQuotationsInquireTimeItemChartPriceOutput,
-                DomesticStockQuotationsInquireTimeItemChartPriceOutput2
+                DomesticStockQuotationsInquireTimeItemChartPriceOutput2[]
             >
         >({
             tradeId: 'FHKST03010200',
@@ -168,13 +175,13 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-timeprice
      */
-    public async inQuireIndexTimePrice<
-        R = DomesticStockQuotationsInquireIndexTimePrice,
-    >(
+    public async inQuireIndexTimePrice(
         iscd: '0001' | '1001' | '2001' | '3003',
         timeframe: '1' | '5' | '15' | '30' | '60' | '300' | '600',
     ) {
-        const response = await this.makeQuotationRequest<BaseResponse<R>>({
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationsInquireIndexTimePriceOutput[]>
+        >({
             tradeId: 'FHPUP02110200',
             url: '/uapi/domestic-stock/v1/quotations/inquire-index-timeprice',
             params: {
@@ -182,6 +189,69 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_ISCD: iscd,
                 FID_INPUT_HOUR_1: timeframe,
             },
+        });
+
+        return response.output;
+    }
+
+    /**
+     * 주식현재가 회원사
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-member
+     */
+    public async inQuireMember(
+        params: DomesticStockQuotationsInquireMemberParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationsInquireMemberOutput[]>
+        >({
+            tradeId: 'FHKST01010600',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-member',
+            params,
+        });
+
+        return response.output;
+    }
+
+    /**
+     * 국내업종 시간별지수
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-daily-price
+     */
+    public async inQuireIndexDailyPrice(
+        params: DomesticStockQuotationsInquireIndexDailyPriceParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockQuotationsInquireIndexDailyPriceOutput,
+                DomesticStockQuotationsInquireIndexDailyPriceOutput2[]
+            >
+        >({
+            tradeId: 'FHPUP02120000',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-index-daily-price',
+            params,
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
+    }
+
+    /**
+     * 종합 시황/공시(제목)
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/news-title
+     */
+    public async inQuireNewsTitle(
+        params: DomesticStockQuotationsNewsTitleParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationsNewsTitleOutput[]>
+        >({
+            tradeId: 'FHKST01011800',
+            url: '/uapi/domestic-stock/v1/quotations/news-title',
+            params,
         });
 
         return response.output;

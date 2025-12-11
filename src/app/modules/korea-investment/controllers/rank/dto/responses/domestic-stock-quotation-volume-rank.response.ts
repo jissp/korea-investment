@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DomesticStockQuotationVolumeRankOutput } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
 
-export class DomesticStockQuotationVolumeRankResponse implements DomesticStockQuotationVolumeRankOutput {
+class DomesticStockQuotationVolumeRank implements DomesticStockQuotationVolumeRankOutput {
     @ApiProperty({
         type: String,
         description: 'HTS 한글 종목명',
@@ -115,4 +115,12 @@ export class DomesticStockQuotationVolumeRankResponse implements DomesticStockQu
         description: '누적 거래 대금',
     })
     acml_tr_pbmn: string;
+}
+
+export class DomesticStockQuotationVolumeRankResponse {
+    @ApiProperty({
+        type: DomesticStockQuotationVolumeRank,
+        isArray: true,
+    })
+    data: DomesticStockQuotationVolumeRank[];
 }

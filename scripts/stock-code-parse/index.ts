@@ -15,7 +15,6 @@ async function main() {
         'kospi_code',
         'nxt_kosdaq_code',
         'nxt_kospi_code',
-        'idxcode',
     ];
 
     for (const fileName of mstFileNames) {

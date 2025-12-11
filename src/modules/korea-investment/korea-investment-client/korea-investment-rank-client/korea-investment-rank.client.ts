@@ -10,12 +10,14 @@ import {
     DomesticStockRankingFluctuationOutput,
     DomesticStockRankingFluctuationParam,
     DomesticStockRankingHtsTopViewOutput,
+    DomesticStockRankingShortSaleOutput,
+    DomesticStockRankingShortSaleParam,
 } from './korea-investment-rank-client.types';
 
 interface RankRequestConfig {
     tradeId: string;
     url: string;
-    params?: Record<string, string>;
+    params?: Record<string, any>;
 }
 
 @Injectable()
@@ -76,6 +78,23 @@ export class KoreaInvestmentRankClient {
         });
 
         return response.output1;
+    }
+
+    /**
+     * 국내주식 공매도 상위종목
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/ranking/short-sale
+     */
+    public async getShortSale(params: DomesticStockRankingShortSaleParam) {
+        const response = await this.makeRankRequest<
+            BaseResponse<DomesticStockRankingShortSaleOutput[]>
+        >({
+            tradeId: 'FHPST04820000',
+            url: '/uapi/domestic-stock/v1/ranking/short-sale',
+            params,
+        });
+
+        return response.output;
     }
 
     /**
