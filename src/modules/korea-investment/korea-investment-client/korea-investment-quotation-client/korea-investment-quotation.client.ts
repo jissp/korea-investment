@@ -17,6 +17,8 @@ import {
     DomesticStockQuotationsInquireMemberParam,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput2,
+    DomesticStockQuotationsIntstockMultPriceOutput,
+    DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleOutput,
     DomesticStockQuotationsNewsTitleParam,
 } from './korea-investment-quotation-client.types';
@@ -251,6 +253,25 @@ export class KoreaInvestmentQuotationClient {
         >({
             tradeId: 'FHKST01011800',
             url: '/uapi/domestic-stock/v1/quotations/news-title',
+            params,
+        });
+
+        return response.output;
+    }
+
+    /**
+     * 관심종목(멀티종목) 시세조회
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/intstock-multprice
+     */
+    public async inQuireIntstockMultiPrice(
+        params: DomesticStockQuotationsIntstockMultPriceParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationsIntstockMultPriceOutput[]>
+        >({
+            tradeId: 'FHKST11300006',
+            url: '/uapi/domestic-stock/v1/quotations/intstock-multprice',
             params,
         });
 

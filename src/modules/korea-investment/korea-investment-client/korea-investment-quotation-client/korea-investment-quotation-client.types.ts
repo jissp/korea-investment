@@ -1243,3 +1243,457 @@ export interface DomesticStockQuotationsNewsTitleOutput {
      */
     iscd5: string;
 }
+
+export interface DomesticStockQuotationsIntstockMultPriceParam {
+
+    /**
+     * 조건 시장 분류 코드1
+     * J: KRX
+     * NX: NXT
+     * UN: 통합
+     */
+    FID_COND_MRKT_DIV_CODE_1: string;
+
+    /**
+     * 입력 종목코드1
+     * 그룹별종목조회 결과 jong_code(종목코드)
+     */
+    FID_INPUT_ISCD_1: string;
+
+    /**
+     * 조건 시장 분류 코드2
+     */
+    FID_COND_MRKT_DIV_CODE_2?: string;
+
+    /**
+     * 입력 종목코드2
+     */
+    FID_INPUT_ISCD_2?: string;
+
+    /**
+     * 조건 시장 분류 코드3
+     */
+    FID_COND_MRKT_DIV_CODE_3?: string;
+
+    /**
+     * 입력 종목코드3
+     */
+    FID_INPUT_ISCD_3?: string;
+
+    /**
+     * 조건 시장 분류 코드4
+     */
+    FID_COND_MRKT_DIV_CODE_4?: string;
+
+    /**
+     * 입력 종목코드4
+     */
+    FID_INPUT_ISCD_4?: string;
+
+    /**
+     * 조건 시장 분류 코드5
+     */
+    FID_COND_MRKT_DIV_CODE_5?: string;
+
+    /**
+     * 입력 종목코드5
+     */
+    FID_INPUT_ISCD_5?: string;
+
+    /**
+     * 조건 시장 분류 코드6
+     */
+    FID_COND_MRKT_DIV_CODE_6?: string;
+
+    /**
+     * 입력 종목코드6
+     */
+    FID_INPUT_ISCD_6?: string;
+
+    /**
+     * 조건 시장 분류 코드7
+     */
+    FID_COND_MRKT_DIV_CODE_7?: string;
+
+    /**
+     * 입력 종목코드7
+     */
+    FID_INPUT_ISCD_7?: string;
+
+    /**
+     * 조건 시장 분류 코드8
+     */
+    FID_COND_MRKT_DIV_CODE_8?: string;
+
+    /**
+     * 입력 종목코드8
+     */
+    FID_INPUT_ISCD_8?: string;
+
+    /**
+     * 조건 시장 분류 코드9
+     */
+    FID_COND_MRKT_DIV_CODE_9?: string;
+
+    /**
+     * 입력 종목코드9
+     */
+    FID_INPUT_ISCD_9?: string;
+
+    /**
+     * 조건 시장 분류 코드10
+     */
+    FID_COND_MRKT_DIV_CODE_10?: string;
+
+    /**
+     * 입력 종목코드10
+     */
+    FID_INPUT_ISCD_10?: string;
+
+    /**
+     * 조건 시장 분류 코드11
+     */
+    FID_COND_MRKT_DIV_CODE_11?: string;
+
+    /**
+     * 입력 종목코드11
+     */
+    FID_INPUT_ISCD_11?: string;
+
+    /**
+     * 조건 시장 분류 코드12
+     */
+    FID_COND_MRKT_DIV_CODE_12?: string;
+
+    /**
+     * 입력 종목코드12
+     */
+    FID_INPUT_ISCD_12?: string;
+
+    /**
+     * 조건 시장 분류 코드13
+     */
+    FID_COND_MRKT_DIV_CODE_13?: string;
+
+    /**
+     * 입력 종목코드13
+     */
+    FID_INPUT_ISCD_13?: string;
+
+    /**
+     * 조건 시장 분류 코드14
+     */
+    FID_COND_MRKT_DIV_CODE_14?: string;
+
+    /**
+     * 입력 종목코드14
+     */
+    FID_INPUT_ISCD_14?: string;
+
+    /**
+     * 조건 시장 분류 코드15
+     */
+    FID_COND_MRKT_DIV_CODE_15?: string;
+
+    /**
+     * 입력 종목코드15
+     */
+    FID_INPUT_ISCD_15?: string;
+
+    /**
+     * 조건 시장 분류 코드16
+     */
+    FID_COND_MRKT_DIV_CODE_16?: string;
+
+    /**
+     * 입력 종목코드16
+     */
+    FID_INPUT_ISCD_16?: string;
+
+    /**
+     * 조건 시장 분류 코드17
+     */
+    FID_COND_MRKT_DIV_CODE_17?: string;
+
+    /**
+     * 입력 종목코드17
+     */
+    FID_INPUT_ISCD_17?: string;
+
+    /**
+     * 조건 시장 분류 코드18
+     */
+    FID_COND_MRKT_DIV_CODE_18?: string;
+
+    /**
+     * 입력 종목코드18
+     */
+    FID_INPUT_ISCD_18?: string;
+
+    /**
+     * 조건 시장 분류 코드19
+     */
+    FID_COND_MRKT_DIV_CODE_19?: string;
+
+    /**
+     * 입력 종목코드19
+     */
+    FID_INPUT_ISCD_19?: string;
+
+    /**
+     * 조건 시장 분류 코드20
+     */
+    FID_COND_MRKT_DIV_CODE_20?: string;
+
+    /**
+     * 입력 종목코드20
+     */
+    FID_INPUT_ISCD_20?: string;
+
+    /**
+     * 조건 시장 분류 코드21
+     */
+    FID_COND_MRKT_DIV_CODE_21?: string;
+
+    /**
+     * 입력 종목코드21
+     */
+    FID_INPUT_ISCD_21?: string;
+
+    /**
+     * 조건 시장 분류 코드22
+     */
+    FID_COND_MRKT_DIV_CODE_22?: string;
+
+    /**
+     * 입력 종목코드22
+     */
+    FID_INPUT_ISCD_22?: string;
+
+    /**
+     * 조건 시장 분류 코드23
+     */
+    FID_COND_MRKT_DIV_CODE_23?: string;
+
+    /**
+     * 입력 종목코드23
+     */
+    FID_INPUT_ISCD_23?: string;
+
+    /**
+     * 조건 시장 분류 코드24
+     */
+    FID_COND_MRKT_DIV_CODE_24?: string;
+
+    /**
+     * 입력 종목코드24
+     */
+    FID_INPUT_ISCD_24?: string;
+
+    /**
+     * 조건 시장 분류 코드25
+     */
+    FID_COND_MRKT_DIV_CODE_25?: string;
+
+    /**
+     * 입력 종목코드25
+     */
+    FID_INPUT_ISCD_25?: string;
+
+    /**
+     * 조건 시장 분류 코드26
+     */
+    FID_COND_MRKT_DIV_CODE_26?: string;
+
+    /**
+     * 입력 종목코드26
+     */
+    FID_INPUT_ISCD_26?: string;
+
+    /**
+     * 조건 시장 분류 코드27
+     */
+    FID_COND_MRKT_DIV_CODE_27?: string;
+
+    /**
+     * 입력 종목코드27
+     */
+    FID_INPUT_ISCD_27?: string;
+
+    /**
+     * 조건 시장 분류 코드28
+     */
+    FID_COND_MRKT_DIV_CODE_28?: string;
+
+    /**
+     * 입력 종목코드28
+     */
+    FID_INPUT_ISCD_28?: string;
+
+    /**
+     * 조건 시장 분류 코드29
+     */
+    FID_COND_MRKT_DIV_CODE_29?: string;
+
+    /**
+     * 입력 종목코드29
+     */
+    FID_INPUT_ISCD_29?: string;
+
+    /**
+     * 조건 시장 분류 코드30
+     */
+    FID_COND_MRKT_DIV_CODE_30?: string;
+
+    /**
+     * 입력 종목코드30
+     */
+    FID_INPUT_ISCD_30?: string;
+}
+
+export interface DomesticStockQuotationsIntstockMultPriceOutput {
+    /**
+     * 코스피 코스닥 구분 명
+     */
+    kospi_kosdaq_cls_name: string;
+
+    /**
+     * 시장 조치 구분 명
+     */
+    mrkt_trtm_cls_name: string;
+
+    /**
+     * 시간 구분 코드
+     */
+    hour_cls_code: string;
+
+    /**
+     * 관심 단축 종목코드
+     */
+    inter_shrn_iscd: string;
+
+    /**
+     * 관심 한글 종목명
+     */
+    inter_kor_isnm: string;
+
+    /**
+     * 관심2 현재가
+     */
+    inter2_prpr: string;
+
+    /**
+     * 관심2 전일 대비
+     */
+    inter2_prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 관심2 시가
+     */
+    inter2_oprc: string;
+
+    /**
+     * 관심2 고가
+     */
+    inter2_hgpr: string;
+
+    /**
+     * 관심2 저가
+     */
+    inter2_lwpr: string;
+
+    /**
+     * 관심2 하한가
+     */
+    inter2_llam: string;
+
+    /**
+     * 관심2 상한가
+     */
+    inter2_mxpr: string;
+
+    /**
+     * 관심2 매도호가
+     */
+    inter2_askp: string;
+
+    /**
+     * 관심2 매수호가
+     */
+    inter2_bidp: string;
+
+    /**
+     * 매도 잔량
+     */
+    seln_rsqn: string;
+
+    /**
+     * 매수2 잔량
+     */
+    shnu_rsqn: string;
+
+    /**
+     * 총 매도호가 잔량
+     */
+    total_askp_rsqn: string;
+
+    /**
+     * 총 매수호가 잔량
+     */
+    total_bidp_rsqn: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 관심2 전일 종가
+     */
+    inter2_prdy_clpr: string;
+
+    /**
+     * 시가 대비 최고가 비율
+     */
+    oprc_vrss_hgpr_rate: string;
+
+    /**
+     * 관심 예상 체결 대비
+     */
+    intr_antc_cntg_vrss: string;
+
+    /**
+     * 관심 예상 체결 대비 부호
+     */
+    intr_antc_cntg_vrss_sign: string;
+
+    /**
+     * 관심 예상 체결 전일 대비율
+     */
+    intr_antc_cntg_prdy_ctrt: string;
+
+    /**
+     * 관심 예상 거래량
+     */
+    intr_antc_vol: string;
+
+    /**
+     * 관심2 기준가
+     */
+    inter2_sdpr: string;
+}

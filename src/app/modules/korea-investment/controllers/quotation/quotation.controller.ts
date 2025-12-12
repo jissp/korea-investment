@@ -15,6 +15,8 @@ import {
     DomesticStockQuotationsInquirePrice2Response,
     DomesticStockQuotationsInquireTimeItemChartPriceQuery,
     DomesticStockQuotationsInquireTimeItemChartPriceResponse,
+    DomesticStockQuotationsIntstockMultpriceQuery,
+    DomesticStockQuotationsIntstockMultPriceResponse,
     DomesticStockQuotationsNewsTitleQuery,
     DomesticStockQuotationsNewsTitleResponse,
 } from './dto';
@@ -207,6 +209,25 @@ export class QuotationController {
         @Query() query: DomesticStockQuotationsNewsTitleQuery,
     ): Promise<DomesticStockQuotationsNewsTitleResponse> {
         const response = await this.quotationClient.inQuireNewsTitle(query);
+
+        return {
+            data: response,
+        };
+    }
+
+    @ApiOperation({
+        summary: '관심종목(멀티종목) 시세조회',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: DomesticStockQuotationsIntstockMultPriceResponse,
+    })
+    @Get('intstock-multi-price')
+    public async getDomesticIntstockMultiPrice(
+        @Query() query: DomesticStockQuotationsIntstockMultpriceQuery,
+    ): Promise<DomesticStockQuotationsIntstockMultPriceResponse> {
+        const response =
+            await this.quotationClient.inQuireIntstockMultiPrice(query);
 
         return {
             data: response,

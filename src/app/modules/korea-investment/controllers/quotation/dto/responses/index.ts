@@ -5,4 +5,5 @@ export * from './domestic-stock-quotations-inquire-index-time-price.response';
 export * from './domestic-stock-quotations-inquire-member.response';
 export * from './domestic-stock-quotations-inquire-price-2.response';
 export * from './domestic-stock-quotations-inquire-time-item-chart-price.response';
+export * from './domestic-stock-quotations-intstock-mult-price.response';
 export * from './domestic-stock-quotations-news-title.response';
