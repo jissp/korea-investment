@@ -43,8 +43,8 @@ export class RedisModule {
 
         return {
             global: true,
-            imports: [ConfigModule, ...(options.imports ?? [])],
             module: RedisModule,
+            imports: [ConfigModule, ...(options.imports ?? [])],
             providers: [...providers, RedisService],
             exports: [RedisConnection, RedisService],
         };
