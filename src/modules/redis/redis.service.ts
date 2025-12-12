@@ -1,13 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { Cluster } from 'ioredis';
+import { Inject, Injectable } from '@nestjs/common';
+import { isNil } from '@nestjs/common/utils/shared.utils';
+import { Nullable } from '@common/types';
 import {
     RedisConnection,
     RedisExpireType,
     RedisKeySetOptions,
     RedisNullString,
     RedisSetType,
-} from '@modules/redis/redis.types';
-import { isNil } from '@nestjs/common/utils/shared.utils';
+} from './redis.types';
 
 @Injectable()
 export class RedisService {
@@ -76,12 +77,20 @@ export class RedisService {
         value: string | number | null,
         options?: RedisKeySetOptions,
     ) {
-        const result = await this.redis.set(
-            key,
-            isNil(value) ? RedisNullString : value,
-            RedisExpireType.EX,
-            this.getOptionExpiredSeconds(options?.seconds),
-        );
+        let result: string | null;
+        if (isNil(options?.seconds)) {
+            result = await this.redis.set(
+                key,
+                isNil(value) ? RedisNullString : value,
+            );
+        } else {
+            result = await this.redis.set(
+                key,
+                isNil(value) ? RedisNullString : value,
+                RedisExpireType.EX,
+                this.getOptionExpiredSeconds(options?.seconds),
+            );
+        }
 
         return result === 'OK';
     }
@@ -114,7 +123,7 @@ export class RedisService {
      * @param seconds
      * @private
      */
-    private getOptionExpiredSeconds(seconds?: number) {
+    private getOptionExpiredSeconds(seconds?: Nullable<number>) {
         return seconds ?? this.defaultExpiredSeconds;
     }
 }

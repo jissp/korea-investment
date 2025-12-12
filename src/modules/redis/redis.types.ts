@@ -1,4 +1,5 @@
 import { FactoryProvider, ModuleMetadata, Type } from '@nestjs/common';
+import { Nullable } from '@common/types';
 import { IConfiguration } from '@app/configuration';
 
 export const RedisConfig = Symbol('RedisConfig');
@@ -38,5 +39,5 @@ export enum RedisExpireType {
 }
 
 export interface RedisKeySetOptions {
-    seconds: number;
+    seconds: Nullable<number>;
 }
