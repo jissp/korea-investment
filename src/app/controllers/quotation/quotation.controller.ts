@@ -78,13 +78,15 @@ export class QuotationController {
     @Get('inquire-ccnl')
     public async getDomesticInquireCcnl(
         @Query() query: DomesticStockQuotationsInquirePrice2Query,
-    ) {
+    ): Promise<DomesticStockQuotationsInquireCcnlResponse> {
         const response = await this.quotationClient.inquireCcnl(
             query.marketDivCode,
             query.iscd,
         );
 
-        return response;
+        return {
+            data: response,
+        };
     }
 
     @ApiOperation({

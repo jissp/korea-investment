@@ -64,7 +64,7 @@ export class KoreaInvestmentQuotationClient {
      */
     public async inquireCcnl(marketDivCode: MarketDivCode, iscd: string) {
         const response = await this.makeQuotationRequest<
-            BaseResponse<DomesticStockQuotationInquireCcnlOutput>
+            BaseResponse<DomesticStockQuotationInquireCcnlOutput[]>
         >({
             tradeId: 'FHKST01010300',
             url: '/uapi/domestic-stock/v1/quotations/inquire-ccnl',
