@@ -9,6 +9,11 @@ export interface IConfiguration {
             host: string;
         };
     };
+    stockPlus: {
+        api: {
+            host: string;
+        };
+    };
     redis: {
         mode?: 'cluster' | 'single';
         host: string;
@@ -25,6 +30,11 @@ export default (): IConfiguration => ({
         },
         webSocket: {
             host: getEnv('KOREA_INVESTMENT_WEBSOCKET_HOST'),
+        },
+    },
+    stockPlus: {
+        api: {
+            host: getEnv('STOCK_PLUS_HOST'),
         },
     },
     redis: {
