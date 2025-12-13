@@ -8,10 +8,8 @@ import {
     DomesticStockRankingFluctuationResponse,
     DomesticStockRankingHtsTopViewResponse,
     DomesticStockRankingShortSaleQuery,
+    DomesticStockRankingShortSaleResponse,
 } from './dto';
-import {
-    DomesticStockRankingShortSaleResponse
-} from '@app/modules/korea-investment/controllers/rank/dto/responses/domestic-stock-ranking-short-sale.response';
 
 @Controller('v1/korea-investment/rank')
 export class RankController {

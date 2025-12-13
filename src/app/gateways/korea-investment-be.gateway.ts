@@ -36,6 +36,9 @@ export class KoreaInvestmentBeGateway
         this.logger.log(`Client disconnected: ${client.id}`);
     }
 
+    /**
+     * @param message
+     */
     @OnEvent(KoreaInvestmentCollectorEventType.MessagePublishedToGateway)
     public onMessage(message: { tradeId: string; record: unknown }) {
         this.server.emit('realtime-data', message);

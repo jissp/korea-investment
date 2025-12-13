@@ -3,10 +3,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { KoreaInvestmentModule } from '@app/modules/korea-investment';
-import { KoreaInvestmentBeGatewayModule } from '@app/modules/korea-investment-be-gateway';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
+import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
 import configuration from './configuration';
+import {
+    AssetController,
+    QuotationController,
+    RankController,
+} from './controllers';
+import { KoreaInvestmentBeGateway } from './gateways';
 
 @Module({
     imports: [
@@ -25,8 +31,10 @@ import configuration from './configuration';
         }),
         EventEmitterModule.forRoot(),
         KoreaInvestmentCollectorModule.forRoot(),
-        KoreaInvestmentBeGatewayModule,
-        KoreaInvestmentModule,
+        KoreaInvestmentQuotationClientModule,
+        KoreaInvestmentRankClientModule,
     ],
+    controllers: [AssetController, QuotationController, RankController],
+    providers: [KoreaInvestmentBeGateway],
 })
 export class AppModule {}
