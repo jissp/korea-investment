@@ -7,7 +7,7 @@ import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-inv
 import {
     KoreaInvestmentQuotationClient,
     KoreaInvestmentQuotationClientModule,
-} from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+} from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     KoreaInvestmentHelperModule,
     KoreaInvestmentHelperService,
@@ -15,7 +15,7 @@ import {
 import {
     KoreaInvestmentRankClient,
     KoreaInvestmentRankClientModule,
-} from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
+} from '@modules/korea-investment/korea-investment-rank-client';
 
 describe('KoreaInvestmentOauthClient e2e 테스트', () => {
     let helperService: KoreaInvestmentHelperService;

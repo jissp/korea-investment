@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DomesticStockQuotationInquireCcnlOutput } from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+import { DomesticStockQuotationInquireCcnlOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 
 class DomesticStockQuotationsInquireCcnl implements DomesticStockQuotationInquireCcnlOutput {
     @ApiProperty({
