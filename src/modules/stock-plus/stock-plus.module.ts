@@ -20,7 +20,8 @@ type StockPlusConfigs = IConfiguration['stockPlus'];
                 }
 
                 return axios.create({
-                    baseURL: configs.api.host as string,
+                    baseURL: configs.api.host,
+                    timeout: 5000,
                 });
             },
         },

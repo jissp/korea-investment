@@ -41,6 +41,27 @@ export class RedisService {
     }
 
     /**
+     * 레디스에 저장된 데이터를 가져온다.
+     * @param key
+     * @param defaultValue
+     */
+    public async getOrDefaultValue<T>(
+        key: string,
+        defaultValue: T,
+    ): Promise<T> {
+        const data = await this.get(key);
+        if (isNil(data)) {
+            return defaultValue;
+        }
+
+        try {
+            return JSON.parse(data) as T;
+        } catch {
+            return defaultValue;
+        }
+    }
+
+    /**
      * 레디스에 저장된 데이터를 삭제한다.
      * @param key
      */

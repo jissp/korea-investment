@@ -334,7 +334,6 @@ class DomesticStockQuotationsInquirePrice2 implements DomesticStockQuotationInqu
 export class DomesticStockQuotationsInquirePrice2Response {
     @ApiProperty({
         type: DomesticStockQuotationsInquirePrice2,
-        description: '',
     })
     data: DomesticStockQuotationsInquirePrice2[];
 }
