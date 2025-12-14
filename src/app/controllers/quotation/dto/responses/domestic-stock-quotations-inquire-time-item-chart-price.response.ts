@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
     DomesticStockQuotationsInquireTimeItemChartPriceOutput,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput2,
-} from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+} from '@modules/korea-investment/korea-investment-quotation-client';
 
 class DomesticStockQuotationsInquireTimeItemChartPrice implements DomesticStockQuotationsInquireTimeItemChartPriceOutput {
     @ApiProperty({

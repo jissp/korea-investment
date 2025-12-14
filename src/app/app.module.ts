@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
-import { EventEmitterModule } from '@nestjs/event-emitter';
+import { QueueModule } from '@modules/queue';
+import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
+import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
-import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
-import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
+import { CrawlerModule } from '@app/modules/crawler';
+import { StockRepositoryModule } from '@app/modules/stock-repository';
 import configuration from './configuration';
 import {
     AssetController,
-    QuotationController,
-    RankController,
+    InformationController,
+    LatestStockRankController,
 } from './controllers';
+import { InformationService } from './services';
 import { KoreaInvestmentBeGateway } from './gateways';
 
 @Module({
@@ -29,12 +34,20 @@ import { KoreaInvestmentBeGateway } from './gateways';
                 return configService.get<RedisConfig>('redis')!;
             },
         }),
+        QueueModule.forRootAsync(),
         EventEmitterModule.forRoot(),
-        KoreaInvestmentCollectorModule.forRoot(),
+        ScheduleModule.forRoot(),
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
+        StockRepositoryModule,
+        CrawlerModule,
+        KoreaInvestmentCollectorModule.forRoot(),
     ],
-    controllers: [AssetController, QuotationController, RankController],
-    providers: [KoreaInvestmentBeGateway],
+    controllers: [
+        AssetController,
+        InformationController,
+        LatestStockRankController,
+    ],
+    providers: [KoreaInvestmentBeGateway, InformationService],
 })
 export class AppModule {}

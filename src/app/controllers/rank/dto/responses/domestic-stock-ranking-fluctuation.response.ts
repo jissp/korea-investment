@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DomesticStockRankingFluctuationOutput } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
+import { DomesticStockRankingFluctuationOutput } from '@modules/korea-investment/korea-investment-rank-client';
 
 class DomesticStockRankingFluctuation implements DomesticStockRankingFluctuationOutput {
     @ApiProperty({

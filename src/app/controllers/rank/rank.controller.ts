@@ -1,6 +1,6 @@
 import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { KoreaInvestmentRankClient } from '@modules/korea-investment/korea-investment-client/korea-investment-rank-client';
+import { KoreaInvestmentRankClient } from '@modules/korea-investment/korea-investment-rank-client';
 import {
     DomesticStockQuotationVolumeRankQuery,
     DomesticStockQuotationVolumeRankResponse,

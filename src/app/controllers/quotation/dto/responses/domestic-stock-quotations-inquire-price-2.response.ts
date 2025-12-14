@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DomesticStockQuotationInquirePrice2Output } from '@modules/korea-investment/korea-investment-client/korea-investment-quotation-client';
+import { DomesticStockQuotationInquirePrice2Output } from '@modules/korea-investment/korea-investment-quotation-client';
 
 class DomesticStockQuotationsInquirePrice2 implements DomesticStockQuotationInquirePrice2Output {
     @ApiProperty({
@@ -334,7 +334,6 @@ class DomesticStockQuotationsInquirePrice2 implements DomesticStockQuotationInqu
 export class DomesticStockQuotationsInquirePrice2Response {
     @ApiProperty({
         type: DomesticStockQuotationsInquirePrice2,
-        description: '',
     })
     data: DomesticStockQuotationsInquirePrice2[];
 }

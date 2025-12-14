@@ -29,6 +29,7 @@ export class RedisModule {
                         const clientInfo = {
                             host: config.host,
                             port: Number(config.port),
+                            maxRetriesPerRequest: null,
                         };
 
                         return config.mode === 'cluster'

@@ -5,7 +5,7 @@ export class DomesticStockQuotationsInquireIndexTimePriceQuery {
     @ApiProperty({
         type: String,
         enum: ['0001', '1001', '2001', '3003'],
-        description: '',
+        description: '종목 코드',
     })
     @IsString()
     @IsEnum(['0001', '1001', '2001', '3003'])
@@ -13,7 +13,7 @@ export class DomesticStockQuotationsInquireIndexTimePriceQuery {
 
     @ApiPropertyOptional({
         type: String,
-        description: '',
+        description: '입력 시간',
         default: '60',
     })
     @IsString()
