@@ -16,7 +16,6 @@ import {
     InformationController,
     LatestStockRankController,
 } from './controllers';
-import { InformationService } from './services';
 import { KoreaInvestmentBeGateway } from './gateways';
 
 @Module({
@@ -48,6 +47,6 @@ import { KoreaInvestmentBeGateway } from './gateways';
         InformationController,
         LatestStockRankController,
     ],
-    providers: [KoreaInvestmentBeGateway, InformationService],
+    providers: [KoreaInvestmentBeGateway],
 })
 export class AppModule {}

@@ -26,7 +26,7 @@ export class RankingSchedule implements OnModuleInit {
         this.handleCrawlingKoreaInvestmentVolumeRank();
     }
 
-    @Cron('*/1 * * * *')
+    @Cron('*/30 * * * * *')
     async handleCrawlingKoreaInvestmentHtsTopView() {
         try {
             await this.requestDomesticHtsTopViewFlow.add({
@@ -51,7 +51,7 @@ export class RankingSchedule implements OnModuleInit {
         }
     }
 
-    @Cron('*/1 * * * *')
+    @Cron('*/30 * * * * *')
     async handleCrawlingKoreaInvestmentVolumeRank() {
         try {
             await this.requestDomesticVolumeRankFlow.add({

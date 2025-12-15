@@ -17,7 +17,7 @@ const NxtKosdaqCodes: AssetIdxItem[] =
 const NxtKospiCodes: AssetIdxItem[] =
     NxtKospiCodeJson as unknown as AssetIdxItem[];
 
-@Controller('v1/korea-investment/assets')
+@Controller('v1/assets')
 export class AssetController {
     @ApiOperation({
         summary: '',
