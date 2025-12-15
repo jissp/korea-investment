@@ -100,7 +100,7 @@ export class QuotationController {
     public async getDomesticInquireTimeItemChartPrice(
         @Query() query: DomesticStockQuotationsInquireTimeItemChartPriceQuery,
     ): Promise<DomesticStockQuotationsInquireTimeItemChartPriceResponse> {
-        const response = await this.quotationClient.inQuireTimeItemChartPrice(
+        const response = await this.quotationClient.inquireTimeItemChartPrice(
             query.marketDivCode,
             query.iscd,
             new Date(),
@@ -126,7 +126,7 @@ export class QuotationController {
     public async getDomesticInquireTimeDailyChartPrice(
         @Query() query: DomesticStockQuotationsInquireTimeItemChartPriceQuery,
     ) {
-        const response = await this.quotationClient.inQuireTimeDailyChartPrice(
+        const response = await this.quotationClient.inquireTimeDailyChartPrice(
             query.marketDivCode,
             query.iscd,
             new Date(),
@@ -149,7 +149,7 @@ export class QuotationController {
     public async getDomesticInquireIndexTimePrice(
         @Query() query: DomesticStockQuotationsInquireIndexTimePriceQuery,
     ): Promise<DomesticStockQuotationsInquireIndexTimePriceResponse> {
-        const response = await this.quotationClient.inQuireIndexTimePrice(
+        const response = await this.quotationClient.inquireIndexTimePrice(
             query.iscd,
             query.timeframe,
         );
@@ -171,7 +171,7 @@ export class QuotationController {
         @Query() query: DomesticStockQuotationsInquireIndexDailyPriceQuery,
     ): Promise<DomesticStockQuotationsInquireIndexDailyPriceResponse> {
         const response =
-            await this.quotationClient.inQuireIndexDailyPrice(query);
+            await this.quotationClient.inquireIndexDailyPrice(query);
 
         return {
             data: {
@@ -192,7 +192,7 @@ export class QuotationController {
     public async getDomesticInquireMember(
         @Query() query: DomesticStockQuotationsInquireMemberQuery,
     ): Promise<DomesticStockQuotationsInquireMemberResponse> {
-        const response = await this.quotationClient.inQuireMember(query);
+        const response = await this.quotationClient.inquireMember(query);
 
         return {
             data: response,
@@ -210,7 +210,7 @@ export class QuotationController {
     public async getDomesticNewsTitle(
         @Query() query: DomesticStockQuotationsNewsTitleQuery,
     ): Promise<DomesticStockQuotationsNewsTitleResponse> {
-        const response = await this.quotationClient.inQuireNewsTitle(query);
+        const response = await this.quotationClient.inquireNewsTitle(query);
 
         return {
             data: response,
@@ -229,7 +229,7 @@ export class QuotationController {
         @Query() query: DomesticStockQuotationsIntstockMultpriceQuery,
     ): Promise<DomesticStockQuotationsIntstockMultPriceResponse> {
         const response =
-            await this.quotationClient.inQuireIntstockMultiPrice(query);
+            await this.quotationClient.inquireIntstockMultiPrice(query);
 
         return {
             data: response,

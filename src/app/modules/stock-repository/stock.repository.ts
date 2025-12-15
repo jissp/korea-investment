@@ -2,6 +2,7 @@ import { Cluster } from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisConnection, RedisService } from '@modules/redis';
 import {
+    KoreaInvestmentDailyItemChartPrice,
     KoreaInvestmentHtsTopViewItem,
     KoreaInvestmentNewsItem,
     KoreaInvestmentPopulatedHtsTopViewItem,
@@ -9,6 +10,7 @@ import {
     KoreaInvestmentVolumeRankItem,
     StockPlusNewsItem,
 } from './stock-repository.types';
+import { Nullable } from '@common/types';
 
 enum StockRepositoryKey {
     KoreaInvestmentHtsTopView = 'KoreaInvestmentHtsTopView',
@@ -17,6 +19,7 @@ enum StockRepositoryKey {
     KoreaInvestmentPopulatedVolumeRank = 'KoreaInvestmentPopulatedVolumeRank',
     KoreaInvestmentNews = 'KoreaInvestmentNews',
     StockPlusNews = 'StockPlusNews',
+    DailyStockChart = 'DailyStockChart',
 }
 
 @Injectable()
@@ -164,6 +167,33 @@ export class StockRepository {
         return this.setData(
             StockRepositoryKey.KoreaInvestmentPopulatedVolumeRank,
             data,
+            null,
+        );
+    }
+
+    /**
+     * 종목 시세를 저장합니다.
+     * @param iscd
+     * @param data
+     */
+    public async setDailyStockChart(
+        iscd: string,
+        data: KoreaInvestmentDailyItemChartPrice,
+    ) {
+        return this.setData(
+            `${StockRepositoryKey.DailyStockChart}:${iscd}`,
+            data,
+            60 * 60 * 2,
+        );
+    }
+
+    /**
+     * 종목 시세를 조회합니다.
+     * @param iscd
+     */
+    public async getDailyStockChart(iscd: string) {
+        return this.getData<Nullable<KoreaInvestmentDailyItemChartPrice>>(
+            `${StockRepositoryKey.DailyStockChart}:${iscd}`,
             null,
         );
     }

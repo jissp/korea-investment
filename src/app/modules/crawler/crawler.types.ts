@@ -2,6 +2,7 @@ export enum CrawlerFlowType {
     RequestDomesticNewsTitle = 'RequestDomesticNewsTitle',
     RequestDomesticHtsTopView = 'RequestDomesticHtsTopView',
     RequestDomesticVolumeRank = 'RequestDomesticVolumeRank',
+    RequestDailyItemChartPrice = 'RequestDailyItemChartPrice',
     RequestRefreshPopulatedHtsTopView = 'RequestRefreshPopulatedHtsTopView',
     RequestRefreshPopulatedVolumeRank = 'RequestRefreshPopulatedVolumeRank',
 }

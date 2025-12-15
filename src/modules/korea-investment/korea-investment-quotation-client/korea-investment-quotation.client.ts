@@ -9,6 +9,9 @@ import {
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
+    DomesticStockQuotationsInquireDailyItemChartPriceParam,
     DomesticStockQuotationsInquireIndexDailyPriceOutput,
     DomesticStockQuotationsInquireIndexDailyPriceOutput2,
     DomesticStockQuotationsInquireIndexDailyPriceParam,
@@ -103,7 +106,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice
      */
-    public async inQuireTimeItemChartPrice(
+    public async inquireTimeItemChartPrice(
         marketDiveCode: MarketDivCode,
         iscd: string,
         date: Date,
@@ -139,7 +142,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice
      */
-    public async inQuireTimeDailyChartPrice(
+    public async inquireTimeDailyChartPrice(
         marketDivCode: MarketDivCode,
         iscd: string,
         date: Date,
@@ -177,7 +180,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-timeprice
      */
-    public async inQuireIndexTimePrice(
+    public async inquireIndexTimePrice(
         iscd: '0001' | '1001' | '2001' | '3003',
         timeframe: '1' | '5' | '15' | '30' | '60' | '300' | '600',
     ) {
@@ -201,7 +204,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-member
      */
-    public async inQuireMember(
+    public async inquireMember(
         params: DomesticStockQuotationsInquireMemberParam,
     ) {
         const response = await this.makeQuotationRequest<
@@ -220,7 +223,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-daily-price
      */
-    public async inQuireIndexDailyPrice(
+    public async inquireIndexDailyPrice(
         params: DomesticStockQuotationsInquireIndexDailyPriceParam,
     ) {
         const response = await this.makeQuotationRequest<
@@ -245,7 +248,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/news-title
      */
-    public async inQuireNewsTitle(
+    public async inquireNewsTitle(
         params: DomesticStockQuotationsNewsTitleParam,
     ) {
         const response = await this.makeQuotationRequest<
@@ -264,7 +267,7 @@ export class KoreaInvestmentQuotationClient {
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/intstock-multprice
      */
-    public async inQuireIntstockMultiPrice(
+    public async inquireIntstockMultiPrice(
         params: DomesticStockQuotationsIntstockMultPriceParam,
     ) {
         const response = await this.makeQuotationRequest<
@@ -276,6 +279,31 @@ export class KoreaInvestmentQuotationClient {
         });
 
         return response.output;
+    }
+
+    /**
+     * 국내주식기간별시세(일/주/월/년)
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice
+     */
+    public async inquireDailyItemChartPrice(
+        params: DomesticStockQuotationsInquireDailyItemChartPriceParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
+            >
+        >({
+            tradeId: 'FHKST03010100',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice',
+            params,
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
     }
 
     /**

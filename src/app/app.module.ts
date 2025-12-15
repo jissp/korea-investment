@@ -15,6 +15,7 @@ import {
     AssetController,
     InformationController,
     LatestStockRankController,
+    StockController,
 } from './controllers';
 import { KoreaInvestmentBeGateway } from './gateways';
 
@@ -45,6 +46,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
     controllers: [
         AssetController,
         InformationController,
+        StockController,
         LatestStockRankController,
     ],
     providers: [KoreaInvestmentBeGateway],

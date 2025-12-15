@@ -8,6 +8,8 @@ import {
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
 import {
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
     DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleOutput,
@@ -17,6 +19,7 @@ import {
     CrawlerQueueType,
     KoreaInvestmentCallApiParam,
 } from '../crawler.types';
+import { BaseMultiResponse } from '@modules/korea-investment/common';
 
 @Injectable()
 export class KoreaInvestmentFlowProcessor {
@@ -192,6 +195,31 @@ export class KoreaInvestmentFlowProcessor {
             await this.stockRepository.setPopulatedVolumeRank(
                 populatedVolumeRanks,
             );
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    @OnQueueProcessor(CrawlerFlowType.RequestDailyItemChartPrice)
+    async processRequestDailyItemChartPrice(job: Job) {
+        try {
+            const { stockCode } = job.data;
+            const childrenValues = await job.getChildrenValues();
+
+            const values: BaseMultiResponse<
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
+            >[] = Object.values(childrenValues);
+            if (!values.length) {
+                return;
+            }
+
+            await this.stockRepository.setDailyStockChart(stockCode, {
+                output: values[0].output1,
+                output2: values[0].output2,
+            });
         } catch (error) {
             this.logger.error(error);
 
