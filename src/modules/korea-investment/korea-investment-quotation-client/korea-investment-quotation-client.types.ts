@@ -1,3 +1,5 @@
+import { MarketDivCode } from '@modules/korea-investment/common';
+
 export interface DomesticStockQuotationInquirePrice2Output {
     /**
      * 대표 시장 한글 명
@@ -1697,11 +1699,11 @@ export interface DomesticStockQuotationsIntstockMultPriceOutput {
     inter2_sdpr: string;
 }
 
-export class DomesticStockQuotationsInquireDailyItemChartPriceParam {
+export interface DomesticStockQuotationsInquireDailyItemChartPriceParam {
     /**
      * 조건 시장 분류 코드 (J:KRX, NX:NXT, UN:통합)
      */
-    FID_COND_MRKT_DIV_CODE: string;
+    FID_COND_MRKT_DIV_CODE: MarketDivCode;
 
     /**
      * 입력 종목코드 (ex 005930 삼성전자)
