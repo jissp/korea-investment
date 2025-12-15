@@ -1245,7 +1245,6 @@ export interface DomesticStockQuotationsNewsTitleOutput {
 }
 
 export interface DomesticStockQuotationsIntstockMultPriceParam {
-
     /**
      * 조건 시장 분류 코드1
      * J: KRX
@@ -1696,4 +1695,273 @@ export interface DomesticStockQuotationsIntstockMultPriceOutput {
      * 관심2 기준가
      */
     inter2_sdpr: string;
+}
+
+export class DomesticStockQuotationsInquireDailyItemChartPriceParam {
+    /**
+     * 조건 시장 분류 코드 (J:KRX, NX:NXT, UN:통합)
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+
+    /**
+     * 입력 종목코드 (ex 005930 삼성전자)
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 입력 날짜 1 (조회 시작일자)
+     */
+    FID_INPUT_DATE_1: string;
+
+    /**
+     * 입력 날짜 2 (조회 종료일자, 최대 100개)
+     */
+    FID_INPUT_DATE_2: string;
+
+    /**
+     * 기간분류코드 (D:일봉 W:주봉, M:월봉, Y:년봉)
+     */
+    FID_PERIOD_DIV_CODE: string;
+
+    /**
+     * 수정주가 원주가 가격 여부 (0:수정주가 1:원주가)
+     */
+    FID_ORG_ADJ_PRC: string;
+}
+
+export interface DomesticStockQuotationsInquireDailyItemChartPriceOutput {
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * 주식 전일 종가
+     */
+    stck_prdy_clpr: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * HTS 한글 종목명
+     */
+    hts_kor_isnm: string;
+
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+
+    /**
+     * 주식 단축 종목코드
+     */
+    stck_shrn_iscd: string;
+
+    /**
+     * 전일 거래량
+     */
+    prdy_vol: string;
+
+    /**
+     * 주식 상한가
+     */
+    stck_mxpr: string;
+
+    /**
+     * 주식 하한가
+     */
+    stck_llam: string;
+
+    /**
+     * 주식 시가2
+     */
+    stck_oprc: string;
+
+    /**
+     * 주식 최고가
+     */
+    stck_hgpr: string;
+
+    /**
+     * 주식 최저가
+     */
+    stck_lwpr: string;
+
+    /**
+     * 주식 전일 시가
+     */
+    stck_prdy_oprc: string;
+
+    /**
+     * 주식 전일 최고가
+     */
+    stck_prdy_hgpr: string;
+
+    /**
+     * 주식 전일 최저가
+     */
+    stck_prdy_lwpr: string;
+
+    /**
+     * 매도호가
+     */
+    askp: string;
+
+    /**
+     * 매수호가
+     */
+    bidp: string;
+
+    /**
+     * 전일 대비 거래량
+     */
+    prdy_vrss_vol: string;
+
+    /**
+     * 거래량 회전율
+     */
+    vol_tnrt: string;
+
+    /**
+     * 주식 액면가
+     */
+    stck_fcam: string;
+
+    /**
+     * 상장 주수
+     */
+    lstn_stcn: string;
+
+    /**
+     * 자본금
+     */
+    cpfn: string;
+
+    /**
+     * HTS 시가총액
+     */
+    hts_avls: string;
+
+    /**
+     * PER
+     */
+    per: string;
+
+    /**
+     * EPS
+     */
+    eps: string;
+
+    /**
+     * PBR
+     */
+    pbr: string;
+
+    /**
+     * 전체 융자 잔고 비율
+     */
+    itewhol_loan_rmnd_ratem: string;
+}
+export interface DomesticStockQuotationsInquireDailyItemChartPriceOutput2 {
+    /**
+     * 주식 영업 일자
+     */
+    stck_bsop_date: string;
+
+    /**
+     * 주식 종가
+     */
+    stck_clpr: string;
+
+    /**
+     * 주식 시가2
+     */
+    stck_oprc: string;
+
+    /**
+     * 주식 최고가
+     */
+    stck_hgpr: string;
+
+    /**
+     * 주식 최저가
+     */
+    stck_lwpr: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 락 구분 코드
+     * 01 : 권리락
+     * 02 : 배당락
+     * 03 : 분배락
+     * 04 : 권배락
+     * 05 : 중간(분기)배당락
+     * 06 : 권리중간배당락
+     * 07 : 권리분기배당락
+     */
+    flng_cls_code: string;
+
+    /**
+     * 분할 비율
+     * 기준가/전일 종가
+     */
+    prtt_rate: string;
+
+    /**
+     * 변경 여부
+     * 현재 영업일에 체결이 발생하지 않아 시가가 없을경우 Y 로 표시(차트에서 사용)
+     */
+    mod_yn: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 재평가사유코드
+     * 00:해당없음
+     * 01:회사분할
+     * 02:자본감소
+     * 03:장기간정지
+     * 04:초과분배
+     * 05:대규모배당
+     * 06:회사분할합병
+     * 07:ETN증권병합/분할
+     * 08:신종증권기세조정
+     * 99:기타
+     */
+    revl_issu_reas: string;
 }

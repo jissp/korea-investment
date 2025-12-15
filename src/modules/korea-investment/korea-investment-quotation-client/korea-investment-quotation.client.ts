@@ -9,6 +9,9 @@ import {
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
+    DomesticStockQuotationsInquireDailyItemChartPriceParam,
     DomesticStockQuotationsInquireIndexDailyPriceOutput,
     DomesticStockQuotationsInquireIndexDailyPriceOutput2,
     DomesticStockQuotationsInquireIndexDailyPriceParam,
@@ -276,6 +279,31 @@ export class KoreaInvestmentQuotationClient {
         });
 
         return response.output;
+    }
+
+    /**
+     * 국내주식기간별시세(일/주/월/년)
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice
+     */
+    public async inQuireDailyItemChartPrice(
+        params: DomesticStockQuotationsInquireDailyItemChartPriceParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+                DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
+            >
+        >({
+            tradeId: 'FHKST03010100',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice',
+            params,
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
     }
 
     /**
