@@ -33,10 +33,7 @@ export class Parser {
         // const content = line.slice(0, line.length - this.SUFFIX_LENGTH);
         //
         const field1 = line.slice(1, this.FIELD1_LENGTH);
-        const field2 = line.slice(
-            this.FIELD1_LENGTH,
-            this.FIELD2_LENGTH,
-        );
+        const field2 = line.slice(this.FIELD1_LENGTH, this.FIELD2_LENGTH);
         return [field1, field2].map((v) => v.trim());
     }
 }

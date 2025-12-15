@@ -309,6 +309,18 @@ export interface DomesticStockQuotationInquireCcnlOutput {
     prdy_ctrt: string;
 }
 
+export interface DomesticStockQuotationInquireIndexPriceParam {
+    /**
+     * FID 조건 시장 분류 코드
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+
+    /**
+     * FID 입력 종목코드
+     */
+    FID_INPUT_ISCD: string;
+}
+
 export interface DomesticStockQuotationInquireIndexPriceOutput {
     /**
      * 업종 지수 현재가

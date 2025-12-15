@@ -2,11 +2,16 @@ import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { StockPlusModule } from '@modules/stock-plus';
-import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
+import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
+import { StockPlusModule } from '@modules/stock-plus';
 import { CrawlerFlowType, CrawlerQueueType } from './crawler.types';
-import { ChartSchedule, NewsSchedule, RankingSchedule } from './schedules';
+import {
+    ChartSchedule,
+    NewsSchedule,
+    RankingSchedule,
+    StockIndexSchedule,
+} from './schedules';
 import {
     KoreaInvestmentFlowProcessor,
     KoreaInvestmentProcessor,
@@ -21,9 +26,17 @@ const flowTypes = [
     CrawlerFlowType.RequestDomesticHtsTopView,
     CrawlerFlowType.RequestRefreshPopulatedHtsTopView,
     CrawlerFlowType.RequestDailyItemChartPrice,
+    CrawlerFlowType.RequestKoreaIndex,
+    CrawlerFlowType.RequestOverseasIndex,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
 const processors = [KoreaInvestmentFlowProcessor, KoreaInvestmentProcessor];
+const schedules = [
+    NewsSchedule,
+    RankingSchedule,
+    ChartSchedule,
+    StockIndexSchedule,
+];
 
 @Module({
     imports: [
@@ -47,9 +60,7 @@ const processors = [KoreaInvestmentFlowProcessor, KoreaInvestmentProcessor];
         StockPlusModule,
     ],
     providers: [
-        NewsSchedule,
-        RankingSchedule,
-        ChartSchedule,
+        ...schedules,
         ...processors,
         ...queueProviders,
         ...flowProviders,

@@ -1,16 +1,18 @@
 import { Cluster } from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
+import { Nullable } from '@common/types';
 import { RedisConnection, RedisService } from '@modules/redis';
 import {
+    KoreaIndexItem,
     KoreaInvestmentDailyItemChartPrice,
     KoreaInvestmentHtsTopViewItem,
     KoreaInvestmentNewsItem,
     KoreaInvestmentPopulatedHtsTopViewItem,
     KoreaInvestmentPopulatedVolumeRankItem,
     KoreaInvestmentVolumeRankItem,
+    OverseasIndexItem,
     StockPlusNewsItem,
 } from './stock-repository.types';
-import { Nullable } from '@common/types';
 
 enum StockRepositoryKey {
     KoreaInvestmentHtsTopView = 'KoreaInvestmentHtsTopView',
@@ -20,6 +22,8 @@ enum StockRepositoryKey {
     KoreaInvestmentNews = 'KoreaInvestmentNews',
     StockPlusNews = 'StockPlusNews',
     DailyStockChart = 'DailyStockChart',
+    KoreaIndex = 'KoreaIndex',
+    OverseasIndex = 'OverseasIndex',
 }
 
 @Injectable()
@@ -194,6 +198,46 @@ export class StockRepository {
     public async getDailyStockChart(iscd: string) {
         return this.getData<Nullable<KoreaInvestmentDailyItemChartPrice>>(
             `${StockRepositoryKey.DailyStockChart}:${iscd}`,
+            null,
+        );
+    }
+
+    /**
+     * 국내 업종 시세를 저장합니다. (코스피, 코스닥 지수 등)
+     * @param data
+     */
+    public async setKoreaIndex(data: Record<string, KoreaIndexItem>) {
+        return this.setData(StockRepositoryKey.KoreaIndex, data, 60 * 60 * 2);
+    }
+
+    /**
+     * 국내 업종 시세를 조회합니다. (코스피, 코스닥 지수 등)
+     */
+    public async getKoreaIndex() {
+        return this.getData<Nullable<Record<string, KoreaIndexItem>>>(
+            StockRepositoryKey.KoreaIndex,
+            null,
+        );
+    }
+
+    /**
+     * 해외 업종 시세를 저장합니다. (다우존스 산업지수, 나스닥, S&P500 등)
+     * @param data
+     */
+    public async setOverseasIndex(data: Record<string, OverseasIndexItem>) {
+        return this.setData(
+            StockRepositoryKey.OverseasIndex,
+            data,
+            60 * 60 * 2,
+        );
+    }
+
+    /**
+     * 해외 업종 시세를 조회합니다. (다우존스 산업지수, 나스닥, S&P500 등)
+     */
+    public async getOverseasIndex() {
+        return this.getData<Nullable<Record<string, OverseasIndexItem>>>(
+            StockRepositoryKey.OverseasIndex,
             null,
         );
     }

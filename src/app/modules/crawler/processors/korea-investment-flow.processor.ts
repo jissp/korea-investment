@@ -4,22 +4,28 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
 import { StockRepository } from '@app/modules/stock-repository';
 import {
+    BaseMultiResponse,
+    BaseResponse,
+} from '@modules/korea-investment/common';
+import {
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
 import {
+    DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
     DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleOutput,
+    OverseasQuotationInquireDailyChartPriceOutput,
+    OverseasQuotationInquireDailyChartPriceOutput2,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     CrawlerFlowType,
     CrawlerQueueType,
     KoreaInvestmentCallApiParam,
 } from '../crawler.types';
-import { BaseMultiResponse } from '@modules/korea-investment/common';
 
 @Injectable()
 export class KoreaInvestmentFlowProcessor {
@@ -227,6 +233,65 @@ export class KoreaInvestmentFlowProcessor {
         }
     }
 
+    @OnQueueProcessor(CrawlerFlowType.RequestKoreaIndex)
+    async processRequestKoreaIndex(job: Job) {
+        try {
+            const childrenValues =
+                await job.getChildrenValues<
+                    BaseResponse<DomesticStockQuotationInquireIndexPriceOutput>
+                >();
+
+            const [kospi, kosdaq] = Object.values(childrenValues);
+
+            await this.stockRepository.setKoreaIndex({
+                kospi: kospi.output,
+                kosdaq: kosdaq.output,
+            });
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    @OnQueueProcessor(CrawlerFlowType.RequestOverseasIndex)
+    async processRequestOverseasIndex(job: Job) {
+        try {
+            const childrenValues =
+                await job.getChildrenValues<
+                    BaseMultiResponse<
+                        OverseasQuotationInquireDailyChartPriceOutput,
+                        OverseasQuotationInquireDailyChartPriceOutput2[]
+                    >
+                >();
+
+            /**
+             * .DJI: 다우존스
+             * COMP: 나스닥
+             * SPX: S&P500
+             * SOX: 필라델피아 반도체 지수
+             */
+            const [dji, comp, spx, sox] = Object.values(childrenValues).map(
+                (value) => value.output1,
+            );
+
+            await this.stockRepository.setOverseasIndex({
+                dji,
+                comp,
+                spx,
+                sox,
+            });
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    /**
+     * @param iscdList
+     * @private
+     */
     private generateRequestApiForIntstockMultiPrice(iscdList: string[]) {
         return {
             name: CrawlerQueueType.RequestKoreaInvestmentApi,
@@ -239,6 +304,10 @@ export class KoreaInvestmentFlowProcessor {
         };
     }
 
+    /**
+     * @param iscdList
+     * @private
+     */
     private buildIntstockMultiPriceParam(
         iscdList: string[],
     ): DomesticStockQuotationsIntstockMultPriceParam {

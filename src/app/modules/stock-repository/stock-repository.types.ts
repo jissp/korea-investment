@@ -1,9 +1,11 @@
 import { StockPlusNews } from '@modules/stock-plus';
 import {
+    DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
     DomesticStockQuotationsNewsTitleOutput,
+    OverseasQuotationInquireDailyChartPriceOutput,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     DomesticStockQuotationVolumeRankOutput,
@@ -28,3 +30,5 @@ export type KoreaInvestmentDailyItemChartPrice = {
     output: DomesticStockQuotationsInquireDailyItemChartPriceOutput;
     output2: DomesticStockQuotationsInquireDailyItemChartPriceOutput2[];
 };
+export type KoreaIndexItem = DomesticStockQuotationInquireIndexPriceOutput;
+export type OverseasIndexItem = OverseasQuotationInquireDailyChartPriceOutput;
