@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
-import { StockParser } from './stock-parser';
+import path from 'node:path';
+import { Parser } from './parser';
 
 interface StockCode {
     shortCode: string;
@@ -8,7 +9,7 @@ interface StockCode {
 }
 
 async function main() {
-    const parser = new StockParser();
+    const parser = new Parser();
 
     const mstFileNames = [
         'kosdaq_code',
@@ -18,7 +19,7 @@ async function main() {
     ];
 
     for (const fileName of mstFileNames) {
-        const filePath = `${__dirname}/asserts/${fileName}.mst`;
+        const filePath = path.join(__dirname, 'asserts', `${fileName}.mst`);
         const codes = await parser.parse(filePath);
 
         const codeJson = codes.map(([shortCode, code, name]): StockCode => {
@@ -29,10 +30,16 @@ async function main() {
             };
         });
 
-        fs.writeFileSync(
-            `src/assets/${fileName}.json`,
-            JSON.stringify(codeJson, null, 2),
+        const outputPath = path.join(
+            __dirname,
+            '..',
+            '..',
+            'src',
+            'assets',
+            `${fileName}.json`,
         );
+
+        fs.writeFileSync(outputPath, JSON.stringify(codeJson, null, 2));
     }
 }
 

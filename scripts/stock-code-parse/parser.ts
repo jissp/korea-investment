@@ -1,7 +1,7 @@
 import * as iconv from 'iconv-lite';
 import * as fs from 'node:fs';
 
-export class StockParser {
+export class Parser {
     private readonly SUFFIX_LENGTH = 228;
     private readonly FIELD1_LENGTH = 9;
     private readonly FIELD2_LENGTH = 12;

@@ -5,6 +5,8 @@ export enum CrawlerFlowType {
     RequestDailyItemChartPrice = 'RequestDailyItemChartPrice',
     RequestRefreshPopulatedHtsTopView = 'RequestRefreshPopulatedHtsTopView',
     RequestRefreshPopulatedVolumeRank = 'RequestRefreshPopulatedVolumeRank',
+    RequestKoreaIndex = 'RequestKoreaIndex',
+    RequestOverseasIndex = 'RequestOverseasIndex',
 }
 
 export enum CrawlerQueueType {
