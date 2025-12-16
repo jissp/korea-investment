@@ -2,17 +2,18 @@ import * as _ from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
-import { StockRepository } from '@app/modules/stock-repository';
 import {
-    BaseMultiResponse,
-    BaseResponse,
-} from '@modules/korea-investment/common';
+    KoreaIndexItem,
+    OverseasIndexItem,
+    StockRepository,
+} from '@app/modules/stock-repository';
 import {
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
 import {
     DomesticStockQuotationInquireIndexPriceOutput,
+    DomesticStockQuotationInquireIndexPriceParam,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
@@ -24,7 +25,9 @@ import {
 import {
     CrawlerFlowType,
     CrawlerQueueType,
+    KoreaInvestmentCallApiMultiResult,
     KoreaInvestmentCallApiParam,
+    KoreaInvestmentCallApiResult,
 } from '../crawler.types';
 
 @Injectable()
@@ -44,10 +47,13 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestDomesticNewsTitle)
     async processRequestDomesticNewsTitle(job: Job) {
         try {
-            const childrenValues = await job.getChildrenValues();
-
-            const childrenResults: DomesticStockQuotationsNewsTitleOutput[] =
-                Object.values(childrenValues).flatMap((v) => v.output);
+            const childrenResponse = await this.getChildResponses<
+                any,
+                DomesticStockQuotationsNewsTitleOutput[]
+            >(job);
+            const childrenResults = childrenResponse.flatMap(
+                (response) => response.output,
+            );
 
             await this.stockRepository.setKoreaInvestmentNews(childrenResults);
         } catch (error) {
@@ -60,10 +66,13 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestDomesticHtsTopView)
     async processRequestDomesticHtsTopView(job: Job) {
         try {
-            const childrenValues = await job.getChildrenValues();
-
-            const childrenResults: DomesticStockRankingHtsTopViewOutput[] =
-                Object.values(childrenValues).flatMap((v) => v.output1);
+            const childrenResponses = await this.getChildMultiResponses<
+                any,
+                DomesticStockRankingHtsTopViewOutput[]
+            >(job);
+            const childrenResults = childrenResponses.flatMap(
+                (response) => response.output1,
+            );
 
             await this.stockRepository.setHtsTopView(childrenResults);
 
@@ -102,10 +111,13 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestDomesticVolumeRank)
     async processRequestDomesticVolumeRank(job: Job) {
         try {
-            const childrenValues = await job.getChildrenValues();
-
-            const childrenResults: DomesticStockQuotationVolumeRankOutput[] =
-                Object.values(childrenValues).flatMap((v) => v.output);
+            const childrenResponses = await this.getChildResponses<
+                any,
+                DomesticStockQuotationVolumeRankOutput[]
+            >(job);
+            const childrenResults = childrenResponses.flatMap(
+                (response) => response.output,
+            );
 
             await this.stockRepository.setVolumeRank(childrenResults);
 
@@ -144,10 +156,13 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestRefreshPopulatedHtsTopView)
     async processRequestRefreshPopulatedHtsTopView(job: Job) {
         try {
-            const childrenValues = await job.getChildrenValues();
-
-            const childrenResults: DomesticStockQuotationsIntstockMultPriceOutput[] =
-                Object.values(childrenValues).flatMap((v) => v.output);
+            const childrenResponses = await this.getChildResponses<
+                any,
+                DomesticStockQuotationsIntstockMultPriceOutput[]
+            >(job);
+            const childrenResults = childrenResponses.flatMap(
+                (response) => response.output,
+            );
 
             const intStockMultiPriceMap = _.keyBy(
                 childrenResults,
@@ -178,10 +193,13 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestRefreshPopulatedVolumeRank)
     async processRequestRefreshPopulatedVolumeRank(job: Job) {
         try {
-            const childrenValues = await job.getChildrenValues();
-
-            const childrenResults: DomesticStockQuotationsIntstockMultPriceOutput[] =
-                Object.values(childrenValues).flatMap((v) => v.output);
+            const childrenResponses = await this.getChildResponses<
+                any,
+                DomesticStockQuotationsIntstockMultPriceOutput[]
+            >(job);
+            const childrenResults = childrenResponses.flatMap(
+                (response) => response.output,
+            );
 
             const intStockMultiPriceMap = _.keyBy(
                 childrenResults,
@@ -212,19 +230,21 @@ export class KoreaInvestmentFlowProcessor {
     async processRequestDailyItemChartPrice(job: Job) {
         try {
             const { stockCode } = job.data;
-            const childrenValues = await job.getChildrenValues();
 
-            const values: BaseMultiResponse<
+            const childrenResults = await this.getChildMultiResponses<
+                any,
                 DomesticStockQuotationsInquireDailyItemChartPriceOutput,
                 DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
-            >[] = Object.values(childrenValues);
-            if (!values.length) {
+            >(job);
+
+            if (!childrenResults.length) {
+                this.logger.warn(`No data for stock: ${stockCode}`);
                 return;
             }
 
             await this.stockRepository.setDailyStockChart(stockCode, {
-                output: values[0].output1,
-                output2: values[0].output2,
+                output: childrenResults[0].output1,
+                output2: childrenResults[0].output2,
             });
         } catch (error) {
             this.logger.error(error);
@@ -238,15 +258,21 @@ export class KoreaInvestmentFlowProcessor {
         try {
             const childrenValues =
                 await job.getChildrenValues<
-                    BaseResponse<DomesticStockQuotationInquireIndexPriceOutput>
+                    KoreaInvestmentCallApiResult<
+                        DomesticStockQuotationInquireIndexPriceParam,
+                        DomesticStockQuotationInquireIndexPriceOutput
+                    >
                 >();
 
-            const [kospi, kosdaq] = Object.values(childrenValues);
+            const childrenResults = Object.values(childrenValues);
+            const indexContents = Object.fromEntries(
+                childrenResults.map(({ request, response }) => [
+                    request.params.FID_INPUT_ISCD,
+                    response.output,
+                ]),
+            ) as Record<string, KoreaIndexItem>;
 
-            await this.stockRepository.setKoreaIndex({
-                kospi: kospi.output,
-                kosdaq: kosdaq.output,
-            });
+            await this.stockRepository.setKoreaIndex(indexContents);
         } catch (error) {
             this.logger.error(error);
 
@@ -259,28 +285,22 @@ export class KoreaInvestmentFlowProcessor {
         try {
             const childrenValues =
                 await job.getChildrenValues<
-                    BaseMultiResponse<
+                    KoreaInvestmentCallApiMultiResult<
+                        DomesticStockQuotationInquireIndexPriceParam,
                         OverseasQuotationInquireDailyChartPriceOutput,
-                        OverseasQuotationInquireDailyChartPriceOutput2[]
+                        OverseasQuotationInquireDailyChartPriceOutput2
                     >
                 >();
 
-            /**
-             * .DJI: 다우존스
-             * COMP: 나스닥
-             * SPX: S&P500
-             * SOX: 필라델피아 반도체 지수
-             */
-            const [dji, comp, spx, sox] = Object.values(childrenValues).map(
-                (value) => value.output1,
-            );
+            const childrenResults = Object.values(childrenValues);
+            const indexContents = Object.fromEntries(
+                childrenResults.map(({ request, response }) => [
+                    request.params.FID_INPUT_ISCD,
+                    response.output1,
+                ]),
+            ) as Record<string, OverseasIndexItem>;
 
-            await this.stockRepository.setOverseasIndex({
-                dji,
-                comp,
-                spx,
-                sox,
-            });
+            await this.stockRepository.setOverseasIndex(indexContents);
         } catch (error) {
             this.logger.error(error);
 
@@ -328,5 +348,33 @@ export class KoreaInvestmentFlowProcessor {
         });
 
         return params;
+    }
+
+    /**
+     * @param job
+     * @private
+     */
+    private async getChildResponses<Params, Response>(job: Job) {
+        const childrenValues =
+            await job.getChildrenValues<
+                KoreaInvestmentCallApiResult<Params, Response>
+            >();
+
+        return Object.values(childrenValues).map((v) => v.response);
+    }
+
+    /**
+     * @param job
+     * @private
+     */
+    private async getChildMultiResponses<Params, Response, Response2 = any>(
+        job: Job,
+    ) {
+        const childrenValues =
+            await job.getChildrenValues<
+                KoreaInvestmentCallApiMultiResult<Params, Response, Response2>
+            >();
+
+        return Object.values(childrenValues).map((v) => v.response);
     }
 }
