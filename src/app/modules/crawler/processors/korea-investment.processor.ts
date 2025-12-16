@@ -35,11 +35,16 @@ export class KoreaInvestmentProcessor {
         const headers =
             await this.koreaInvestmentHelperService.buildHeaders(tradeId);
 
-        return this.koreaInvestmentHelperService.request({
+        const response = await this.koreaInvestmentHelperService.request({
             method: 'GET',
             url,
             params,
             headers,
         });
+
+        return {
+            request: job.data,
+            response,
+        };
     }
 }
