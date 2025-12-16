@@ -10,6 +10,7 @@ import {
     KoreaInvestmentPopulatedHtsTopViewItem,
     KoreaInvestmentPopulatedVolumeRankItem,
     KoreaInvestmentVolumeRankItem,
+    OverseasGovernmentBondItem,
     OverseasIndexItem,
     StockPlusNewsItem,
 } from './stock-repository.types';
@@ -24,6 +25,7 @@ enum StockRepositoryKey {
     DailyStockChart = 'DailyStockChart',
     KoreaIndex = 'KoreaIndex',
     OverseasIndex = 'OverseasIndex',
+    OverseasGovernmentBond = 'OverseasGovernmentBond',
 }
 
 @Injectable()
@@ -240,5 +242,28 @@ export class StockRepository {
             StockRepositoryKey.OverseasIndex,
             null,
         );
+    }
+
+    /**
+     * 미국 국채 정보를 저장합니다.
+     * @param data
+     */
+    public async setOverseasGovernmentBonds(
+        data: Record<string, OverseasGovernmentBondItem>,
+    ) {
+        return this.setData(
+            StockRepositoryKey.OverseasGovernmentBond,
+            data,
+            60 * 60 * 2,
+        );
+    }
+
+    /**
+     * 미국 국채 정보를 조회합니다.
+     */
+    public async getOverseasGovernmentBonds() {
+        return this.getData<
+            Nullable<Record<string, OverseasGovernmentBondItem>>
+        >(StockRepositoryKey.OverseasGovernmentBond, null);
     }
 }

@@ -4,6 +4,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
 import {
     KoreaIndexItem,
+    OverseasGovernmentBondItem,
     OverseasIndexItem,
     StockRepository,
 } from '@app/modules/stock-repository';
@@ -21,6 +22,7 @@ import {
     DomesticStockQuotationsNewsTitleOutput,
     OverseasQuotationInquireDailyChartPriceOutput,
     OverseasQuotationInquireDailyChartPriceOutput2,
+    OverseasQuotationInquireDailyChartPriceParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     CrawlerFlowType,
@@ -301,6 +303,39 @@ export class KoreaInvestmentFlowProcessor {
             ) as Record<string, OverseasIndexItem>;
 
             await this.stockRepository.setOverseasIndex(indexContents);
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    @OnQueueProcessor(CrawlerFlowType.RequestOverseasGovernmentBond)
+    async processRequestOverseasGovernmentBond(job: Job) {
+        try {
+            const childrenValues =
+                await job.getChildrenValues<
+                    KoreaInvestmentCallApiMultiResult<
+                        OverseasQuotationInquireDailyChartPriceParam,
+                        OverseasQuotationInquireDailyChartPriceOutput,
+                        OverseasQuotationInquireDailyChartPriceOutput2[]
+                    >
+                >();
+
+            const childrenResults = Object.values(childrenValues);
+            const indexContents = Object.fromEntries(
+                childrenResults.map(({ request, response }) => [
+                    request.params.FID_INPUT_ISCD,
+                    {
+                        output: response.output1,
+                        output2: response.output2,
+                    },
+                ]),
+            ) as Record<string, OverseasGovernmentBondItem>;
+
+            await this.stockRepository.setOverseasGovernmentBonds(
+                indexContents,
+            );
         } catch (error) {
             this.logger.error(error);
 

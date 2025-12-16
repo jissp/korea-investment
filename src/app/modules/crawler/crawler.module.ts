@@ -28,6 +28,7 @@ const flowTypes = [
     CrawlerFlowType.RequestDailyItemChartPrice,
     CrawlerFlowType.RequestKoreaIndex,
     CrawlerFlowType.RequestOverseasIndex,
+    CrawlerFlowType.RequestOverseasGovernmentBond,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
 const processors = [KoreaInvestmentFlowProcessor, KoreaInvestmentProcessor];

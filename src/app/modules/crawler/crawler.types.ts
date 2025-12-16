@@ -12,6 +12,7 @@ export enum CrawlerFlowType {
     RequestRefreshPopulatedVolumeRank = 'RequestRefreshPopulatedVolumeRank',
     RequestKoreaIndex = 'RequestKoreaIndex',
     RequestOverseasIndex = 'RequestOverseasIndex',
+    RequestOverseasGovernmentBond = 'RequestOverseasGovernmentBond',
 }
 
 export enum CrawlerQueueType {
