@@ -7,6 +7,7 @@ import {
     OverseasIndexPriceResponse,
     OverseasIndexPriceWithKey,
 } from './dto';
+import { OverseasGovernmentBondsResponse } from '@app/controllers/stock-index/dto/responses/overseas-government-bonds.response';
 
 @Controller('v1/stocks/indexes')
 export class StockIndexController {
@@ -47,7 +48,6 @@ export class StockIndexController {
     @Get('overseas')
     public async getOverseasIndexes(): Promise<OverseasIndexPriceResponse> {
         const indexes = await this.stockRepository.getOverseasIndex();
-
         if (!indexes) {
             return {
                 data: [],
@@ -61,6 +61,30 @@ export class StockIndexController {
                     data: value,
                 }),
             ),
+        };
+    }
+
+    @ApiOperation({
+        summary: '미국 국채 지수 조회',
+    })
+    @ApiOkResponse({
+        type: OverseasGovernmentBondsResponse,
+    })
+    @Get('overseas/government-bonds')
+    public async getOverseasGovernmentBonds(): Promise<OverseasGovernmentBondsResponse> {
+        const bonds = await this.stockRepository.getOverseasGovernmentBonds();
+        if (!bonds) {
+            return {
+                data: [],
+            };
+        }
+
+        return {
+            data: Object.entries(bonds).map(([key, value]) => ({
+                key,
+                data: value.output,
+                data2: value.output2,
+            })),
         };
     }
 }

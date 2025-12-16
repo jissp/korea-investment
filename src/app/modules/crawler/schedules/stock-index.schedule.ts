@@ -17,27 +17,69 @@ import {
 export class StockIndexSchedule implements OnModuleInit {
     private readonly logger: Logger = new Logger(StockIndexSchedule.name);
 
+    private readonly DOMESTIC_INDEX_CODES = [
+        {
+            code: '0001',
+            name: '코스피',
+        },
+        {
+            code: '1001',
+            name: '코스닥',
+        },
+    ];
+
+    private readonly OVERSEAS_INDEX_CODES = [
+        {
+            code: '.DJI',
+            name: '다우존스 산업지수',
+        },
+        {
+            code: 'COMP',
+            name: '나스닥 종합',
+        },
+        {
+            code: 'SPX',
+            name: 'S&P500',
+        },
+        {
+            code: 'SOX',
+            name: '필라델피아 반도체지수',
+        },
+    ];
+
+    private readonly GOVERNMENT_BOND_CODES = [
+        { code: 'Y0104', name: '국고채 1년' },
+        { code: 'Y0101', name: '국고채 3년' },
+        { code: 'Y0105', name: '국고채 5년' },
+        { code: 'Y0106', name: '국고채 10년' },
+    ];
+
     constructor(
         private readonly helper: KoreaInvestmentHelperService,
         @Inject(CrawlerFlowType.RequestKoreaIndex)
         private readonly requestKoreaIndexFlow: FlowProducer,
         @Inject(CrawlerFlowType.RequestOverseasIndex)
         private readonly requestOverseasIndexFlow: FlowProducer,
+        @Inject(CrawlerFlowType.RequestOverseasGovernmentBond)
+        private readonly requestOverseasGovernmentBond: FlowProducer,
     ) {}
 
     onModuleInit() {
         this.handleCrawlingKoreaIndex();
         this.handleCrawlingOverseasIndex();
+        this.handleCrawlingOverseasGovernmentBond();
     }
 
     @Cron('*/1 * * * *')
     async handleCrawlingKoreaIndex() {
         try {
+            const codes = this.DOMESTIC_INDEX_CODES.map((code) => code.code);
+
             await this.requestKoreaIndexFlow.add(
                 {
                     name: CrawlerFlowType.RequestKoreaIndex,
                     queueName: CrawlerFlowType.RequestKoreaIndex,
-                    children: ['0001', '1001'].map((iscd) => ({
+                    children: this.DOMESTIC_INDEX_CODES.map(({ code }) => ({
                         name: CrawlerQueueType.RequestKoreaInvestmentApi,
                         queueName: CrawlerQueueType.RequestKoreaInvestmentApi,
                         data: {
@@ -45,7 +87,7 @@ export class StockIndexSchedule implements OnModuleInit {
                             tradeId: 'FHPUP02100000',
                             params: {
                                 FID_COND_MRKT_DIV_CODE: 'U',
-                                FID_INPUT_ISCD: iscd,
+                                FID_INPUT_ISCD: code,
                             },
                         } as KoreaInvestmentCallApiParam<DomesticStockQuotationInquireIndexPriceParam>,
                     })),
@@ -75,27 +117,84 @@ export class StockIndexSchedule implements OnModuleInit {
                 {
                     name: CrawlerFlowType.RequestOverseasIndex,
                     queueName: CrawlerFlowType.RequestOverseasIndex,
-                    children: ['.DJI', 'COMP', 'SPX', 'SOX'].map((iscd) => ({
-                        name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                        queueName: CrawlerQueueType.RequestKoreaInvestmentApi,
-                        data: {
-                            url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
-                            tradeId: 'FHKST03030100',
-                            params: {
-                                FID_COND_MRKT_DIV_CODE: 'N',
-                                FID_INPUT_ISCD: iscd,
-                                FID_INPUT_DATE_1:
-                                    this.helper.formatDateParam(currentDate),
-                                FID_INPUT_DATE_2:
-                                    this.helper.formatDateParam(currentDate),
-                                FID_PERIOD_DIV_CODE: 'D',
-                            },
-                        } as KoreaInvestmentCallApiParam<OverseasQuotationInquireDailyChartPriceParam>,
-                    })),
+                    children: this.OVERSEAS_INDEX_CODES.map(
+                        ({ code, name }) => ({
+                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
+                            queueName:
+                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            data: {
+                                url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
+                                tradeId: 'FHKST03030100',
+                                params: {
+                                    FID_COND_MRKT_DIV_CODE: 'N',
+                                    FID_INPUT_ISCD: code,
+                                    FID_INPUT_DATE_1:
+                                        this.helper.formatDateParam(
+                                            currentDate,
+                                        ),
+                                    FID_INPUT_DATE_2:
+                                        this.helper.formatDateParam(
+                                            currentDate,
+                                        ),
+                                    FID_PERIOD_DIV_CODE: 'D',
+                                },
+                            } as KoreaInvestmentCallApiParam<OverseasQuotationInquireDailyChartPriceParam>,
+                        }),
+                    ),
                 },
                 {
                     queuesOptions: {
                         [CrawlerFlowType.RequestOverseasIndex]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                    },
+                },
+            );
+        } catch (error) {
+            this.logger.error(error);
+        }
+    }
+
+    @Cron('*/10 * * * *')
+    async handleCrawlingOverseasGovernmentBond() {
+        try {
+            const currentDate = new Date();
+            const fromDate = new Date();
+            fromDate.setDate(currentDate.getDate() - 90);
+
+            await this.requestOverseasGovernmentBond.add(
+                {
+                    name: CrawlerFlowType.RequestOverseasGovernmentBond,
+                    queueName: CrawlerFlowType.RequestOverseasGovernmentBond,
+                    children: this.GOVERNMENT_BOND_CODES.map(
+                        ({ code, name }) => ({
+                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
+                            queueName:
+                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            data: {
+                                url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
+                                tradeId: 'FHKST03030100',
+                                params: {
+                                    FID_COND_MRKT_DIV_CODE: 'I',
+                                    FID_INPUT_ISCD: code,
+                                    FID_INPUT_DATE_1:
+                                        this.helper.formatDateParam(fromDate),
+                                    FID_INPUT_DATE_2:
+                                        this.helper.formatDateParam(
+                                            currentDate,
+                                        ),
+                                    FID_PERIOD_DIV_CODE: 'D',
+                                },
+                            } as KoreaInvestmentCallApiParam<OverseasQuotationInquireDailyChartPriceParam>,
+                        }),
+                    ),
+                },
+                {
+                    queuesOptions: {
+                        [CrawlerFlowType.RequestOverseasGovernmentBond]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                         [CrawlerQueueType.RequestKoreaInvestmentApi]: {
