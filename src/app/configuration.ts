@@ -19,6 +19,13 @@ export interface IConfiguration {
         host: string;
         port: string;
     };
+    naver: {
+        api: {
+            host: string;
+            key: string;
+            secret: string;
+        }
+    }
 }
 
 export default (): IConfiguration => ({
@@ -42,6 +49,13 @@ export default (): IConfiguration => ({
         host: getEnv('REDIS_HOST'),
         port: getEnv('REDIS_PORT'),
     },
+    naver: {
+        api: {
+            host: getEnv('NAVER_APP_HOST'),
+            key: getEnv('NAVER_APP_CLIENT_ID'),
+            secret: getEnv('NAVER_APP_CLIENT_SECRET'),
+        }
+    }
 });
 
 function getEnv(key: string): string {
