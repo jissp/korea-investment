@@ -3,22 +3,25 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { getCurrentMarketDivCode } from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
+import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import { DomesticStockQuotationsInquireDailyItemChartPriceParam } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentSettingService } from '@app/modules';
+import {
+    KoreaInvestmentSettingHelperService,
+    KoreaInvestmentSettingKey,
+} from '@app/modules/korea-investment-setting';
 import {
     CrawlerFlowType,
     CrawlerQueueType,
     KoreaInvestmentCallApiParam,
 } from '../crawler.types';
-import { MarketDivCode } from '@modules/korea-investment/common';
 
 @Injectable()
 export class ChartSchedule implements OnModuleInit {
     private readonly logger: Logger = new Logger(ChartSchedule.name);
 
     constructor(
-        private readonly koreaInvestmentSetting: KoreaInvestmentSettingService,
+        private readonly koreaInvestmentSettingHelperService: KoreaInvestmentSettingHelperService,
         private readonly helper: KoreaInvestmentHelperService,
         @Inject(CrawlerFlowType.RequestDailyItemChartPrice)
         private readonly requestDailyItemChartPriceFlow: FlowProducer,
@@ -31,8 +34,9 @@ export class ChartSchedule implements OnModuleInit {
     @Cron('00 */1 * * *')
     async handleCrawlingStockDailyItemChartPrice() {
         try {
-            const stockCodes =
-                await this.koreaInvestmentSetting.getStockCodes();
+            const stockCodes = await this.koreaInvestmentSettingHelperService
+                .getSettingSet(KoreaInvestmentSettingKey.StockCodes)
+                .list();
 
             const currentDate = new Date();
             const fromDate = new Date(currentDate);

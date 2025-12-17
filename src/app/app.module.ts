@@ -9,7 +9,12 @@ import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { CrawlerModule } from '@app/modules/crawler';
+import { NaverNewsCrawlerModule } from '@app/modules/naver-news-crawler';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
+import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
+import { StockModule } from '@app/modules/stock';
+import { StockKeywordModule } from '@app/modules/stock-keyword';
+import { NaverNewsModule } from '@app/modules/naver-news';
 import configuration from './configuration';
 import {
     AssetController,
@@ -42,7 +47,12 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentRankClientModule,
         StockRepositoryModule,
         CrawlerModule,
+        NaverNewsCrawlerModule,
         KoreaInvestmentCollectorModule.forRoot(),
+        KoreaInvestmentSettingModule,
+        StockModule,
+        StockKeywordModule,
+        NaverNewsModule,
     ],
     controllers: [
         AssetController,

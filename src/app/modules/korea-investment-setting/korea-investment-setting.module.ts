@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { KoreaInvestmentSettingService } from './korea-investment-setting.service';
+import { RedisModule } from '@modules/redis';
+import { KoreaInvestmentSettingHelperService } from './korea-investment-setting-helper.service';
 
 @Module({
-    imports: [],
-    providers: [KoreaInvestmentSettingService],
-    exports: [KoreaInvestmentSettingService],
+    imports: [RedisModule.forFeature()],
+    providers: [KoreaInvestmentSettingHelperService],
+    exports: [KoreaInvestmentSettingHelperService],
 })
 export class KoreaInvestmentSettingModule {}

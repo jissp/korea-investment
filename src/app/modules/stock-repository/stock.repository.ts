@@ -1,7 +1,7 @@
 import { Cluster } from 'ioredis';
 import { Inject, Injectable } from '@nestjs/common';
 import { Nullable } from '@common/types';
-import { RedisConnection, RedisService } from '@modules/redis';
+import { RedisConnection, RedisHelper, RedisService, RedisZset } from '@modules/redis';
 import {
     KoreaIndexItem,
     KoreaInvestmentDailyItemChartPrice,
@@ -33,7 +33,8 @@ export class StockRepository {
     constructor(
         private readonly redisService: RedisService,
         @Inject(RedisConnection) private readonly redisClient: Cluster,
-    ) {}
+    ) {
+    }
 
     private async getData<T>(key: string, defaultValue: T): Promise<T> {
         return this.redisService.getOrDefaultValue<T>(key, defaultValue);
@@ -48,6 +49,8 @@ export class StockRepository {
             seconds: ttl,
         });
     }
+
+
 
     /**
      * 수집한 한국투자증권의 뉴스 정보를 응답합니다.
