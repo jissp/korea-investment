@@ -4,10 +4,10 @@ import { StockRepository } from '@app/modules/stock-repository';
 import {
     DomesticIndexPriceResponse,
     DomesticIndexPriceWithKey,
+    OverseasGovernmentBondsResponse,
     OverseasIndexPriceResponse,
     OverseasIndexPriceWithKey,
 } from './dto';
-import { OverseasGovernmentBondsResponse } from '@app/controllers/stock-index/dto/responses/overseas-government-bonds.response';
 
 @Controller('v1/stocks/indexes')
 export class StockIndexController {

@@ -28,6 +28,8 @@ describe('Naver API Test', () => {
                     sort: 'date',
                 });
 
+                console.log(response);
+
                 expect(response.items).toBeDefined();
             } catch (error) {
                 console.log(error.response.data);

@@ -28,10 +28,16 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         await this.connect();
     }
 
+    /**
+     * socket이 연결중인지 확인합니다.
+     */
     public isConnected() {
         return isConnected(this.socket);
     }
 
+    /**
+     * socket을 연결합니다.
+     */
     public async connect() {
         if (isConnected(this.socket)) {
             return;
@@ -54,6 +60,9 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         });
     }
 
+    /**
+     * socket을 닫습니다.
+     */
     public disconnect() {
         if (!this.isConnected()) {
             return;
@@ -65,15 +74,26 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         this.socket.close();
     }
 
+    /**
+     * socket을 재연결합니다.
+     */
     public async reconnect() {
         this.disconnect();
         await this.connect();
     }
 
+    /**
+     * socket을 통해 메세지를 전송합니다.
+     * @param message
+     */
     public send<T>(message: T) {
         this.socket.send(JSON.stringify(message));
     }
 
+    /**
+     * Korea Investment Web Socket을 통해 구독을 요청합니다.
+     * @param payload
+     */
     public async subscribe(payload: SubscribeRequest) {
         const approvalKey = await this.helperService.getWebSocketToken();
         const message = {
@@ -89,6 +109,10 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         this.send(message);
     }
 
+    /**
+     * Korea Investment Web Socket을 통해 구독을 취소합니다.
+     * @param payload
+     */
     public async unsubscribe(payload: SubscribeRequest) {
         const approvalKey = await this.helperService.getWebSocketToken();
         const message = {
@@ -105,6 +129,7 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     }
 
     /**
+     * Korea Investment Web Socket 요청 헤더를 생성합니다.
      * @param requestType
      * @param approvalKey
      * @private
