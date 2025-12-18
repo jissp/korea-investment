@@ -2,25 +2,18 @@ import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
+import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockPlusModule } from '@modules/stock-plus';
-import { CrawlerFlowType, CrawlerQueueType } from './crawler.types';
+import { CrawlerFlowType } from './crawler.types';
 import {
     ChartSchedule,
-    NewsSchedule,
     RankingSchedule,
     StockIndexSchedule,
 } from './schedules';
-import {
-    KoreaInvestmentFlowProcessor,
-    KoreaInvestmentProcessor,
-} from './processors';
+import { KoreaInvestmentFlowProcessor } from './processors';
 
-const queueTypes = [CrawlerQueueType.RequestKoreaInvestmentApi];
-const queueProviders = QueueModule.getQueueProviders(queueTypes);
 const flowTypes = [
-    CrawlerFlowType.RequestDomesticNewsTitle,
     CrawlerFlowType.RequestDomesticVolumeRank,
     CrawlerFlowType.RequestRefreshPopulatedVolumeRank,
     CrawlerFlowType.RequestDomesticHtsTopView,
@@ -31,18 +24,12 @@ const flowTypes = [
     CrawlerFlowType.RequestOverseasGovernmentBond,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
-const processors = [KoreaInvestmentFlowProcessor, KoreaInvestmentProcessor];
-const schedules = [
-    NewsSchedule,
-    RankingSchedule,
-    ChartSchedule,
-    StockIndexSchedule,
-];
+const processors = [KoreaInvestmentFlowProcessor];
+const schedules = [RankingSchedule, ChartSchedule, StockIndexSchedule];
 
 @Module({
     imports: [
         QueueModule.forFeature({
-            queueTypes,
             flowTypes,
             jobOptions: {
                 removeOnFail: {
@@ -54,18 +41,13 @@ const schedules = [
                 },
             },
         }),
+        KoreaInvestmentRequestApiModule,
         StockRepositoryModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentHelperModule,
         KoreaInvestmentSettingModule,
-        StockPlusModule,
     ],
-    providers: [
-        ...schedules,
-        ...processors,
-        ...queueProviders,
-        ...flowProviders,
-    ],
-    exports: [...queueProviders, ...flowProviders],
+    providers: [...schedules, ...processors, ...flowProviders],
+    exports: [...flowProviders],
 })
 export class CrawlerModule {}

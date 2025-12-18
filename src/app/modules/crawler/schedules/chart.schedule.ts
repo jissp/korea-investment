@@ -11,10 +11,10 @@ import {
     KoreaInvestmentSettingKey,
 } from '@app/modules/korea-investment-setting';
 import {
-    CrawlerFlowType,
-    CrawlerQueueType,
     KoreaInvestmentCallApiParam,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api';
+import { CrawlerFlowType } from '../crawler.types';
 
 @Injectable()
 export class ChartSchedule implements OnModuleInit {
@@ -54,9 +54,8 @@ export class ChartSchedule implements OnModuleInit {
                             },
                             children: [
                                 {
-                                    name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                                    queueName:
-                                        CrawlerQueueType.RequestKoreaInvestmentApi,
+                                    name: KoreaInvestmentRequestApiType,
+                                    queueName: KoreaInvestmentRequestApiType,
                                     data: {
                                         url: '/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice',
                                         tradeId: 'FHKST03010100',
@@ -85,7 +84,7 @@ export class ChartSchedule implements OnModuleInit {
                                 [CrawlerFlowType.RequestDailyItemChartPrice]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
-                                [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                                [KoreaInvestmentRequestApiType]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
                             },

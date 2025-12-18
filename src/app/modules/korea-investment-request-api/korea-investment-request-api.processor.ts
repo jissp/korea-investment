@@ -1,14 +1,16 @@
 import { Job } from 'bullmq';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
-    CrawlerQueueType,
     KoreaInvestmentCallApiParam,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiType,
+} from './korea-investment-request-api.type';
 
 @Injectable()
-export class KoreaInvestmentProcessor {
+export class KoreaInvestmentRequestApiProcessor {
+    private readonly logger = new Logger(KoreaInvestmentRequestApiProcessor.name);
+
     constructor(
         private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
     ) {}
@@ -20,7 +22,7 @@ export class KoreaInvestmentProcessor {
      * @see https://apiportal.koreainvestment.com/community/10000000-0000-0011-0000-000000000002/post/8548106c-c7a8-4126-abb7-b8ec46a8cb5c
      * @param job
      */
-    @OnQueueProcessor(CrawlerQueueType.RequestKoreaInvestmentApi, {
+    @OnQueueProcessor(KoreaInvestmentRequestApiType, {
         concurrency: 5,
         limiter: {
             max: 5,
@@ -30,21 +32,27 @@ export class KoreaInvestmentProcessor {
     public async processorCallKoreaInvestmentApi(
         job: Job<KoreaInvestmentCallApiParam>,
     ) {
-        const { url, tradeId, params } = job.data;
+        try {
+            const { url, tradeId, params } = job.data;
 
-        const headers =
-            await this.koreaInvestmentHelperService.buildHeaders(tradeId);
+            const headers =
+                await this.koreaInvestmentHelperService.buildHeaders(tradeId);
 
-        const response = await this.koreaInvestmentHelperService.request({
-            method: 'GET',
-            url,
-            params,
-            headers,
-        });
+            const response = await this.koreaInvestmentHelperService.request({
+                method: 'GET',
+                url,
+                params,
+                headers,
+            });
 
-        return {
-            request: job.data,
-            response,
-        };
+            return {
+                request: job.data,
+                response,
+            };
+        } catch(error) {
+            this.logger.error(error);
+
+            throw error;
+        }
     }
 }
