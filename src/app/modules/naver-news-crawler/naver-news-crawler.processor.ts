@@ -2,10 +2,7 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { NaverApiClient } from '@modules/naver';
-import {
-    KoreaInvestmentSettingHelperService,
-    KoreaInvestmentSettingKey,
-} from '@app/modules/korea-investment-setting';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { NaverNewsService } from '@app/modules/naver-news';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
 
@@ -15,7 +12,7 @@ export class NaverNewsCrawlerProcessor {
 
     constructor(
         private readonly client: NaverApiClient,
-        private readonly koreaInvestmentSettingHelperService: KoreaInvestmentSettingHelperService,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         private readonly naverNewsService: NaverNewsService,
     ) {}
 
@@ -23,9 +20,8 @@ export class NaverNewsCrawlerProcessor {
     public async processCrawlingNaverNews(job: Job) {
         const { keyword } = job.data;
 
-        const stockCodes = await this.koreaInvestmentSettingHelperService
-            .getSettingSet(KoreaInvestmentSettingKey.StockKeywordMap, keyword)
-            .list();
+        const stockCodes =
+            await this.koreaInvestmentSettingService.getStockCodes();
         if (!stockCodes.length) {
             return;
         }

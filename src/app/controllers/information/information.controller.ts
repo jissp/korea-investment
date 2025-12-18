@@ -4,10 +4,6 @@ import { getStockName } from '@common/domains';
 import { NaverNewsService } from '@app/modules/naver-news';
 import { StockRepository } from '@app/modules/stock-repository';
 import {
-    KoreaInvestmentSettingHelperService,
-    KoreaInvestmentSettingKey,
-} from '@app/modules/korea-investment-setting';
-import {
     InformationKoreaInvestmentNewsResponse,
     InformationNaverNewsByKeywordResponse,
     InformationNaverNewsByStockCodeResponse,
@@ -15,13 +11,14 @@ import {
     InformationNaverNewsResponse,
     InformationStockPlusNewsResponse,
 } from './dto';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting/korea-investment-setting.service';
 
 @Controller('v1/information')
 export class InformationController {
     constructor(
         private readonly stockRepository: StockRepository,
         private readonly naverNewsService: NaverNewsService,
-        private readonly koreaInvestmentSettingHelperService: KoreaInvestmentSettingHelperService,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
     ) {}
 
     @ApiOperation({
@@ -78,9 +75,7 @@ export class InformationController {
     })
     @Get('news/by-keyword')
     public async getNaverNewsByKeyword(): Promise<InformationNaverNewsByKeywordResponse> {
-        const keywords = await this.koreaInvestmentSettingHelperService
-            .getSettingSet(KoreaInvestmentSettingKey.Keywords)
-            .list();
+        const keywords = await this.koreaInvestmentSettingService.getKeywords();
 
         // 키워드가 없을 경우 빈 배열 응답
         if (!keywords.length) {
@@ -120,9 +115,8 @@ export class InformationController {
     })
     @Get('news/by-stock-code')
     public async getNaverNewsByStockCode(): Promise<InformationNaverNewsByStockCodeResponse> {
-        const stockCodes = await this.koreaInvestmentSettingHelperService
-            .getSettingSet(KoreaInvestmentSettingKey.StockCodes)
-            .list();
+        const stockCodes =
+            await this.koreaInvestmentSettingService.getStockCodes();
 
         // 종목 코드가 없을 경우 빈 배열 응답
         if (!stockCodes.length) {

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
-import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
@@ -45,7 +44,6 @@ const schedules = [RankingSchedule, ChartSchedule, StockIndexSchedule];
         StockRepositoryModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentHelperModule,
-        KoreaInvestmentSettingModule,
     ],
     providers: [...schedules, ...processors, ...flowProviders],
     exports: [...flowProviders],

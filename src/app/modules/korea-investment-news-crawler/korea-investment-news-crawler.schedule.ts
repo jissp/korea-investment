@@ -5,10 +5,7 @@ import { Cron } from '@nestjs/schedule';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import { DomesticStockQuotationsNewsTitleParam } from '@modules/korea-investment/korea-investment-quotation-client';
-import {
-    KoreaInvestmentSettingHelperService,
-    KoreaInvestmentSettingKey,
-} from '@app/modules/korea-investment-setting';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
@@ -24,7 +21,7 @@ export class KoreaInvestmentNewsCrawlerSchedule implements OnModuleInit {
     constructor(
         private readonly koreaInvestmentHelper: KoreaInvestmentHelperService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentSettingHelperService: KoreaInvestmentSettingHelperService,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         @Inject(KoreaInvestmentNewsCrawlerType.RequestDomesticNewsTitle)
         private readonly requestDomesticNewsTitleFlow: FlowProducer,
     ) {}
@@ -36,9 +33,8 @@ export class KoreaInvestmentNewsCrawlerSchedule implements OnModuleInit {
     @Cron('*/1 * * * *')
     async handleCrawlingKoreaInvestmentNewsByStockCode() {
         try {
-            const stockCodes = await this.koreaInvestmentSettingHelperService
-                .getSettingSet(KoreaInvestmentSettingKey.StockCodes)
-                .list();
+            const stockCodes =
+                await this.koreaInvestmentSettingService.getStockCodes();
             if (!stockCodes.length) {
                 return;
             }
