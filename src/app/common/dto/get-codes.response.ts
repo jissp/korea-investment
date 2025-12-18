@@ -5,6 +5,11 @@ export class CodeItem {
         type: String,
     })
     code: string;
+
+    @ApiProperty({
+        type: String,
+    })
+    name: string;
 }
 
 export class GetCodesResponse {

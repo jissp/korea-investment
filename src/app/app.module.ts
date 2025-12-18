@@ -13,14 +13,14 @@ import { CrawlerModule } from '@app/modules/crawler';
 import { NaverNewsCrawlerModule } from '@app/modules/naver-news-crawler';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { StockModule } from '@app/modules/stock';
-import { StockKeywordModule } from '@app/modules/stock-keyword';
 import { NaverNewsModule } from '@app/modules/naver-news';
 import { StockPlusNewsCrawlerModule } from '@app/modules/stock-plus-news-cralwer';
 import configuration from './configuration';
 import {
     AssetController,
+    FavoriteStockController,
     InformationController,
+    KeywordController,
     LatestStockRankController,
     StockController,
     StockIndexController,
@@ -46,7 +46,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         EventEmitterModule.forRoot(),
         ScheduleModule.forRoot(),
         KoreaInvestmentCollectorModule.forRoot(),
-        KoreaInvestmentSettingModule,
+        KoreaInvestmentSettingModule.forRoot(),
         KoreaInvestmentNewsCrawlerModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
@@ -54,16 +54,16 @@ import { KoreaInvestmentBeGateway } from './gateways';
         StockRepositoryModule,
         CrawlerModule,
         NaverNewsCrawlerModule,
-        StockModule,
-        StockKeywordModule,
         NaverNewsModule,
     ],
     controllers: [
         AssetController,
         InformationController,
+        LatestStockRankController,
         StockController,
         StockIndexController,
-        LatestStockRankController,
+        FavoriteStockController,
+        KeywordController,
     ],
     providers: [KoreaInvestmentBeGateway],
 })

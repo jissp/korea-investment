@@ -1,38 +1,26 @@
-import { Nullable } from '@common/types';
-import { MarketDivCode } from '@modules/korea-investment/common';
+import * as _ from 'lodash';
+import * as kospiCodes from '@assets/kospi_code.json';
+import * as kosdaqCodes from '@assets/kosdaq_code.json';
 
-// KRX 정규장: 09:00 ~ 15:30
-const krxStart = 9 * 60; // 540
-const krxEnd = 15 * 60 + 30; // 930
-
-// NXT 시간외 단일가: 15:30 ~ 16:00
-const nxtStart = 8 * 60; // 480
-const nxtEnd = 20 * 60; // 960
+const codeMap = {
+    ..._.keyBy(kospiCodes, 'shortCode'),
+    ..._.keyBy(kosdaqCodes, 'shortCode'),
+};
 
 /**
- * 현재 시간이 장 오픈 시간(KRX/NXT) 또는 종료 시간인지 확인합니다.
- * @returns 'KRX' | 'NXT' | null
- * - KRX: 정규장 (09:00 ~ 15:30)
- * - NXT: 시간외 단일가 (15:30 ~ 16:00)
- * - null: 장 종료
+ * 종목명을 가져옵니다.
+ * @param stockCode
  */
-export function getCurrentMarketDivCode(date?: Date): Nullable<MarketDivCode> {
-    const targetDate = date ? new Date(date.getTime()) : new Date();
-    const hours = targetDate.getHours();
-    const minutes = targetDate.getMinutes();
+export function getStockName(stockCode: string) {
+    const stock = codeMap[stockCode];
 
-    const currentTime = hours * 60 + minutes;
+    return stock ? stock.name : stockCode;
+}
 
-    const isKrx = currentTime >= krxStart && currentTime < krxEnd;
-    if (isKrx) {
-        return MarketDivCode.KRX;
-    }
-
-    const isStartNxt = currentTime >= nxtStart && currentTime < krxStart;
-    const isEndNxt = currentTime >= krxEnd && currentTime < nxtEnd;
-    if (isStartNxt || isEndNxt) {
-        return MarketDivCode.NXT;
-    }
-
-    return null;
+/**
+ * 종목 코드가 유효한지 검사합니다.
+ * @param stockCode
+ */
+export function existsStockCode(stockCode: string) {
+    return !!codeMap[stockCode];
 }

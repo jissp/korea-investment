@@ -94,9 +94,11 @@ export class KoreaInvestmentRequestApiHelper {
     /**
      * @param job
      */
-    public async getChildMultiResponses<Params, Response, Response2 = any>(
-        job: Job,
-    ) {
+    public async getChildMultiResponses<
+        Params,
+        Response,
+        Response2 = unknown | null,
+    >(job: Job) {
         const childrenValues =
             await job.getChildrenValues<
                 KoreaInvestmentCallApiMultiResult<Params, Response, Response2>

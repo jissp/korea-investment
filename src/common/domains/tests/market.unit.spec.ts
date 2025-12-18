@@ -1,4 +1,4 @@
-import { getCurrentMarketDivCode } from '@common/domains/stock';
+import { getCurrentMarketDivCode } from '@common/domains';
 import { MarketDivCode } from '@modules/korea-investment/common';
 
 describe('stock 도메인 테스트', () => {
