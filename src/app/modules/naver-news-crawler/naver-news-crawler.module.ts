@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { NaverApiModule } from '@modules/naver';
 import { QueueModule } from '@modules/queue';
-import { NaverNewsModule } from '@app/modules/naver-news';
+import { NewsModule } from '@app/modules/news';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
 import { NaverNewsCrawlerProcessor } from './naver-news-crawler.processor';
 import { NaverNewsCrawlerSchedule } from './naver-news-crawler.schedule';
@@ -25,7 +25,7 @@ const queueProviders = QueueModule.getQueueProviders(queueTypes);
             },
         }),
         NaverApiModule,
-        NaverNewsModule,
+        NewsModule,
     ],
     providers: [
         ...queueProviders,

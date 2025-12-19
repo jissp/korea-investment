@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RedisModule } from '@modules/redis';
-import { NaverNewsModule } from '@app/modules/naver-news';
+import { NewsModule } from '@app/modules/news';
 import { KoreaInvestmentSettingListener } from './korea-investment-setting.listener';
 import { KoreaInvestmentSettingService } from './korea-investment-setting.service';
 
@@ -10,7 +10,7 @@ export class KoreaInvestmentSettingModule {
         return {
             module: KoreaInvestmentSettingModule,
             global: true,
-            imports: [RedisModule.forFeature(), NaverNewsModule],
+            imports: [RedisModule.forFeature(), NewsModule],
             providers: [
                 KoreaInvestmentSettingListener,
                 KoreaInvestmentSettingService,

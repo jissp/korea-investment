@@ -1,8 +1,8 @@
 import { Queue } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting/korea-investment-setting.service';
 
 @Injectable()
 export class NaverNewsCrawlerSchedule implements OnModuleInit {

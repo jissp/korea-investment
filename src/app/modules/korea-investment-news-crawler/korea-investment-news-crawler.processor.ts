@@ -1,41 +1,62 @@
+import * as _ from 'lodash';
 import { Job } from 'bullmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
-import { StockRepository } from '@app/modules/stock-repository';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
+import { NewsService } from '@app/modules/news';
 import {
     KoreaInvestmentNewsCrawlerType,
     RequestDomesticNewsTitleResponse,
 } from './korea-investment-news-crawler.types';
+import { KoreaInvestmentNewsToNewsTransformer } from './korea-investment-news-to-news.transformer';
 
 @Injectable()
 export class KoreaInvestmentNewsCrawlerProcessor {
-    private readonly logger = new Logger(
-        KoreaInvestmentNewsCrawlerProcessor.name,
-    );
+    private transformer = new KoreaInvestmentNewsToNewsTransformer();
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly stockRepository: StockRepository,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly newsService: NewsService,
     ) {}
 
     @OnQueueProcessor(KoreaInvestmentNewsCrawlerType.RequestDomesticNewsTitle)
     async processRequestDomesticNewsTitle(job: Job) {
-        try {
-            const childrenResponse =
-                await this.koreaInvestmentRequestApiHelper.getChildResponses<
-                    any,
-                    RequestDomesticNewsTitleResponse
-                >(job);
-            const childrenResults = childrenResponse.flatMap(
-                (response) => response.output,
-            );
+        const childrenResponse =
+            await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                any,
+                RequestDomesticNewsTitleResponse
+            >(job);
+        const childrenResults = childrenResponse.flatMap(
+            (response) => response.output,
+        );
 
-            await this.stockRepository.setKoreaInvestmentNews(childrenResults);
-        } catch (error) {
-            this.logger.error(error);
+        const settingStockCodes =
+            await this.koreaInvestmentSettingService.getStockCodes();
+        const stockCodeSet = new Set(settingStockCodes);
+        const transformedNewsItems = childrenResults.map((newsItem) =>
+            this.transformer.transform(newsItem),
+        );
+        const chunks = _.chunk(transformedNewsItems, 10);
+        for (const chunk of chunks) {
+            await Promise.allSettled([
+                ...chunk.map((news) => this.newsService.addNews(news)),
+                ...chunk.flatMap((news) => {
+                    // 설정된 종목 코드에 해당하는 종목만 종목 뉴스에 추가합니다.
+                    const filteredStockCodes = news.stockCodes.filter(
+                        (stockCode) => stockCodeSet.has(stockCode),
+                    );
 
-            throw error;
+                    return filteredStockCodes.map((stockCode) =>
+                        this.newsService.setStockNewsScore(
+                            stockCode,
+                            news.articleId,
+                            new Date(news.createdAt).getTime(),
+                        ),
+                    );
+                }),
+            ]);
         }
     }
 }

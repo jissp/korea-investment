@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { Module } from '@nestjs/common';
 import { RedisModule } from '@modules/redis';
 import {
@@ -21,9 +22,19 @@ import { KoreaInvestmentHelperService } from './korea-investment-helper.service'
             useFactory: (configService: KoreaInvestmentConfigService) => {
                 const host = configService.getHost();
 
-                return axios.create({
+                const client = axios.create({
                     baseURL: host,
                 });
+
+                axiosRetry(client, {
+                    retries: 3,
+                    retryCondition: (err) => {
+                        return err.isAxiosError;
+                    },
+                    retryDelay: () => 250,
+                });
+
+                return client;
             },
         },
         KoreaInvestmentHelperService,

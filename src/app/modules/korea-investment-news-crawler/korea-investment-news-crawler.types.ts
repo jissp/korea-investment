@@ -1,8 +1,9 @@
 import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 
 export enum KoreaInvestmentNewsCrawlerType {
-    RequestDomesticNewsTitle = 'RequestDomesticNewsTitle'
+    RequestDomesticNewsTitle = 'RequestDomesticNewsTitle',
 }
 
-export type RequestDomesticNewsTitleResponse =
-    DomesticStockQuotationsNewsTitleOutput[];
+export type KoreaInvestmentNewsItem = DomesticStockQuotationsNewsTitleOutput;
+
+export type RequestDomesticNewsTitleResponse = KoreaInvestmentNewsItem[];

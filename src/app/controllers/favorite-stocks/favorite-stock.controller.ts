@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -37,14 +38,18 @@ export class FavoriteStockController {
     })
     @ApiNoContentResponse()
     @Post()
-    public async registerFavoriteStockCode(
+    public async addFavoriteStockCode(
         @Body() { stockCode }: UpsertFavoriteStockBody,
     ) {
-        if (!existsStockCode(stockCode)) {
-            throw new Error('존재하지 않는 종목 코드입니다.');
-        }
+        try {
+            this.assertStockCode(stockCode);
 
-        await this.koreaInvestmentSettingService.addStockCode(stockCode);
+            await this.koreaInvestmentSettingService.addStockCode(stockCode);
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
     }
 
     @ApiOperation({
@@ -61,11 +66,22 @@ export class FavoriteStockController {
     public async deleteFavoriteStockCode(
         @Param('stockCode') stockCode: string,
     ) {
-        await this.koreaInvestmentSettingService.deleteStockCode(stockCode);
+        try {
+            this.assertStockCode(stockCode);
 
-        this.eventEmitter.emit(KoreaInvestmentSettingEvent.DeletedStockCode, {
-            stockCode,
-        });
+            await this.koreaInvestmentSettingService.deleteStockCode(stockCode);
+
+            this.eventEmitter.emit(
+                KoreaInvestmentSettingEvent.DeletedStockCode,
+                {
+                    stockCode,
+                },
+            );
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
     }
 
     @ApiOperation({
@@ -77,13 +93,31 @@ export class FavoriteStockController {
     })
     @Get()
     public async getFavoriteStockCodes(): Promise<GetCodesResponse> {
-        const codes = await this.koreaInvestmentSettingService.getStockCodes();
+        try {
+            const codes =
+                await this.koreaInvestmentSettingService.getStockCodes();
 
-        return {
-            data: codes.map((code) => ({
-                code,
-                name: getStockName(code),
-            })),
-        };
+            return {
+                data: codes.map((code) => ({
+                    code,
+                    name: getStockName(code),
+                })),
+            };
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    /**
+     * 종목 코드가 유효한지 확인합니다.
+     * @param stockCode
+     * @private
+     */
+    private assertStockCode(stockCode: string) {
+        if (!existsStockCode(stockCode)) {
+            throw new BadRequestException('존재하지 않는 종목 코드입니다.');
+        }
     }
 }

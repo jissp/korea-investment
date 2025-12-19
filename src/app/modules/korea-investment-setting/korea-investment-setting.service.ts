@@ -99,7 +99,7 @@ export class KoreaInvestmentSettingService {
     public async deleteKeywordFromStock(stockCode: string, keyword: string) {
         const stockKeywordSet = this.getKeywordsByStockSet(stockCode);
 
-        return await stockKeywordSet.remove(keyword);
+        return stockKeywordSet.remove(keyword);
     }
 
     /**

@@ -1,10 +1,8 @@
-import { StockPlusNews } from '@modules/stock-plus';
 import {
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
-    DomesticStockQuotationsNewsTitleOutput,
     OverseasQuotationInquireDailyChartPriceOutput,
     OverseasQuotationInquireDailyChartPriceOutput2,
 } from '@modules/korea-investment/korea-investment-quotation-client';
@@ -13,8 +11,6 @@ import {
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
 
-export type KoreaInvestmentNewsItem = DomesticStockQuotationsNewsTitleOutput;
-export type StockPlusNewsItem = StockPlusNews;
 export type KoreaInvestmentVolumeRankItem =
     DomesticStockQuotationVolumeRankOutput;
 export type KoreaInvestmentHtsTopViewItem =

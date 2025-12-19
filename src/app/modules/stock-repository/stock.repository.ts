@@ -1,18 +1,15 @@
-import { Cluster } from 'ioredis';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Nullable } from '@common/types';
-import { RedisConnection, RedisHelper, RedisService, RedisZset } from '@modules/redis';
+import { RedisService } from '@modules/redis';
 import {
     KoreaIndexItem,
     KoreaInvestmentDailyItemChartPrice,
     KoreaInvestmentHtsTopViewItem,
-    KoreaInvestmentNewsItem,
     KoreaInvestmentPopulatedHtsTopViewItem,
     KoreaInvestmentPopulatedVolumeRankItem,
     KoreaInvestmentVolumeRankItem,
     OverseasGovernmentBondItem,
     OverseasIndexItem,
-    StockPlusNewsItem,
 } from './stock-repository.types';
 
 enum StockRepositoryKey {
@@ -20,8 +17,6 @@ enum StockRepositoryKey {
     KoreaInvestmentVolumeRank = 'KoreaInvestmentVolumeRank',
     KoreaInvestmentPopulatedHtsTopView = 'KoreaInvestmentPopulatedHtsTopView',
     KoreaInvestmentPopulatedVolumeRank = 'KoreaInvestmentPopulatedVolumeRank',
-    KoreaInvestmentNews = 'KoreaInvestmentNews',
-    StockPlusNews = 'StockPlusNews',
     DailyStockChart = 'DailyStockChart',
     KoreaIndex = 'KoreaIndex',
     OverseasIndex = 'OverseasIndex',
@@ -30,11 +25,7 @@ enum StockRepositoryKey {
 
 @Injectable()
 export class StockRepository {
-    constructor(
-        private readonly redisService: RedisService,
-        @Inject(RedisConnection) private readonly redisClient: Cluster,
-    ) {
-    }
+    constructor(private readonly redisService: RedisService) {}
 
     private async getData<T>(key: string, defaultValue: T): Promise<T> {
         return this.redisService.getOrDefaultValue<T>(key, defaultValue);
@@ -48,44 +39,6 @@ export class StockRepository {
         return this.redisService.set(key, JSON.stringify(data), {
             seconds: ttl,
         });
-    }
-
-
-
-    /**
-     * 수집한 한국투자증권의 뉴스 정보를 응답합니다.
-     */
-    public async getKoreaInvestmentNews() {
-        return this.getData<KoreaInvestmentNewsItem[]>(
-            StockRepositoryKey.KoreaInvestmentNews,
-            [],
-        );
-    }
-
-    /**
-     * 한국투자증권의 뉴스 정보를 저장합니다.
-     * @param data
-     */
-    public async setKoreaInvestmentNews(data: KoreaInvestmentNewsItem[]) {
-        return this.setData(StockRepositoryKey.KoreaInvestmentNews, data, null);
-    }
-
-    /**
-     * 수집한 증권 플러스의 뉴스 정보를 응답합니다.
-     */
-    public async getStockPlusNews() {
-        return this.getData<StockPlusNewsItem[]>(
-            StockRepositoryKey.StockPlusNews,
-            [],
-        );
-    }
-
-    /**
-     * 증권 플러스의 뉴스 정보를 저장합니다.
-     * @param data
-     */
-    public async setStockPlusNews(data: StockPlusNewsItem[]) {
-        return this.setData(StockRepositoryKey.StockPlusNews, data, null);
     }
 
     /**

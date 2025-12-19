@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { NaverNewsService } from '@app/modules/naver-news';
+import { NewsService } from '@app/modules/news';
 import { KoreaInvestmentSettingEvent } from './korea-investment-setting.types';
 import { KoreaInvestmentSettingService } from './korea-investment-setting.service';
 
@@ -10,7 +10,7 @@ export class KoreaInvestmentSettingListener {
 
     constructor(
         private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
-        private readonly naverNewsService: NaverNewsService,
+        private readonly newsService: NewsService,
     ) {}
 
     @OnEvent(KoreaInvestmentSettingEvent.DeletedKeyword)
@@ -29,7 +29,7 @@ export class KoreaInvestmentSettingListener {
                         keyword,
                     ),
                 ),
-                this.naverNewsService.deleteKeywordNews(keyword),
+                this.newsService.deleteKeywordNews(keyword),
             ]);
         } catch (error) {
             this.logger.error(error);
@@ -51,7 +51,7 @@ export class KoreaInvestmentSettingListener {
                     stockCode,
                 ),
             ),
-            this.naverNewsService.deleteNaverNewsByStockCode(stockCode),
+            this.newsService.deleteNaverNewsByStockCode(stockCode),
         ]);
     }
 
@@ -93,7 +93,7 @@ export class KoreaInvestmentSettingListener {
             // 키워드와 뉴스 제거
             await Promise.all([
                 this.koreaInvestmentSettingService.deleteKeyword(keyword),
-                this.naverNewsService.deleteKeywordNews(keyword),
+                this.newsService.deleteKeywordNews(keyword),
             ]);
         }
     }

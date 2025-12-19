@@ -1,19 +1,22 @@
+import * as _ from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { NaverApiClient } from '@modules/naver';
 import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
-import { NaverNewsService } from '@app/modules/naver-news';
+import { NewsService } from '@app/modules/news';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
+import { NaverNewsToNewsTransformer } from './naver-news-to-news.transformer';
 
 @Injectable()
 export class NaverNewsCrawlerProcessor {
     private readonly logger = new Logger(NaverNewsCrawlerProcessor.name);
+    private readonly transformer = new NaverNewsToNewsTransformer();
 
     constructor(
         private readonly client: NaverApiClient,
         private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
-        private readonly naverNewsService: NaverNewsService,
+        private readonly newsService: NewsService,
     ) {}
 
     @OnQueueProcessor(NaverNewsCrawlerQueueType.CrawlingNaverNews)
@@ -21,10 +24,9 @@ export class NaverNewsCrawlerProcessor {
         const { keyword } = job.data;
 
         const stockCodes =
-            await this.koreaInvestmentSettingService.getStockCodes();
-        if (!stockCodes.length) {
-            return;
-        }
+            await this.koreaInvestmentSettingService.getStockCodesFromKeyword(
+                keyword,
+            );
 
         const response = await this.client.getNews({
             query: keyword,
@@ -33,33 +35,46 @@ export class NaverNewsCrawlerProcessor {
             sort: 'date',
         });
 
-        for (const item of response.items) {
-            try {
-                const newsId = item.link;
-                const score = new Date(item.pubDate).getTime();
+        const transformedNews = response.items.map(
+            this.transformer.transform,
+            this.transformer,
+        );
+        const newsScore = transformedNews.reduce(
+            (previousValue, news) => {
+                previousValue[news.articleId] = new Date(
+                    news.createdAt,
+                ).getTime();
 
-                // 뉴스 저장
-                await this.naverNewsService.setNews(newsId, item);
-                await this.naverNewsService.setNewsScore(newsId, score);
+                return previousValue;
+            },
+            {} as Record<string, number>,
+        );
+        const populatedNews = transformedNews.map((news) => ({
+            ...news,
+            stockCodes,
+        }));
 
-                // 키워드별 뉴스 저장
-                await this.naverNewsService.setKeywordNewsScore(
-                    keyword,
-                    newsId,
-                    score,
-                );
-
-                // 종목별 뉴스 저장
-                for (const stockCode of stockCodes) {
-                    await this.naverNewsService.setStockNewsScore(
-                        stockCode,
-                        newsId,
-                        score,
-                    );
-                }
-            } catch (error) {
-                this.logger.error(error);
-            }
+        const chunks = _.chunk(populatedNews, 10);
+        for (const chunk of chunks) {
+            await Promise.allSettled([
+                ...chunk.map((news) => this.newsService.addNews(news)),
+                ...chunk.map((news) =>
+                    this.newsService.setKeywordNewsScore(
+                        keyword,
+                        news.articleId,
+                        newsScore[news.articleId],
+                    ),
+                ),
+                ...chunk.flatMap((news) =>
+                    stockCodes.map((stockCode) =>
+                        this.newsService.setStockNewsScore(
+                            stockCode,
+                            news.articleId,
+                            newsScore[news.articleId],
+                        ),
+                    ),
+                ),
+            ]);
         }
     }
 }
