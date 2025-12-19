@@ -4,24 +4,21 @@ import { Cron } from '@nestjs/schedule';
 import { getCurrentMarketDivCode } from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
 import { MarketDivCode } from '@modules/korea-investment/common';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import { DomesticStockQuotationsInquireDailyItemChartPriceParam } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
-    KoreaInvestmentSettingHelperService,
-    KoreaInvestmentSettingKey,
-} from '@app/modules/korea-investment-setting';
-import {
-    CrawlerFlowType,
-    CrawlerQueueType,
     KoreaInvestmentCallApiParam,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api';
+import { CrawlerFlowType } from '../crawler.types';
 
 @Injectable()
 export class ChartSchedule implements OnModuleInit {
     private readonly logger: Logger = new Logger(ChartSchedule.name);
 
     constructor(
-        private readonly koreaInvestmentSettingHelperService: KoreaInvestmentSettingHelperService,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         private readonly helper: KoreaInvestmentHelperService,
         @Inject(CrawlerFlowType.RequestDailyItemChartPrice)
         private readonly requestDailyItemChartPriceFlow: FlowProducer,
@@ -34,9 +31,8 @@ export class ChartSchedule implements OnModuleInit {
     @Cron('00 */1 * * *')
     async handleCrawlingStockDailyItemChartPrice() {
         try {
-            const stockCodes = await this.koreaInvestmentSettingHelperService
-                .getSettingSet(KoreaInvestmentSettingKey.StockCodes)
-                .list();
+            const stockCodes =
+                await this.koreaInvestmentSettingService.getStockCodes();
 
             const currentDate = new Date();
             const fromDate = new Date(currentDate);
@@ -54,9 +50,8 @@ export class ChartSchedule implements OnModuleInit {
                             },
                             children: [
                                 {
-                                    name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                                    queueName:
-                                        CrawlerQueueType.RequestKoreaInvestmentApi,
+                                    name: KoreaInvestmentRequestApiType,
+                                    queueName: KoreaInvestmentRequestApiType,
                                     data: {
                                         url: '/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice',
                                         tradeId: 'FHKST03010100',
@@ -85,7 +80,7 @@ export class ChartSchedule implements OnModuleInit {
                                 [CrawlerFlowType.RequestDailyItemChartPrice]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
-                                [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                                [KoreaInvestmentRequestApiType]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
                             },

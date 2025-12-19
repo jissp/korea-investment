@@ -70,10 +70,7 @@ export class NaverNewsService {
      * @param stockCode
      */
     public async getStockNewsIdsByStockCode(stockCode: string) {
-        const zSet = this.redisHelper.createZSet(
-            RedisKey.NaverStockNews,
-            stockCode,
-        );
+        const zSet = this.getNaverNewsSet(stockCode);
 
         return zSet.list();
     }
@@ -89,10 +86,7 @@ export class NaverNewsService {
         newsId: string,
         score: number,
     ) {
-        const zSet = this.redisHelper.createZSet(
-            RedisKey.NaverStockNews,
-            stockCode,
-        );
+        const zSet = this.getNaverNewsSet(stockCode);
 
         return zSet.add(newsId, score);
     }
@@ -102,10 +96,7 @@ export class NaverNewsService {
      * @param keyword
      */
     public async getNaverNewsIdsByKeyword(keyword: string) {
-        const zSet = this.redisHelper.createZSet(
-            RedisKey.NaverKeywordNews,
-            keyword,
-        );
+        const zSet = this.getNaverKeywordNewsSet(keyword);
 
         return zSet.list();
     }
@@ -121,11 +112,45 @@ export class NaverNewsService {
         newsId: string,
         score: number,
     ) {
-        const zSet = this.redisHelper.createZSet(
-            RedisKey.NaverKeywordNews,
-            keyword,
-        );
+        const zSet = this.getNaverKeywordNewsSet(keyword);
 
         return zSet.add(newsId, score);
+    }
+
+    /**
+     * 키워드별 네이버 News 점수를 설정합니다.
+     * @param keyword
+     */
+    public async deleteKeywordNews(keyword: string) {
+        const zSet = this.getNaverKeywordNewsSet(keyword);
+
+        return zSet.clear();
+    }
+
+    /**
+     * @param stockCode
+     */
+    public async deleteNaverNewsByStockCode(stockCode: string) {
+        const zSet = this.getNaverNewsSet(stockCode);
+
+        return zSet.clear();
+    }
+
+    /**
+     * NaverNews RedisSet을 생성합니다.
+     * @param stockCode
+     * @private
+     */
+    private getNaverNewsSet(stockCode: string) {
+        return this.redisHelper.createZSet(RedisKey.NaverStockNews, stockCode);
+    }
+
+    /**
+     * NaverKeywordNews RedisSet을 생성합니다.
+     * @param keyword
+     * @private
+     */
+    private getNaverKeywordNewsSet(keyword: string) {
+        return this.redisHelper.createZSet(RedisKey.NaverKeywordNews, keyword);
     }
 }

@@ -56,8 +56,8 @@ export class RedisModule {
         return {
             module: RedisModule,
             imports: [RedisModule],
-            providers: [RedisHelper, RedisService],
-            exports: [RedisHelper, RedisService],
+            providers: [RedisService],
+            exports: [RedisService],
         };
     }
 }

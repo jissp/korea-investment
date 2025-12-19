@@ -6,10 +6,10 @@ import { getDefaultJobOptions } from '@modules/queue';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { DomesticStockQuotationVolumeRankParam } from '@modules/korea-investment/korea-investment-rank-client';
 import {
-    CrawlerFlowType,
-    CrawlerQueueType,
     KoreaInvestmentCallApiParam,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api';
+import { CrawlerFlowType } from '../crawler.types';
 
 @Injectable()
 export class RankingSchedule implements OnModuleInit {
@@ -36,9 +36,8 @@ export class RankingSchedule implements OnModuleInit {
                     queueName: CrawlerFlowType.RequestDomesticHtsTopView,
                     children: [
                         {
-                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                            queueName:
-                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            name: KoreaInvestmentRequestApiType,
+                            queueName: KoreaInvestmentRequestApiType,
                             data: {
                                 url: '/uapi/domestic-stock/v1/ranking/hts-top-view',
                                 tradeId: 'HHMCM000100C0',
@@ -52,7 +51,7 @@ export class RankingSchedule implements OnModuleInit {
                         [CrawlerFlowType.RequestDomesticHtsTopView]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -72,14 +71,15 @@ export class RankingSchedule implements OnModuleInit {
                     queueName: CrawlerFlowType.RequestDomesticVolumeRank,
                     children: [
                         {
-                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                            queueName:
-                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            name: KoreaInvestmentRequestApiType,
+                            queueName: KoreaInvestmentRequestApiType,
                             data: {
                                 url: '/uapi/domestic-stock/v1/quotations/volume-rank',
                                 tradeId: 'FHPST01710000',
                                 params: {
-                                    FID_COND_MRKT_DIV_CODE: getCurrentMarketDivCode() || MarketDivCode.KRX,
+                                    FID_COND_MRKT_DIV_CODE:
+                                        getCurrentMarketDivCode() ||
+                                        MarketDivCode.KRX,
                                     FID_COND_SCR_DIV_CODE: '20171',
                                     FID_INPUT_ISCD: '0000',
                                     FID_DIV_CLS_CODE: '1',
@@ -100,7 +100,7 @@ export class RankingSchedule implements OnModuleInit {
                         [CrawlerFlowType.RequestDomesticVolumeRank]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

@@ -8,10 +8,10 @@ import {
     OverseasQuotationInquireDailyChartPriceParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
-    CrawlerFlowType,
-    CrawlerQueueType,
     KoreaInvestmentCallApiParam,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api';
+import { CrawlerFlowType } from '../crawler.types';
 
 @Injectable()
 export class StockIndexSchedule implements OnModuleInit {
@@ -80,8 +80,8 @@ export class StockIndexSchedule implements OnModuleInit {
                     name: CrawlerFlowType.RequestKoreaIndex,
                     queueName: CrawlerFlowType.RequestKoreaIndex,
                     children: this.DOMESTIC_INDEX_CODES.map(({ code }) => ({
-                        name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                        queueName: CrawlerQueueType.RequestKoreaInvestmentApi,
+                        name: KoreaInvestmentRequestApiType,
+                        queueName: KoreaInvestmentRequestApiType,
                         data: {
                             url: '/uapi/domestic-stock/v1/quotations/inquire-index-price',
                             tradeId: 'FHPUP02100000',
@@ -97,7 +97,7 @@ export class StockIndexSchedule implements OnModuleInit {
                         [CrawlerFlowType.RequestKoreaIndex]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -119,9 +119,8 @@ export class StockIndexSchedule implements OnModuleInit {
                     queueName: CrawlerFlowType.RequestOverseasIndex,
                     children: this.OVERSEAS_INDEX_CODES.map(
                         ({ code, name }) => ({
-                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                            queueName:
-                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            name: KoreaInvestmentRequestApiType,
+                            queueName: KoreaInvestmentRequestApiType,
                             data: {
                                 url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
                                 tradeId: 'FHKST03030100',
@@ -147,7 +146,7 @@ export class StockIndexSchedule implements OnModuleInit {
                         [CrawlerFlowType.RequestOverseasIndex]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -171,9 +170,8 @@ export class StockIndexSchedule implements OnModuleInit {
                     queueName: CrawlerFlowType.RequestOverseasGovernmentBond,
                     children: this.GOVERNMENT_BOND_CODES.map(
                         ({ code, name }) => ({
-                            name: CrawlerQueueType.RequestKoreaInvestmentApi,
-                            queueName:
-                                CrawlerQueueType.RequestKoreaInvestmentApi,
+                            name: KoreaInvestmentRequestApiType,
+                            queueName: KoreaInvestmentRequestApiType,
                             data: {
                                 url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
                                 tradeId: 'FHKST03030100',
@@ -197,7 +195,7 @@ export class StockIndexSchedule implements OnModuleInit {
                         [CrawlerFlowType.RequestOverseasGovernmentBond]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

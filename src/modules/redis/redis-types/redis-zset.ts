@@ -71,4 +71,12 @@ export class RedisZset {
     public async count() {
         return this.redis.zcard(this.key);
     }
+
+    /**
+     * ZSet Key를 제거합니다.
+     * @returns number
+     */
+    public async clear() {
+        return this.redis.del(this.key);
+    }
 }

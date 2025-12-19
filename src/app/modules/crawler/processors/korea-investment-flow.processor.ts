@@ -18,19 +18,17 @@ import {
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
-    DomesticStockQuotationsIntstockMultPriceParam,
-    DomesticStockQuotationsNewsTitleOutput,
     OverseasQuotationInquireDailyChartPriceOutput,
     OverseasQuotationInquireDailyChartPriceOutput2,
     OverseasQuotationInquireDailyChartPriceParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
-    CrawlerFlowType,
-    CrawlerQueueType,
     KoreaInvestmentCallApiMultiResult,
-    KoreaInvestmentCallApiParam,
     KoreaInvestmentCallApiResult,
-} from '../crawler.types';
+    KoreaInvestmentRequestApiHelper,
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api';
+import { CrawlerFlowType } from '../crawler.types';
 
 @Injectable()
 export class KoreaInvestmentFlowProcessor {
@@ -40,38 +38,21 @@ export class KoreaInvestmentFlowProcessor {
 
     constructor(
         private readonly stockRepository: StockRepository,
+        private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         @Inject(CrawlerFlowType.RequestRefreshPopulatedVolumeRank)
         private readonly requestRefreshPopulatedVolumeRankFlow: FlowProducer,
         @Inject(CrawlerFlowType.RequestRefreshPopulatedHtsTopView)
         private readonly requestRefreshPopulatedHtsTopViewFlow: FlowProducer,
     ) {}
 
-    @OnQueueProcessor(CrawlerFlowType.RequestDomesticNewsTitle)
-    async processRequestDomesticNewsTitle(job: Job) {
-        try {
-            const childrenResponse = await this.getChildResponses<
-                any,
-                DomesticStockQuotationsNewsTitleOutput[]
-            >(job);
-            const childrenResults = childrenResponse.flatMap(
-                (response) => response.output,
-            );
-
-            await this.stockRepository.setKoreaInvestmentNews(childrenResults);
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
-    }
-
     @OnQueueProcessor(CrawlerFlowType.RequestDomesticHtsTopView)
     async processRequestDomesticHtsTopView(job: Job) {
         try {
-            const childrenResponses = await this.getChildMultiResponses<
-                any,
-                DomesticStockRankingHtsTopViewOutput[]
-            >(job);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
+                    any,
+                    DomesticStockRankingHtsTopViewOutput[]
+                >(job);
             const childrenResults = childrenResponses.flatMap(
                 (response) => response.output1,
             );
@@ -84,7 +65,7 @@ export class KoreaInvestmentFlowProcessor {
                     queueName:
                         CrawlerFlowType.RequestRefreshPopulatedHtsTopView,
                     children: [
-                        this.generateRequestApiForIntstockMultiPrice(
+                        this.koreaInvestmentRequestApiHelper.generateRequestApiForIntstockMultiPrice(
                             childrenResults.map(
                                 (childrenResult) =>
                                     childrenResult.mksc_shrn_iscd,
@@ -97,7 +78,7 @@ export class KoreaInvestmentFlowProcessor {
                         [CrawlerFlowType.RequestRefreshPopulatedHtsTopView]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -113,10 +94,11 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestDomesticVolumeRank)
     async processRequestDomesticVolumeRank(job: Job) {
         try {
-            const childrenResponses = await this.getChildResponses<
-                any,
-                DomesticStockQuotationVolumeRankOutput[]
-            >(job);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                    any,
+                    DomesticStockQuotationVolumeRankOutput[]
+                >(job);
             const childrenResults = childrenResponses.flatMap(
                 (response) => response.output,
             );
@@ -129,7 +111,7 @@ export class KoreaInvestmentFlowProcessor {
                     queueName:
                         CrawlerFlowType.RequestRefreshPopulatedVolumeRank,
                     children: [
-                        this.generateRequestApiForIntstockMultiPrice(
+                        this.koreaInvestmentRequestApiHelper.generateRequestApiForIntstockMultiPrice(
                             childrenResults.map(
                                 (childrenResult) =>
                                     childrenResult.mksc_shrn_iscd,
@@ -142,7 +124,7 @@ export class KoreaInvestmentFlowProcessor {
                         [CrawlerFlowType.RequestRefreshPopulatedVolumeRank]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [CrawlerQueueType.RequestKoreaInvestmentApi]: {
+                        [KoreaInvestmentRequestApiType]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -158,10 +140,11 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestRefreshPopulatedHtsTopView)
     async processRequestRefreshPopulatedHtsTopView(job: Job) {
         try {
-            const childrenResponses = await this.getChildResponses<
-                any,
-                DomesticStockQuotationsIntstockMultPriceOutput[]
-            >(job);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                    any,
+                    DomesticStockQuotationsIntstockMultPriceOutput[]
+                >(job);
             const childrenResults = childrenResponses.flatMap(
                 (response) => response.output,
             );
@@ -195,10 +178,11 @@ export class KoreaInvestmentFlowProcessor {
     @OnQueueProcessor(CrawlerFlowType.RequestRefreshPopulatedVolumeRank)
     async processRequestRefreshPopulatedVolumeRank(job: Job) {
         try {
-            const childrenResponses = await this.getChildResponses<
-                any,
-                DomesticStockQuotationsIntstockMultPriceOutput[]
-            >(job);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                    any,
+                    DomesticStockQuotationsIntstockMultPriceOutput[]
+                >(job);
             const childrenResults = childrenResponses.flatMap(
                 (response) => response.output,
             );
@@ -233,11 +217,12 @@ export class KoreaInvestmentFlowProcessor {
         try {
             const { stockCode } = job.data;
 
-            const childrenResults = await this.getChildMultiResponses<
-                any,
-                DomesticStockQuotationsInquireDailyItemChartPriceOutput,
-                DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
-            >(job);
+            const childrenResults =
+                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
+                    any,
+                    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+                    DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
+                >(job);
 
             if (!childrenResults.length) {
                 this.logger.warn(`No data for stock: ${stockCode}`);
@@ -341,75 +326,5 @@ export class KoreaInvestmentFlowProcessor {
 
             throw error;
         }
-    }
-
-    /**
-     * @param iscdList
-     * @private
-     */
-    private generateRequestApiForIntstockMultiPrice(iscdList: string[]) {
-        return {
-            name: CrawlerQueueType.RequestKoreaInvestmentApi,
-            queueName: CrawlerQueueType.RequestKoreaInvestmentApi,
-            data: {
-                url: '/uapi/domestic-stock/v1/quotations/intstock-multprice',
-                tradeId: 'FHKST11300006',
-                params: this.buildIntstockMultiPriceParam(iscdList),
-            } as KoreaInvestmentCallApiParam<DomesticStockQuotationsIntstockMultPriceParam>,
-        };
-    }
-
-    /**
-     * @param iscdList
-     * @private
-     */
-    private buildIntstockMultiPriceParam(
-        iscdList: string[],
-    ): DomesticStockQuotationsIntstockMultPriceParam {
-        const params: DomesticStockQuotationsIntstockMultPriceParam = {
-            FID_COND_MRKT_DIV_CODE_1: 'UN',
-            FID_INPUT_ISCD_1: '',
-        };
-
-        iscdList.forEach((iscd, index) => {
-            const indexKey = index + 1;
-            const marketDivCodeKey =
-                `FID_COND_MRKT_DIV_CODE_${indexKey}` as keyof DomesticStockQuotationsIntstockMultPriceParam;
-            const inputIscdKey =
-                `FID_INPUT_ISCD_${indexKey}` as keyof DomesticStockQuotationsIntstockMultPriceParam;
-
-            params[marketDivCodeKey] = 'UN';
-            params[inputIscdKey] = iscd;
-        });
-
-        return params;
-    }
-
-    /**
-     * @param job
-     * @private
-     */
-    private async getChildResponses<Params, Response>(job: Job) {
-        const childrenValues =
-            await job.getChildrenValues<
-                KoreaInvestmentCallApiResult<Params, Response>
-            >();
-
-        return Object.values(childrenValues).map((v) => v.response);
-    }
-
-    /**
-     * @param job
-     * @private
-     */
-    private async getChildMultiResponses<Params, Response, Response2 = any>(
-        job: Job,
-    ) {
-        const childrenValues =
-            await job.getChildrenValues<
-                KoreaInvestmentCallApiMultiResult<Params, Response, Response2>
-            >();
-
-        return Object.values(childrenValues).map((v) => v.response);
     }
 }

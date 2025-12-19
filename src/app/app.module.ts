@@ -5,21 +5,23 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { QueueModule } from '@modules/queue';
+import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
+import { KoreaInvestmentNewsCrawlerModule } from '@app/modules/korea-investment-news-crawler';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
-import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { CrawlerModule } from '@app/modules/crawler';
 import { NaverNewsCrawlerModule } from '@app/modules/naver-news-crawler';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { StockModule } from '@app/modules/stock';
-import { StockKeywordModule } from '@app/modules/stock-keyword';
-import { NaverNewsModule } from '@app/modules/naver-news';
+import { StockPlusNewsCrawlerModule } from '@app/modules/stock-plus-news-cralwer';
+import { NewsModule } from '@app/modules/news';
 import configuration from './configuration';
 import {
     AssetController,
-    InformationController,
+    FavoriteStockController,
+    KeywordController,
     LatestStockRankController,
+    NewsController,
     StockController,
     StockIndexController,
 } from './controllers';
@@ -43,23 +45,25 @@ import { KoreaInvestmentBeGateway } from './gateways';
         QueueModule.forRootAsync(),
         EventEmitterModule.forRoot(),
         ScheduleModule.forRoot(),
+        KoreaInvestmentCollectorModule.forRoot(),
+        KoreaInvestmentSettingModule.forRoot(),
+        KoreaInvestmentNewsCrawlerModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
+        StockPlusNewsCrawlerModule,
         StockRepositoryModule,
         CrawlerModule,
         NaverNewsCrawlerModule,
-        KoreaInvestmentCollectorModule.forRoot(),
-        KoreaInvestmentSettingModule,
-        StockModule,
-        StockKeywordModule,
-        NaverNewsModule,
+        NewsModule,
     ],
     controllers: [
         AssetController,
-        InformationController,
+        NewsController,
+        LatestStockRankController,
         StockController,
         StockIndexController,
-        LatestStockRankController,
+        FavoriteStockController,
+        KeywordController,
     ],
     providers: [KoreaInvestmentBeGateway],
 })
