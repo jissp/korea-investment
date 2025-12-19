@@ -8,6 +8,7 @@ export class NaverNewsToNewsTransformer {
             category: NewsCategory.Naver,
             title: naverNewsItem.title,
             description: naverNewsItem.description,
+            link: naverNewsItem.link,
             stockCodes: [],
             createdAt: new Date(naverNewsItem.pubDate).toISOString(),
         };
