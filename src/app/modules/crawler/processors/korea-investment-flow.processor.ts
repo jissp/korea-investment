@@ -54,7 +54,7 @@ export class KoreaInvestmentFlowProcessor {
                     DomesticStockRankingHtsTopViewOutput[]
                 >(job);
             const childrenResults = childrenResponses.flatMap(
-                (response) => response.output1,
+                ({ response }) => response.output1,
             );
 
             await this.stockRepository.setHtsTopView(childrenResults);
@@ -229,9 +229,10 @@ export class KoreaInvestmentFlowProcessor {
                 return;
             }
 
+            const { response } = childrenResults[0];
             await this.stockRepository.setDailyStockChart(stockCode, {
-                output: childrenResults[0].output1,
-                output2: childrenResults[0].output2,
+                output: response.output1,
+                output2: response.output2,
             });
         } catch (error) {
             this.logger.error(error);

@@ -5,6 +5,7 @@ import * as KrxKosdaqCodeJson from '@assets/kosdaq_code.json';
 import * as KrxKospiCodeJson from '@assets/kospi_code.json';
 import * as NxtKosdaqCodeJson from '@assets/nxt_kosdaq_code.json';
 import * as NxtKospiCodeJson from '@assets/nxt_kospi_code.json';
+import { getStocks, searchStockCode } from '@common/domains';
 import { type AssetIdxItem, AssetIdxResponse } from './dto';
 
 const IdxCodes: AssetIdxItem[] = IdxCodeJson as unknown as AssetIdxItem[];
@@ -72,6 +73,45 @@ export class AssetController {
     ): Promise<AssetIdxResponse> {
         return {
             data: type === 'nxt' ? NxtKospiCodes : KrxKospiCodes,
+        };
+    }
+
+    @ApiOperation({
+        summary: '전체 종목을 조회합니다.',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: AssetIdxResponse,
+    })
+    @Get('stocks')
+    public async getAllStocks(): Promise<AssetIdxResponse> {
+        const stocks = getStocks();
+
+        return {
+            data: stocks,
+        };
+    }
+
+    @ApiOperation({
+        summary: '종목을 검색합니다.',
+    })
+    @ApiParam({
+        name: 'keyword',
+        type: String,
+        description: '검색어(종목코드, 종목명)',
+    })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        type: AssetIdxResponse,
+    })
+    @Get('stocks/:keyword')
+    public async searchKeyword(
+        @Param('keyword') keyword: string,
+    ): Promise<AssetIdxResponse> {
+        const stockCodes = searchStockCode(keyword);
+
+        return {
+            data: stockCodes,
         };
     }
 }

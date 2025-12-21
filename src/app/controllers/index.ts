@@ -1,4 +1,5 @@
 export * from './asset';
+export * from './accounts';
 export * from './news';
 export * from './latest-stock-rank';
 export * from './stocks';

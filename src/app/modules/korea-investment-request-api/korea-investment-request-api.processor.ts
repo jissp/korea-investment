@@ -9,7 +9,9 @@ import {
 
 @Injectable()
 export class KoreaInvestmentRequestApiProcessor {
-    private readonly logger = new Logger(KoreaInvestmentRequestApiProcessor.name);
+    private readonly logger = new Logger(
+        KoreaInvestmentRequestApiProcessor.name,
+    );
 
     constructor(
         private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
@@ -49,7 +51,7 @@ export class KoreaInvestmentRequestApiProcessor {
                 request: job.data,
                 response,
             };
-        } catch(error) {
+        } catch (error) {
             this.logger.error(error);
 
             throw error;

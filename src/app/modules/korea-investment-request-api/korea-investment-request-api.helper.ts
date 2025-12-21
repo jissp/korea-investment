@@ -104,6 +104,6 @@ export class KoreaInvestmentRequestApiHelper {
                 KoreaInvestmentCallApiMultiResult<Params, Response, Response2>
             >();
 
-        return Object.values(childrenValues).map((v) => v.response);
+        return Object.values(childrenValues);
     }
 }
