@@ -1,10 +1,10 @@
 import { SubscribeType } from '@modules/korea-investment/korea-investment-web-socket';
 
 export enum KoreaInvestmentCollectorQueueType {
-    RequestRealityData = 'RequestRealityData',
+    RequestRealTimeData = 'RequestRealTimeData',
 }
 
-export interface KoreaInvestmentRequestRealityJobPayload {
+export interface KoreaInvestmentRequestRealTimeJobPayload {
     stockCode: string;
     subscribeType: SubscribeType;
 }

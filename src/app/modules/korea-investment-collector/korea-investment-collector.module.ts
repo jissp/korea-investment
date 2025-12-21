@@ -7,7 +7,7 @@ import { KoreaInvestmentCollectorListener } from './korea-investment-collector.l
 import { KoreaInvestmentCollectorProcessor } from './korea-investment-collector.processor';
 import { KoreaInvestmentCollectorSocket } from './korea-investment-collector.socket';
 
-const queueTypes = [KoreaInvestmentCollectorQueueType.RequestRealityData];
+const queueTypes = [KoreaInvestmentCollectorQueueType.RequestRealTimeData];
 const queueProviders = QueueModule.getQueueProviders(queueTypes);
 
 @Module({})

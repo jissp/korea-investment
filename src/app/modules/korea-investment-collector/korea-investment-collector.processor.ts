@@ -10,7 +10,7 @@ import {
 } from '@modules/korea-investment/korea-investment-web-socket';
 import {
     KoreaInvestmentCollectorQueueType,
-    KoreaInvestmentRequestRealityJobPayload,
+    KoreaInvestmentRequestRealTimeJobPayload,
 } from './korea-investment-collector.types';
 import { KoreaInvestmentCollectorSocket } from './korea-investment-collector.socket';
 
@@ -23,7 +23,7 @@ export class KoreaInvestmentCollectorProcessor {
      * 국내주식 실시간회원사(통합): H0UNMBC0
      * 국내주식 실시간프로그램매매(통합): H0UNPGM0
      */
-    private realityTradeIds = [
+    private realTimeTradeIds = [
         'H0UNCNT0',
         'H0UNASP0',
         'H0UNANC0',
@@ -44,18 +44,18 @@ export class KoreaInvestmentCollectorProcessor {
      * 한국투자증권으로 구독 / 구독 해지 요청을 전송하는 Job
      * @param job
      */
-    @OnQueueProcessor(KoreaInvestmentCollectorQueueType.RequestRealityData, {
+    @OnQueueProcessor(KoreaInvestmentCollectorQueueType.RequestRealTimeData, {
         concurrency: 1,
     })
-    public async processRealityDataRequest(
-        job: Job<KoreaInvestmentRequestRealityJobPayload>,
+    public async processRealTimeDataRequest(
+        job: Job<KoreaInvestmentRequestRealTimeJobPayload>,
     ) {
         try {
             const { stockCode, subscribeType } = job.data;
 
             // 패킷 메세지 빌드
             const approvalKey = await this.helperService.getWebSocketToken();
-            const messages = this.realityTradeIds.map((tradeId) => ({
+            const messages = this.realTimeTradeIds.map((tradeId) => ({
                 header: this.buildSubscribeHeader(subscribeType, approvalKey),
                 body: {
                     input: {

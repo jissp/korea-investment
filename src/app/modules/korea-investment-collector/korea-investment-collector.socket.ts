@@ -11,7 +11,7 @@ import {
 import {
     KoreaInvestmentCollectorEventType,
     KoreaInvestmentCollectorQueueType,
-    KoreaInvestmentRequestRealityJobPayload,
+    KoreaInvestmentRequestRealTimeJobPayload,
 } from './korea-investment-collector.types';
 
 @Injectable()
@@ -22,8 +22,8 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     constructor(
         private readonly factory: KoreaInvestmentWsFactory,
         private readonly eventEmitter: EventEmitter2,
-        @Inject(KoreaInvestmentCollectorQueueType.RequestRealityData)
-        private readonly queue: Queue<KoreaInvestmentRequestRealityJobPayload>,
+        @Inject(KoreaInvestmentCollectorQueueType.RequestRealTimeData)
+        private readonly queue: Queue<KoreaInvestmentRequestRealTimeJobPayload>,
     ) {}
 
     async onModuleInit() {
@@ -99,7 +99,7 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
      */
     public async subscribe(stockCode: string) {
         return this.queue.add(
-            KoreaInvestmentCollectorQueueType.RequestRealityData,
+            KoreaInvestmentCollectorQueueType.RequestRealTimeData,
             {
                 subscribeType: SubscribeType.Subscribe,
                 stockCode,
@@ -113,7 +113,7 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
      */
     public async unsubscribe(stockCode: string) {
         return this.queue.add(
-            KoreaInvestmentCollectorQueueType.RequestRealityData,
+            KoreaInvestmentCollectorQueueType.RequestRealTimeData,
             {
                 subscribeType: SubscribeType.Unsubscribe,
                 stockCode,
