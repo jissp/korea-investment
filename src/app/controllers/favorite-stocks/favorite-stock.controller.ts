@@ -10,13 +10,14 @@ import {
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
+    ApiBody,
     ApiNoContentResponse,
     ApiOkResponse,
     ApiOperation,
     ApiParam,
 } from '@nestjs/swagger';
-import { GetCodesResponse } from '@app/common';
 import { existsStockCode, getStockName } from '@common/domains';
+import { GetCodesResponse } from '@app/common';
 import {
     KoreaInvestmentSettingEvent,
     KoreaInvestmentSettingService,
@@ -35,6 +36,9 @@ export class FavoriteStockController {
     @ApiOperation({
         summary: '관심있는 종목 추가',
         description: '관심있는 종목 코드를 추가합니다.',
+    })
+    @ApiBody({
+        type: UpsertFavoriteStockBody,
     })
     @ApiNoContentResponse()
     @Post()

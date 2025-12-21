@@ -1,11 +1,24 @@
 import * as _ from 'lodash';
-import * as kospiCodes from '@assets/kospi_code.json';
-import * as kosdaqCodes from '@assets/kosdaq_code.json';
+import * as KospiCodes from '@assets/kospi_code.json';
+import * as KosdaqCodes from '@assets/kosdaq_code.json';
 
-const codeMap = {
-    ..._.keyBy(kospiCodes, 'shortCode'),
-    ..._.keyBy(kosdaqCodes, 'shortCode'),
-};
+interface StockCodeItem {
+    shortCode: string;
+    code: string;
+    name: string;
+}
+
+const kospiCodes: StockCodeItem[] = KospiCodes;
+const kosdaqCodes: StockCodeItem[] = KosdaqCodes;
+
+const allCodes = [...kospiCodes, ...kosdaqCodes];
+
+const codeMap = _.keyBy(allCodes, 'shortCode');
+const sortedAllCodes = _.sortBy(allCodes, 'name');
+
+export function getStocks() {
+    return sortedAllCodes;
+}
 
 /**
  * 종목명을 가져옵니다.
@@ -23,4 +36,11 @@ export function getStockName(stockCode: string) {
  */
 export function existsStockCode(stockCode: string) {
     return !!codeMap[stockCode];
+}
+
+export function searchStockCode(keyword: string) {
+    return sortedAllCodes.filter(
+        (stock) =>
+            stock.name.includes(keyword) || stock.shortCode.includes(keyword),
+    );
 }
