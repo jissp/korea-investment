@@ -1,17 +1,18 @@
 import * as ws from 'ws';
 import { Subscription } from 'rxjs';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Queue } from 'bullmq';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { isConnected } from '@common/domains';
-import { CustomerType } from '@modules/korea-investment/common';
 import {
-    KoreaInvestmentWebSocketHelperService,
     KoreaInvestmentWsFactory,
-    SubscribeRequest,
     SubscribeType,
-    WebSocketHeader,
 } from '@modules/korea-investment/korea-investment-web-socket';
-import { KoreaInvestmentCollectorEventType } from './korea-investment-collector.types';
+import {
+    KoreaInvestmentCollectorEventType,
+    KoreaInvestmentCollectorQueueType,
+    KoreaInvestmentRequestRealityJobPayload,
+} from './korea-investment-collector.types';
 
 @Injectable()
 export class KoreaInvestmentCollectorSocket implements OnModuleInit {
@@ -19,9 +20,10 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     private messageSubscription: Subscription | null = null;
 
     constructor(
-        private readonly helperService: KoreaInvestmentWebSocketHelperService,
         private readonly factory: KoreaInvestmentWsFactory,
         private readonly eventEmitter: EventEmitter2,
+        @Inject(KoreaInvestmentCollectorQueueType.RequestRealityData)
+        private readonly queue: Queue<KoreaInvestmentRequestRealityJobPayload>,
     ) {}
 
     async onModuleInit() {
@@ -78,6 +80,7 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
      * socket을 재연결합니다.
      */
     public async reconnect() {
+        // TODO 추후 기존 구독 내역을 자동으로 복원할 수 있어야 한다. RedisSet을 통해서 구현하는게 쉬울지도.
         this.disconnect();
         await this.connect();
     }
@@ -91,58 +94,30 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     }
 
     /**
-     * Korea Investment Web Socket을 통해 구독을 요청합니다.
-     * @param payload
+     * 구독 요청 Job을 생성합니다.
+     * @param stockCode
      */
-    public async subscribe(payload: SubscribeRequest) {
-        const approvalKey = await this.helperService.getWebSocketToken();
-        const message = {
-            header: this.buildSubscribeHeader(
-                SubscribeType.Subscribe,
-                approvalKey,
-            ),
-            body: {
-                input: payload,
+    public async subscribe(stockCode: string) {
+        return this.queue.add(
+            KoreaInvestmentCollectorQueueType.RequestRealityData,
+            {
+                subscribeType: SubscribeType.Subscribe,
+                stockCode,
             },
-        };
-
-        this.send(message);
+        );
     }
 
     /**
-     * Korea Investment Web Socket을 통해 구독을 취소합니다.
-     * @param payload
+     * 구독 해제 요청 Job을 생성합니다.
+     * @param stockCode
      */
-    public async unsubscribe(payload: SubscribeRequest) {
-        const approvalKey = await this.helperService.getWebSocketToken();
-        const message = {
-            header: this.buildSubscribeHeader(
-                SubscribeType.Unsubscribe,
-                approvalKey,
-            ),
-            body: {
-                input: payload,
+    public async unsubscribe(stockCode: string) {
+        return this.queue.add(
+            KoreaInvestmentCollectorQueueType.RequestRealityData,
+            {
+                subscribeType: SubscribeType.Unsubscribe,
+                stockCode,
             },
-        };
-
-        this.send(message);
-    }
-
-    /**
-     * Korea Investment Web Socket 요청 헤더를 생성합니다.
-     * @param requestType
-     * @param approvalKey
-     * @private
-     */
-    private buildSubscribeHeader(
-        requestType: SubscribeType,
-        approvalKey: string,
-    ): WebSocketHeader {
-        return {
-            approval_key: approvalKey,
-            tr_type: requestType,
-            custtype: CustomerType.Personal,
-            content_type: 'utf-8',
-        };
+        );
     }
 }

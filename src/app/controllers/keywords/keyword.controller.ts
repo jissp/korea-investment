@@ -1,12 +1,4 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
     ApiBody,
     ApiCreatedResponse,
@@ -16,7 +8,7 @@ import {
     ApiParam,
 } from '@nestjs/swagger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { existsStockCode, getStockName } from '@common/domains';
+import { assertStockCode, getStockName } from '@common/domains';
 import { GetCodesResponse } from '@app/common';
 import {
     KoreaInvestmentSettingEvent,
@@ -98,7 +90,7 @@ export class KeywordController {
     public async getKeywordsByStock(
         @Param('stockCode') stockCode: string,
     ): Promise<GetCodesResponse> {
-        this.assertStockCode(stockCode);
+        assertStockCode(stockCode);
 
         const keywords =
             await this.koreaInvestmentSettingService.getKeywordsByStockCode(
@@ -161,7 +153,7 @@ export class KeywordController {
         @Param('keyword') keyword: string,
         @Body() { stockCode }: UpsertKeywordByStockCodeBody,
     ) {
-        this.assertStockCode(stockCode);
+        assertStockCode(stockCode);
 
         await Promise.all([
             this.koreaInvestmentSettingService.addKeyword(keyword),
@@ -196,22 +188,11 @@ export class KeywordController {
         @Param('stockCode') stockCode: string,
         @Param('keyword') keyword: string,
     ) {
-        this.assertStockCode(stockCode);
+        assertStockCode(stockCode);
 
         await this.koreaInvestmentSettingService.deleteStockCodeFromKeyword(
             keyword,
             stockCode,
         );
-    }
-
-    /**
-     * 종목 코드가 유효한지 확인합니다.
-     * @param stockCode
-     * @private
-     */
-    private assertStockCode(stockCode: string) {
-        if (!existsStockCode(stockCode)) {
-            throw new BadRequestException('존재하지 않는 종목 코드입니다.');
-        }
     }
 }

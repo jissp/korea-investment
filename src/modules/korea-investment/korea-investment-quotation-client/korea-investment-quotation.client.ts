@@ -307,6 +307,43 @@ export class KoreaInvestmentQuotationClient {
     }
 
     /**
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend
+     */
+    public async inquireRgnmemPchsTrend(params: {
+        FID_INPUT_ISCD: string; //	조건시장분류코드	String	Y	12	종목코드(ex) 005930(삼성전자))
+        FID_INPUT_ISCD_2?: string; //	조건화면분류코드	String	Y	8	외국계 전체(99999)
+        FID_COND_MRKT_DIV_CODE?: string; //	시장구분코드	String	Y	10	J (KRX만 지원)
+    }) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<{
+                bsop_hour: string;
+                stck_prpr: string;
+                prdy_vrss: string;
+                prdy_vrss_sign: string;
+                prdy_ctrt: string;
+                acml_vol: string;
+                frgn_seln_vol: string;
+                frgn_shnu_vol: string;
+                glob_ntby_qty: string;
+                frgn_ntby_qty_icdc: string;
+            }>
+        >({
+            tradeId: 'FHKST644400C0',
+            url: '/uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend',
+            params: {
+                FID_INPUT_ISCD: params.FID_INPUT_ISCD,
+                FID_INPUT_ISCD_2: params.FID_INPUT_ISCD_2 ?? '99999',
+                FID_COND_MRKT_DIV_CODE: params.FID_COND_MRKT_DIV_CODE ?? 'J',
+            },
+        });
+
+        return {
+            output: response.output,
+        };
+    }
+
+    /**
      * 공통 시세 조회 요청 처리
      * @private
      */

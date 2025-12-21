@@ -2,7 +2,7 @@ import { CustomerType } from '@modules/korea-investment/common';
 
 export enum SubscribeType {
     Subscribe = '1',
-    Unsubscribe = '0',
+    Unsubscribe = '2',
 }
 
 export interface WebSocketHeader {
