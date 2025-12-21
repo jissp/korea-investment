@@ -4,42 +4,17 @@ import {
     KoreaInvestmentWebSocketHelperService,
     TransformResult,
 } from '@modules/korea-investment/korea-investment-web-socket';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentCollectorEventType } from './korea-investment-collector.types';
 import { KoreaInvestmentCollectorSocket } from './korea-investment-collector.socket';
 
 @Injectable()
 export class KoreaInvestmentCollectorListener {
-    private readonly DEFAULT_TRADE_IDS = ['H0UNASP0', 'H0UNCNT0'] as const;
-
     constructor(
         private readonly logger: Logger,
         private readonly helperService: KoreaInvestmentWebSocketHelperService,
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         private readonly koreaInvestmentCollectorSocket: KoreaInvestmentCollectorSocket,
         private readonly eventEmitter: EventEmitter2,
     ) {}
-
-    @OnEvent(KoreaInvestmentCollectorEventType.Opened)
-    public async handleSocketOpened() {
-        try {
-            const stockCodes =
-                await this.koreaInvestmentSettingService.getStockCodes();
-
-            await Promise.all(
-                this.DEFAULT_TRADE_IDS.flatMap((trId) =>
-                    stockCodes.map((stockCode) =>
-                        this.koreaInvestmentCollectorSocket.subscribe({
-                            tr_id: trId,
-                            tr_key: stockCode,
-                        }),
-                    ),
-                ),
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
-    }
 
     @OnEvent(KoreaInvestmentCollectorEventType.Closed)
     public async handleSocketClosed() {

@@ -17,6 +17,9 @@ export class KoreaInvestmentWsFactory {
         private readonly pipe: KoreaInvestmentWebSocketPipe,
     ) {}
 
+    /**
+     * 웹 소켓 생성
+     */
     public create() {
         const url = this.webSocketHelper.getWebSocketUrl();
         const koreaInvestmentWs = new ws(url);
@@ -30,6 +33,12 @@ export class KoreaInvestmentWsFactory {
         };
     }
 
+    /**
+     * 웹소켓 이벤트 설정
+     * @param webSocket
+     * @param messageSubject
+     * @private
+     */
     private setUpWebsocketEvents(
         webSocket: ws,
         messageSubject: Subject<TransformResult>,

@@ -1,5 +1,4 @@
 import {
-    BadRequestException,
     Body,
     Controller,
     Delete,
@@ -16,7 +15,7 @@ import {
     ApiOperation,
     ApiParam,
 } from '@nestjs/swagger';
-import { existsStockCode, getStockName } from '@common/domains';
+import { assertStockCode, getStockName } from '@common/domains';
 import { GetCodesResponse } from '@app/common';
 import {
     KoreaInvestmentSettingEvent,
@@ -46,7 +45,7 @@ export class FavoriteStockController {
         @Body() { stockCode }: UpsertFavoriteStockBody,
     ) {
         try {
-            this.assertStockCode(stockCode);
+            assertStockCode(stockCode);
 
             await this.koreaInvestmentSettingService.addStockCode(stockCode);
         } catch (error) {
@@ -71,7 +70,7 @@ export class FavoriteStockController {
         @Param('stockCode') stockCode: string,
     ) {
         try {
-            this.assertStockCode(stockCode);
+            assertStockCode(stockCode);
 
             await this.koreaInvestmentSettingService.deleteStockCode(stockCode);
 
@@ -111,17 +110,6 @@ export class FavoriteStockController {
             this.logger.error(error);
 
             throw error;
-        }
-    }
-
-    /**
-     * 종목 코드가 유효한지 확인합니다.
-     * @param stockCode
-     * @private
-     */
-    private assertStockCode(stockCode: string) {
-        if (!existsStockCode(stockCode)) {
-            throw new BadRequestException('존재하지 않는 종목 코드입니다.');
         }
     }
 }
