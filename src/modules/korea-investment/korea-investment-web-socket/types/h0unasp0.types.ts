@@ -2,261 +2,325 @@ export interface H0unasp0Data {
     /**
      * 유가증권 단축 종목코드
      */
-    mkscShrnIscd: string;
+    MKSC_SHRN_ISCD: string;
+
     /**
      * 영업 시간
      */
-    bsopHour: string;
+    BSOP_HOUR: string;
+
     /**
      * 시간 구분 코드
      */
-    hourClsCode: string;
+    HOUR_CLS_CODE: string;
+
     /**
      * 매도호가1
      */
-    askp1: string;
+    ASKP1: string;
+
     /**
      * 매도호가2
      */
-    askp2: string;
+    ASKP2: string;
+
     /**
      * 매도호가3
      */
-    askp3: string;
+    ASKP3: string;
+
     /**
      * 매도호가4
      */
-    askp4: string;
+    ASKP4: string;
+
     /**
      * 매도호가5
      */
-    askp5: string;
+    ASKP5: string;
+
     /**
      * 매도호가6
      */
-    askp6: string;
+    ASKP6: string;
+
     /**
      * 매도호가7
      */
-    askp7: string;
+    ASKP7: string;
+
     /**
      * 매도호가8
      */
-    askp8: string;
+    ASKP8: string;
+
     /**
      * 매도호가9
      */
-    askp9: string;
+    ASKP9: string;
+
     /**
      * 매도호가10
      */
-    askp10: string;
+    ASKP10: string;
+
     /**
      * 매수호가1
      */
-    bidp1: string;
+    BIDP1: string;
+
     /**
      * 매수호가2
      */
-    bidp2: string;
+    BIDP2: string;
+
     /**
      * 매수호가3
      */
-    bidp3: string;
+    BIDP3: string;
+
     /**
      * 매수호가4
      */
-    bidp4: string;
+    BIDP4: string;
+
     /**
      * 매수호가5
      */
-    bidp5: string;
+    BIDP5: string;
+
     /**
      * 매수호가6
      */
-    bidp6: string;
+    BIDP6: string;
+
     /**
      * 매수호가7
      */
-    bidp7: string;
+    BIDP7: string;
+
     /**
      * 매수호가8
      */
-    bidp8: string;
+    BIDP8: string;
+
     /**
      * 매수호가9
      */
-    bidp9: string;
+    BIDP9: string;
+
     /**
      * 매수호가10
      */
-    bidp10: string;
+    BIDP10: string;
+
     /**
      * 매도호가 잔량1
      */
-    askpRsqn1: string;
+    ASKP_RSQN1: string;
+
     /**
      * 매도호가 잔량2
      */
-    askpRsqn2: string;
+    ASKP_RSQN2: string;
+
     /**
      * 매도호가 잔량3
      */
-    askpRsqn3: string;
+    ASKP_RSQN3: string;
+
     /**
      * 매도호가 잔량4
      */
-    askpRsqn4: string;
+    ASKP_RSQN4: string;
+
     /**
      * 매도호가 잔량5
      */
-    askpRsqn5: string;
+    ASKP_RSQN5: string;
+
     /**
      * 매도호가 잔량6
      */
-    askpRsqn6: string;
+    ASKP_RSQN6: string;
+
     /**
      * 매도호가 잔량7
      */
-    askpRsqn7: string;
+    ASKP_RSQN7: string;
+
     /**
      * 매도호가 잔량8
      */
-    askpRsqn8: string;
+    ASKP_RSQN8: string;
+
     /**
      * 매도호가 잔량9
      */
-    askpRsqn9: string;
+    ASKP_RSQN9: string;
+
     /**
      * 매도호가 잔량10
      */
-    askpRsqn10: string;
+    ASKP_RSQN10: string;
+
     /**
      * 매수호가 잔량1
      */
-    bidpRsqn1: string;
+    BIDP_RSQN1: string;
+
     /**
      * 매수호가 잔량2
      */
-    bidpRsqn2: string;
+    BIDP_RSQN2: string;
+
     /**
      * 매수호가 잔량3
      */
-    bidpRsqn3: string;
+    BIDP_RSQN3: string;
+
     /**
      * 매수호가 잔량4
      */
-    bidpRsqn4: string;
+    BIDP_RSQN4: string;
+
     /**
      * 매수호가 잔량5
      */
-    bidpRsqn5: string;
+    BIDP_RSQN5: string;
+
     /**
      * 매수호가 잔량6
      */
-    bidpRsqn6: string;
+    BIDP_RSQN6: string;
+
     /**
      * 매수호가 잔량7
      */
-    bidpRsqn7: string;
+    BIDP_RSQN7: string;
+
     /**
      * 매수호가 잔량8
      */
-    bidpRsqn8: string;
+    BIDP_RSQN8: string;
+
     /**
      * 매수호가 잔량9
      */
-    bidpRsqn9: string;
+    BIDP_RSQN9: string;
+
     /**
      * 매수호가 잔량10
      */
-    bidpRsqn10: string;
+    BIDP_RSQN10: string;
+
     /**
      * 총 매도호가 잔량
      */
-    totalAskpRsqn: string;
+    TOTAL_ASKP_RSQN: string;
+
     /**
      * 총 매수호가 잔량
      */
-    totalBidpRsqn: string;
+    TOTAL_BIDP_RSQN: string;
+
     /**
      * 시간외 총 매도호가 잔량
      */
-    ovtmTotalAskpRsqn: string;
+    OVTM_TOTAL_ASKP_RSQN: string;
+
     /**
      * 시간외 총 매수호가 잔량
      */
-    ovtmTotalBidpRsqn: string;
+    OVTM_TOTAL_BIDP_RSQN: string;
+
     /**
      * 예상 체결가
      */
-    antcCnpr: string;
+    ANTC_CNPR: string;
+
     /**
      * 예상 체결량
      */
-    antcCnqn: string;
+    ANTC_CNQN: string;
+
     /**
      * 예상 거래량
      */
-    antcVol: string;
+    ANTC_VOL: string;
+
     /**
      * 예상 체결 대비
      */
-    antcCntgVrss: string;
+    ANTC_CNTG_VRSS: string;
+
     /**
      * 예상 체결 대비 부호
      */
-    antcCntgVrssSign: string;
+    ANTC_CNTG_VRSS_SIGN: string;
+
     /**
      * 예상 체결 전일 대비율
      */
-    antcCntgPrdyCtrt: string;
+    ANTC_CNTG_PRDY_CTRT: string;
+
     /**
      * 누적 거래량
      */
-    acmlVol: string;
+    ACML_VOL: string;
+
     /**
      * 총 매도호가 잔량 증감
      */
-    totalAskpRsqnIcdc: string;
+    TOTAL_ASKP_RSQN_ICDC: string;
+
     /**
      * 총 매수호가 잔량 증감
      */
-    totalBidpRsqnIcdc: string;
+    TOTAL_BIDP_RSQN_ICDC: string;
+
     /**
      * 시간외 총 매도호가 증감
      */
-    ovtmTotalAskpIcdc: string;
+    OVTM_TOTAL_ASKP_ICDC: string;
+
     /**
      * 시간외 총 매수호가 증감
      */
-    ovtmTotalBidpIcdc: string;
+    OVTM_TOTAL_BIDP_ICDC: string;
+
     /**
      * 주식 매매 구분 코드
      */
-    stckDealClsCode: string;
+    STCK_DEAL_CLS_CODE: string;
+
     /**
      * KRX 중간가
      */
-    kmidPrc: string;
+    KMID_PRC: string;
+
     /**
      * KRX 중간가잔량합계수량
      */
-    kmidTotalRsqn: string;
+    KMID_TOTAL_RSQN: string;
+
     /**
      * KRX 중간가 매수매도 구분
      */
-    kmidClsCode: string;
+    KMID_CLS_CODE: string;
+
     /**
      * NXT 중간가
      */
-    nmidPrc: string;
+    NMID_PRC: string;
+
     /**
      * NXT 중간가잔량합계수량
      */
-    nmidTotalRsqn: string;
+    NMID_TOTAL_RSQN: string;
+
     /**
      * NXT 중간가 매수매도 구분
      */
-    nmidClsCode: string;
+    NMID_CLS_CODE: string;
 }

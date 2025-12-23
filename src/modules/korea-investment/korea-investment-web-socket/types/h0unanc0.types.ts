@@ -1,91 +1,91 @@
-export interface H0uncnt0Data {
+export interface H0unanc0Data {
     /**
-     * 유가증권 단축 종목코드
+     * 유가증권단축종목코드
      */
     MKSC_SHRN_ISCD: string;
 
     /**
-     * 주식 체결 시간
+     * 주식체결시간
      */
     STCK_CNTG_HOUR: string;
 
     /**
-     * 주식 현재가
+     * 주식현재가
      */
     STCK_PRPR: string;
 
     /**
-     * 전일 대비 부호
+     * 전일대비구분
      */
     PRDY_VRSS_SIGN: string;
 
     /**
-     * 전일 대비
+     * 전일대비
      */
     PRDY_VRSS: string;
 
     /**
-     * 전일 대비율
+     * 등락율
      */
     PRDY_CTRT: string;
 
     /**
-     * 가중 평균 주식 가격
+     * 가중평균주식가격
      */
     WGHN_AVRG_STCK_PRC: string;
 
     /**
-     * 주식 시가
+     * 시가
      */
     STCK_OPRC: string;
 
     /**
-     * 주식 최고가
+     * 고가
      */
     STCK_HGPR: string;
 
     /**
-     * 주식 최저가
+     * 저가
      */
     STCK_LWPR: string;
 
     /**
-     * 매도호가1
+     * 매도호가
      */
     ASKP1: string;
 
     /**
-     * 매수호가1
+     * 매수호가
      */
     BIDP1: string;
 
     /**
-     * 체결 거래량
+     * 거래량
      */
     CNTG_VOL: string;
 
     /**
-     * 누적 거래량
+     * 누적거래량
      */
     ACML_VOL: string;
 
     /**
-     * 누적 거래 대금
+     * 누적거래대금
      */
     ACML_TR_PBMN: string;
 
     /**
-     * 매도 체결 건수
+     * 매도체결건수
      */
     SELN_CNTG_CSNU: string;
 
     /**
-     * 매수 체결 건수
+     * 매수체결건수
      */
     SHNU_CNTG_CSNU: string;
 
     /**
-     * 순매수 체결 건수
+     * 순매수체결건수
      */
     NTBY_CNTG_CSNU: string;
 
@@ -95,12 +95,12 @@ export interface H0uncnt0Data {
     CTTR: string;
 
     /**
-     * 총 매도 수량
+     * 총매도수량
      */
     SELN_CNTG_SMTN: string;
 
     /**
-     * 총 매수 수량
+     * 총매수수량
      */
     SHNU_CNTG_SMTN: string;
 
@@ -115,12 +115,12 @@ export interface H0uncnt0Data {
     SHNU_RATE: string;
 
     /**
-     * 전일 거래량 대비 등락율
+     * 전일거래량대비등락율
      */
     PRDY_VOL_VRSS_ACML_VOL_RATE: string;
 
     /**
-     * 시가 시간
+     * 시가시간
      */
     OPRC_HOUR: string;
 
@@ -135,7 +135,7 @@ export interface H0uncnt0Data {
     OPRC_VRSS_PRPR: string;
 
     /**
-     * 최고가 시간
+     * 최고가시간
      */
     HGPR_HOUR: string;
 
@@ -150,7 +150,7 @@ export interface H0uncnt0Data {
     HGPR_VRSS_PRPR: string;
 
     /**
-     * 최저가 시간
+     * 최저가시간
      */
     LWPR_HOUR: string;
 
@@ -165,57 +165,57 @@ export interface H0uncnt0Data {
     LWPR_VRSS_PRPR: string;
 
     /**
-     * 영업 일자
+     * 영업일자
      */
     BSOP_DATE: string;
 
     /**
-     * 신 장운영 구분 코드
+     * 신장운영구분코드
      */
     NEW_MKOP_CLS_CODE: string;
 
     /**
-     * 거래정지 여부
+     * 거래정지여부
      */
     TRHT_YN: string;
 
     /**
-     * 매도호가 잔량1
+     * 매도호가잔량1
      */
     ASKP_RSQN1: string;
 
     /**
-     * 매수호가 잔량1
+     * 매수호가잔량1
      */
     BIDP_RSQN1: string;
 
     /**
-     * 총 매도호가 잔량
+     * 총매도호가잔량
      */
     TOTAL_ASKP_RSQN: string;
 
     /**
-     * 총 매수호가 잔량
+     * 총매수호가잔량
      */
     TOTAL_BIDP_RSQN: string;
 
     /**
-     * 거래량 회전율
+     * 거래량회전율
      */
     VOL_TNRT: string;
 
     /**
-     * 전일 동시간 누적 거래량
+     * 전일동시간누적거래량
      */
     PRDY_SMNS_HOUR_ACML_VOL: string;
 
     /**
-     * 전일 동시간 누적 거래량 비율
+     * 전일동시간누적거래량비율
      */
     PRDY_SMNS_HOUR_ACML_VOL_RATE: string;
 
     /**
-     * 시간 구분 코드
+     * 시간구분코드
      */
     HOUR_CLS_CODE: string;
 
@@ -225,7 +225,7 @@ export interface H0uncnt0Data {
     MRKT_TRTM_CLS_CODE: string;
 
     /**
-     * 정적VI발동기준가
+     * VI 상태값
      */
     VI_STND_PRC: string;
 }
