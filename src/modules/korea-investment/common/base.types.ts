@@ -4,6 +4,13 @@ export enum MarketDivCode {
     통합 = 'UN',
 }
 
+export enum ProductType {
+    주식 = '300',
+    선물옵션 = '301',
+    채권 = '302',
+    ELS = '306',
+}
+
 export enum CustomerType {
     Corporation = 'B',
     Personal = 'P',

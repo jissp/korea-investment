@@ -25,9 +25,9 @@ export class KoreaInvestmentRequestApiProcessor {
      * @param job
      */
     @OnQueueProcessor(KoreaInvestmentRequestApiType, {
-        concurrency: 5,
+        concurrency: 6,
         limiter: {
-            max: 5,
+            max: 6,
             duration: 1000,
         },
     })

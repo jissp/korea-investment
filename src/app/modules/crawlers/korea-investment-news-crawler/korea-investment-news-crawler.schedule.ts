@@ -4,7 +4,6 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import { DomesticStockQuotationsNewsTitleParam } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import {
     KoreaInvestmentRequestApiHelper,
@@ -21,7 +20,7 @@ export class KoreaInvestmentNewsCrawlerSchedule implements OnModuleInit {
     constructor(
         private readonly koreaInvestmentHelper: KoreaInvestmentHelperService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly settingService: KoreaInvestmentSettingService,
         @Inject(KoreaInvestmentNewsCrawlerType.RequestDomesticNewsTitle)
         private readonly requestDomesticNewsTitleFlow: FlowProducer,
     ) {}
@@ -33,8 +32,7 @@ export class KoreaInvestmentNewsCrawlerSchedule implements OnModuleInit {
     @Cron('*/1 * * * *')
     async handleCrawlingKoreaInvestmentNewsByStockCode() {
         try {
-            const stockCodes =
-                await this.koreaInvestmentSettingService.getStockCodes();
+            const stockCodes = await this.settingService.getStockCodes();
             if (!stockCodes.length) {
                 return;
             }
@@ -83,21 +81,15 @@ export class KoreaInvestmentNewsCrawlerSchedule implements OnModuleInit {
     }
 
     private buildRequestApiChildren(startDate: string, stockCode: string) {
-        return this.requestApiHelper.generateRequestApi<DomesticStockQuotationsNewsTitleParam>(
-            {
-                url: '/uapi/domestic-stock/v1/quotations/news-title',
-                tradeId: 'FHKST01011800',
-                params: {
-                    FID_INPUT_DATE_1: `00${startDate}`,
-                    FID_NEWS_OFER_ENTP_CODE: '',
-                    FID_COND_MRKT_CLS_CODE: '',
-                    FID_INPUT_ISCD: stockCode,
-                    FID_TITL_CNTT: '',
-                    FID_INPUT_HOUR_1: '',
-                    FID_RANK_SORT_CLS_CODE: '',
-                    FID_INPUT_SRNO: '',
-                },
-            },
-        );
+        return this.requestApiHelper.generateDomesticNewsTitle({
+            FID_INPUT_DATE_1: `00${startDate}`,
+            FID_NEWS_OFER_ENTP_CODE: '',
+            FID_COND_MRKT_CLS_CODE: '',
+            FID_INPUT_ISCD: stockCode,
+            FID_TITL_CNTT: '',
+            FID_INPUT_HOUR_1: '',
+            FID_RANK_SORT_CLS_CODE: '',
+            FID_INPUT_SRNO: '',
+        });
     }
 }

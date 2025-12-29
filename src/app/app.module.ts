@@ -6,18 +6,19 @@ import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { QueueModule } from '@modules/queue';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
-import { KoreaInvestmentNewsCrawlerModule } from '@app/modules/korea-investment-news-crawler';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
-import { CrawlerModule } from '@app/modules/crawler';
-import { NaverNewsCrawlerModule } from '@app/modules/naver-news-crawler';
-import { StockRepositoryModule } from '@app/modules/stock-repository';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { StockPlusNewsCrawlerModule } from '@app/modules/stock-plus-news-cralwer';
-import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/korea-investment-account-crawler';
 import { KoreaInvestmentAccountModule } from '@app/modules/korea-investment-account';
 import { NewsModule } from '@app/modules/news';
+import { StockRepositoryModule } from '@app/modules/stock-repository';
+import { CrawlerModule } from '@app/modules/crawlers/crawler';
+import { KoreaInvestmentNewsCrawlerModule } from '@app/modules/crawlers/korea-investment-news-crawler';
+import { NaverNewsCrawlerModule } from '@app/modules/crawlers/naver-news-crawler';
+import { StockPlusNewsCrawlerModule } from '@app/modules/crawlers/stock-plus-news-cralwer';
+import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
 import configuration from './configuration';
+import { KoreaInvestmentKeywordListener } from './listeners';
 import {
     AccountController,
     AssetController,
@@ -50,15 +51,15 @@ import { KoreaInvestmentBeGateway } from './gateways';
         ScheduleModule.forRoot(),
         KoreaInvestmentCollectorModule.forRoot(),
         KoreaInvestmentSettingModule.forRoot(),
-        KoreaInvestmentNewsCrawlerModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
         KoreaInvestmentAccountModule,
-        StockPlusNewsCrawlerModule,
         StockRepositoryModule,
+        NewsModule,
         CrawlerModule,
         NaverNewsCrawlerModule,
-        NewsModule,
+        StockPlusNewsCrawlerModule,
+        KoreaInvestmentNewsCrawlerModule,
         KoreaInvestmentAccountCrawlerModule,
     ],
     controllers: [
@@ -71,6 +72,6 @@ import { KoreaInvestmentBeGateway } from './gateways';
         FavoriteStockController,
         KeywordController,
     ],
-    providers: [KoreaInvestmentBeGateway],
+    providers: [KoreaInvestmentKeywordListener, KoreaInvestmentBeGateway],
 })
 export class AppModule {}

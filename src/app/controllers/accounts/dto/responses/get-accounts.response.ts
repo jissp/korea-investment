@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
     KoreaInvestmentAccountOutput2,
     KoreaInvestmentAccountStockOutput,
-} from '@app/modules/korea-investment-account-crawler';
+} from '@app/modules/korea-investment-request-api';
 
 class GetAccountInfo extends KoreaInvestmentAccountOutput2 {}
 

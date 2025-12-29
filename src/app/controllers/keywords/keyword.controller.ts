@@ -11,15 +11,16 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { assertStockCode, getStockName } from '@common/domains';
 import { GetCodesResponse } from '@app/common';
 import {
-    KoreaInvestmentSettingEvent,
-    KoreaInvestmentSettingService,
+    KeywordType,
+    KoreaInvestmentKeywordSettingEvent,
+    KoreaInvestmentKeywordSettingService,
 } from '@app/modules/korea-investment-setting';
 import { UpsertKeywordBody, UpsertKeywordByStockCodeBody } from './dto';
 
 @Controller('v1/keywords')
 export class KeywordController {
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -32,7 +33,7 @@ export class KeywordController {
     })
     @Get()
     public async getKeywords(): Promise<GetCodesResponse> {
-        const keywords = await this.koreaInvestmentSettingService.getKeywords();
+        const keywords = await this.keywordSettingService.getKeywords();
 
         return {
             data: keywords.map((keyword) => ({
@@ -52,7 +53,14 @@ export class KeywordController {
     @ApiCreatedResponse()
     @Post()
     public async registerKeyword(@Body() { keyword }: UpsertKeywordBody) {
-        await this.koreaInvestmentSettingService.addKeyword(keyword);
+        await this.keywordSettingService.addKeywordsByType(
+            KeywordType.Manual,
+            keyword,
+        );
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
+        );
     }
 
     @ApiOperation({
@@ -67,11 +75,14 @@ export class KeywordController {
     @ApiCreatedResponse()
     @Delete(':keyword')
     public async deleteKeyword(@Param('keyword') keyword: string) {
-        await this.koreaInvestmentSettingService.deleteKeyword(keyword);
-
-        this.eventEmitter.emit(KoreaInvestmentSettingEvent.DeletedKeyword, {
+        await this.keywordSettingService.deleteKeywordsByType(
+            KeywordType.Manual,
             keyword,
-        });
+        );
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
+        );
     }
 
     @ApiOperation({
@@ -93,9 +104,7 @@ export class KeywordController {
         assertStockCode(stockCode);
 
         const keywords =
-            await this.koreaInvestmentSettingService.getKeywordsByStockCode(
-                stockCode,
-            );
+            await this.keywordSettingService.getKeywordsByStockCode(stockCode);
 
         return {
             data: keywords.map((keyword) => ({
@@ -122,9 +131,7 @@ export class KeywordController {
         @Param('keyword') keyword: string,
     ): Promise<GetCodesResponse> {
         const stockCodes =
-            await this.koreaInvestmentSettingService.getStockCodesFromKeyword(
-                keyword,
-            );
+            await this.keywordSettingService.getStockCodesFromKeyword(keyword);
 
         return {
             data: stockCodes.map((stockCode) => ({
@@ -156,16 +163,20 @@ export class KeywordController {
         assertStockCode(stockCode);
 
         await Promise.all([
-            this.koreaInvestmentSettingService.addKeyword(keyword),
-            this.koreaInvestmentSettingService.addKeywordToStock(
-                stockCode,
+            this.keywordSettingService.addKeywordsByType(
+                KeywordType.Manual,
                 keyword,
             ),
-            this.koreaInvestmentSettingService.addStockCodeToKeyword(
+            this.keywordSettingService.addKeywordToStock(stockCode, keyword),
+            this.keywordSettingService.addStockCodeToKeyword(
                 keyword,
                 stockCode,
             ),
         ]);
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
+        );
     }
 
     @ApiOperation({
@@ -190,9 +201,13 @@ export class KeywordController {
     ) {
         assertStockCode(stockCode);
 
-        await this.koreaInvestmentSettingService.deleteStockCodeFromKeyword(
+        await this.keywordSettingService.deleteStockCodeFromKeyword(
             keyword,
             stockCode,
+        );
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
         );
     }
 }

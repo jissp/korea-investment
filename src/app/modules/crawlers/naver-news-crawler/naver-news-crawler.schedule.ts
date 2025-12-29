@@ -1,7 +1,7 @@
 import { Queue } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
+import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class NaverNewsCrawlerSchedule implements OnModuleInit {
     private readonly logger = new Logger(NaverNewsCrawlerSchedule.name);
 
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         @Inject(NaverNewsCrawlerQueueType.CrawlingNaverNews)
         private readonly queue: Queue,
     ) {}
@@ -21,8 +21,7 @@ export class NaverNewsCrawlerSchedule implements OnModuleInit {
     @Cron('*/3 * * * *')
     async requestNaverNewsCrawling() {
         try {
-            const keywords =
-                await this.koreaInvestmentSettingService.getKeywords();
+            const keywords = await this.keywordSettingService.getKeywords();
             if (!keywords.length) {
                 return;
             }

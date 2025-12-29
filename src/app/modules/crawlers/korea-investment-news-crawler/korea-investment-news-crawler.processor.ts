@@ -17,7 +17,7 @@ export class KoreaInvestmentNewsCrawlerProcessor {
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly settingService: KoreaInvestmentSettingService,
         private readonly newsService: NewsService,
     ) {}
 
@@ -32,8 +32,7 @@ export class KoreaInvestmentNewsCrawlerProcessor {
             (response) => response.output,
         );
 
-        const settingStockCodes =
-            await this.koreaInvestmentSettingService.getStockCodes();
+        const settingStockCodes = await this.settingService.getStockCodes();
         const stockCodeSet = new Set(settingStockCodes);
         const transformedNewsItems = childrenResults.map((newsItem) =>
             this.transformer.transform(newsItem),

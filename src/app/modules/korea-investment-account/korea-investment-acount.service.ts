@@ -12,6 +12,8 @@ import {
 import {
     AccountInfo,
     AccountStock,
+    AccountStockByGroup,
+    AccountStockGroup,
     KoreaInvestmentAccountKey,
 } from './korea-investment-account.types';
 
@@ -62,7 +64,7 @@ export class KoreaInvestmentAccountService {
         try {
             return JSON.parse(result) as AccountInfo;
         } catch (error) {
-            throw new InternalServerErrorException('계좌 정보 변환 오류');
+            throw new InternalServerErrorException(error);
         }
     }
 
@@ -76,7 +78,7 @@ export class KoreaInvestmentAccountService {
         accountStockItems: AccountStock[],
     ) {
         return this.redisService.set(
-            this.getAccountStockKey(account),
+            this.getAccountStocksKey(account),
             JSON.stringify(accountStockItems),
             {
                 seconds: 3600,
@@ -90,7 +92,7 @@ export class KoreaInvestmentAccountService {
      */
     public async getAccountStocks(account: string): Promise<AccountStock[]> {
         const result = await this.redisService.get(
-            this.getAccountStockKey(account),
+            this.getAccountStocksKey(account),
         );
         if (!result) {
             return [];
@@ -99,7 +101,85 @@ export class KoreaInvestmentAccountService {
         try {
             return JSON.parse(result) as AccountStock[];
         } catch (error) {
-            throw new InternalServerErrorException('계좌 주직 정보 변환 오류');
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    /**
+     * 관심 종목 그룹 목록을 저장합니다.
+     * @param userId
+     * @param accountStockItems
+     */
+    public async setAccountStockGroups(
+        userId: string,
+        accountStockItems: AccountStockGroup[],
+    ) {
+        return this.redisService.set(
+            this.getAccountStockGroupsKey(userId),
+            JSON.stringify(accountStockItems),
+            {
+                seconds: 3600,
+            },
+        );
+    }
+
+    /**
+     * 관심 종목 그룹 목록을 조회합니다.
+     * @param userId
+     */
+    public async getAccountStockGroups(
+        userId: string,
+    ): Promise<AccountStockGroup[]> {
+        const result = await this.redisService.get(
+            this.getAccountStockGroupsKey(userId),
+        );
+        if (!result) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(result) as AccountStockGroup[];
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    /**
+     * 그룹별 관심 종목 목록을 저장합니다.
+     * @param groupName
+     * @param accountStockItems
+     */
+    public async setAccountStocksByGroup(
+        groupName: string,
+        accountStockItems: AccountStockByGroup[],
+    ) {
+        return this.redisService.set(
+            this.getAccountStocksByGroupKey(groupName),
+            JSON.stringify(accountStockItems),
+            {
+                seconds: 3600,
+            },
+        );
+    }
+
+    /**
+     * 그룹별 관심 종목 목록을 조회합니다.
+     * @param groupName
+     */
+    public async getAccountStocksByGroup(
+        groupName: string,
+    ): Promise<AccountStockByGroup[]> {
+        const result = await this.redisService.get(
+            this.getAccountStocksByGroupKey(groupName),
+        );
+        if (!result) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(result) as AccountStockByGroup[];
+        } catch (error) {
+            throw new InternalServerErrorException(error);
         }
     }
 
@@ -115,7 +195,30 @@ export class KoreaInvestmentAccountService {
      * @param account
      * @private
      */
-    private getAccountStockKey(account: string) {
+    private getAccountStocksKey(account: string) {
         return getRedisKey(KoreaInvestmentAccountKey.AccountStocks, account);
+    }
+
+    /**
+     * @param userId
+     * @private
+     */
+    private getAccountStockGroupsKey(userId: string) {
+        return getRedisKey(
+            KoreaInvestmentAccountKey.AccountStockGroups,
+            userId,
+        );
+    }
+
+    /**
+     * 그룹별 관심 종목 목록의 Redis 키를 반환합니다.
+     * @private
+     * @param groupName
+     */
+    private getAccountStocksByGroupKey(groupName: string) {
+        return getRedisKey(
+            KoreaInvestmentAccountKey.AccountStocksByGroup,
+            groupName,
+        );
     }
 }

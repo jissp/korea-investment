@@ -28,7 +28,7 @@ export class FavoriteStockController {
     private logger = new Logger(FavoriteStockController.name);
 
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly settingService: KoreaInvestmentSettingService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -47,7 +47,7 @@ export class FavoriteStockController {
         try {
             assertStockCode(stockCode);
 
-            await this.koreaInvestmentSettingService.addStockCode(stockCode);
+            await this.settingService.addStockCode(stockCode);
         } catch (error) {
             this.logger.error(error);
 
@@ -72,7 +72,7 @@ export class FavoriteStockController {
         try {
             assertStockCode(stockCode);
 
-            await this.koreaInvestmentSettingService.deleteStockCode(stockCode);
+            await this.settingService.deleteStockCode(stockCode);
 
             this.eventEmitter.emit(
                 KoreaInvestmentSettingEvent.DeletedStockCode,
@@ -97,8 +97,7 @@ export class FavoriteStockController {
     @Get()
     public async getFavoriteStockCodes(): Promise<GetCodesResponse> {
         try {
-            const codes =
-                await this.koreaInvestmentSettingService.getStockCodes();
+            const codes = await this.settingService.getStockCodes();
 
             return {
                 data: codes.map((code) => ({

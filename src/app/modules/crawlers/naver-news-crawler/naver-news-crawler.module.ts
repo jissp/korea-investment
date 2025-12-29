@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { NaverApiModule } from '@modules/naver';
 import { QueueModule } from '@modules/queue';
+import { KoreaInvestmentAccountModule } from '@app/modules/korea-investment-account';
 import { NewsModule } from '@app/modules/news';
 import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
 import { NaverNewsCrawlerProcessor } from './naver-news-crawler.processor';
@@ -24,6 +25,7 @@ const queueProviders = QueueModule.getQueueProviders(queueTypes);
                 },
             },
         }),
+        KoreaInvestmentAccountModule,
         NaverApiModule,
         NewsModule,
     ],
