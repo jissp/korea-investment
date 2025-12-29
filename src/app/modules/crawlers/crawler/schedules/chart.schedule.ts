@@ -18,7 +18,7 @@ export class ChartSchedule implements OnModuleInit {
     private readonly logger: Logger = new Logger(ChartSchedule.name);
 
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly settingService: KoreaInvestmentSettingService,
         private readonly helper: KoreaInvestmentHelperService,
         @Inject(CrawlerFlowType.RequestDailyItemChartPrice)
         private readonly requestDailyItemChartPriceFlow: FlowProducer,
@@ -31,8 +31,7 @@ export class ChartSchedule implements OnModuleInit {
     @Cron('00 */1 * * *')
     async handleCrawlingStockDailyItemChartPrice() {
         try {
-            const stockCodes =
-                await this.koreaInvestmentSettingService.getStockCodes();
+            const stockCodes = await this.settingService.getStockCodes();
 
             const currentDate = new Date();
             const fromDate = new Date(currentDate);
