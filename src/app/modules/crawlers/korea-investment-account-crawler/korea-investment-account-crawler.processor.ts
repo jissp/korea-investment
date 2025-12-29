@@ -138,10 +138,7 @@ export class KoreaInvestmentAccountCrawlerProcessor {
             >(job);
 
         let isUpdatedKeyword: boolean = false;
-        for (const {
-            request: { params },
-            response,
-        } of childrenResponses) {
+        for (const { response } of childrenResponses) {
             const groupName = response.output1.inter_grp_name;
 
             await this.koreaInvestmentAccountService.setAccountStocksByGroup(
@@ -219,7 +216,7 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                     keyword,
                 ),
             ),
-            ...stockInfoList.map(({ name, code }) =>
+            ...stockInfoList.map(({ code }) =>
                 this.settingService.addStockCode(code),
             ),
         ]);
