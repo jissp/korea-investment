@@ -1,5 +1,8 @@
 export interface IConfiguration {
     koreaInvestment: {
+        user: {
+            id: string;
+        };
         api: {
             host: string;
             key: string;
@@ -24,12 +27,20 @@ export interface IConfiguration {
             host: string;
             key: string;
             secret: string;
-        }
-    }
+        };
+    };
+    google: {
+        ai: {
+            key: string;
+        };
+    };
 }
 
 export default (): IConfiguration => ({
     koreaInvestment: {
+        user: {
+            id: getEnv('KOREA_INVESTMENT_USER_ID'),
+        },
         api: {
             host: getEnv('KOREA_INVESTMENT_HOST'),
             key: getEnv('KOREA_INVESTMENT_APP_KEY'),
@@ -54,8 +65,13 @@ export default (): IConfiguration => ({
             host: getEnv('NAVER_APP_HOST'),
             key: getEnv('NAVER_APP_CLIENT_ID'),
             secret: getEnv('NAVER_APP_CLIENT_SECRET'),
-        }
-    }
+        },
+    },
+    google: {
+        ai: {
+            key: getEnv('GOOGLE_AI_API_KEY'),
+        },
+    },
 });
 
 function getEnv(key: string): string {
