@@ -1,8 +1,12 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { RedisModule } from '@modules/redis';
+import { RedisHelper, RedisModule, RedisSet } from '@modules/redis';
 import { NewsModule } from '@app/modules/news';
-import { KoreaInvestmentSettingListener } from './korea-investment-setting.listener';
 import { KoreaInvestmentSettingService } from './korea-investment-setting.service';
+import { KoreaInvestmentKeywordSettingService } from './korea-investment-keyword-setting.service';
+import {
+    KeywordType,
+    KoreaInvestmentKeywordSettingKey,
+} from '@app/modules/korea-investment-setting/korea-investment-keyword-setting.types';
 
 @Module({})
 export class KoreaInvestmentSettingModule {
@@ -12,10 +16,39 @@ export class KoreaInvestmentSettingModule {
             global: true,
             imports: [RedisModule.forFeature(), NewsModule],
             providers: [
-                KoreaInvestmentSettingListener,
+                {
+                    provide: 'KeywordSetMap',
+                    inject: [RedisHelper],
+                    useFactory: (redisHelper: RedisHelper) => {
+                        return new Map<KeywordType, RedisSet>([
+                            [
+                                KeywordType.Manual,
+                                redisHelper.createSet(
+                                    KoreaInvestmentKeywordSettingKey.ManualKeywords,
+                                ),
+                            ],
+                            [
+                                KeywordType.Possess,
+                                redisHelper.createSet(
+                                    KoreaInvestmentKeywordSettingKey.PossessKeywords,
+                                ),
+                            ],
+                            [
+                                KeywordType.StockGroup,
+                                redisHelper.createSet(
+                                    KoreaInvestmentKeywordSettingKey.StockGroupKeywords,
+                                ),
+                            ],
+                        ]);
+                    },
+                },
                 KoreaInvestmentSettingService,
+                KoreaInvestmentKeywordSettingService,
             ],
-            exports: [KoreaInvestmentSettingService],
+            exports: [
+                KoreaInvestmentSettingService,
+                KoreaInvestmentKeywordSettingService,
+            ],
         };
     }
 }

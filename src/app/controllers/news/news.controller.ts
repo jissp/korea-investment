@@ -1,18 +1,23 @@
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
+import { getStockName } from '@common/domains';
+import {
+    KeywordType,
+    KoreaInvestmentKeywordSettingService,
+    KoreaInvestmentSettingService,
+} from '@app/modules/korea-investment-setting';
 import { NewsService } from '@app/modules/news';
 import {
     NewsByKeywordResponse,
     NewsByStockResponse,
     NewsResponse,
 } from './dto';
-import { getStockName } from '@common/domains';
 
 @Controller('v1/news')
 export class NewsController {
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly settingService: KoreaInvestmentSettingService,
+        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         private readonly newsService: NewsService,
     ) {}
 
@@ -40,7 +45,9 @@ export class NewsController {
     })
     @Get('by-keyword')
     public async getNewsByKeyword(): Promise<NewsByKeywordResponse> {
-        const keywords = await this.koreaInvestmentSettingService.getKeywords();
+        const keywords = await this.keywordSettingService.getKeywordsByType(
+            KeywordType.Manual,
+        );
 
         const results = await Promise.allSettled(
             keywords.map(async (keyword) => {
@@ -71,8 +78,7 @@ export class NewsController {
     })
     @Get('by-stock')
     public async getNewsByStock(): Promise<NewsByStockResponse> {
-        const stockCodes =
-            await this.koreaInvestmentSettingService.getStockCodes();
+        const stockCodes = await this.settingService.getStockCodes();
 
         const results = await Promise.allSettled(
             stockCodes.map(async (stockCode) => {
