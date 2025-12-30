@@ -1,12 +1,7 @@
 export enum NewsRedisKey {
     News = 'News:Articles',
-    NewsScore = 'News:Score',
     NewsByKeyword = 'News:Score:Keyword',
     NewsByStockCode = 'News:Score:StockCode',
-}
-
-export enum NewsEvent {
-    AddedNews = 'AddedNews',
 }
 
 export enum NewsCategory {

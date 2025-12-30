@@ -8,9 +8,7 @@ import { RedisHelper } from '@modules/redis/redis.helper';
 
 @Module({})
 export class RedisModule {
-    static async forRootAsync(
-        options: RedisAsyncConfig,
-    ): Promise<DynamicModule> {
+    static forRootAsync(options: RedisAsyncConfig): DynamicModule {
         const providers: Provider[] = [];
 
         if (options.useFactory) {
@@ -48,7 +46,7 @@ export class RedisModule {
             module: RedisModule,
             imports: [ConfigModule, ...(options.imports ?? [])],
             providers: [...providers, RedisHelper, RedisService],
-            exports: [RedisConnection, RedisHelper, RedisService],
+            exports: [RedisConnection, RedisHelper],
         };
     }
 

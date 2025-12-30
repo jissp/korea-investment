@@ -12,10 +12,10 @@ import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-sett
 import { KoreaInvestmentAccountModule } from '@app/modules/korea-investment-account';
 import { NewsModule } from '@app/modules/news';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
+import { IndexRepositoryModule } from '@app/modules/repositories';
 import { CrawlerModule } from '@app/modules/crawlers/crawler';
-import { KoreaInvestmentNewsCrawlerModule } from '@app/modules/crawlers/korea-investment-news-crawler';
-import { NaverNewsCrawlerModule } from '@app/modules/crawlers/naver-news-crawler';
-import { StockPlusNewsCrawlerModule } from '@app/modules/crawlers/stock-plus-news-cralwer';
+import { NewsCrawlerModule } from '@app/modules/crawlers/news-crawler';
+import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-index-crawler';
 import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
 import configuration from './configuration';
 import { KoreaInvestmentKeywordListener } from './listeners';
@@ -40,9 +40,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         RedisModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
-            useFactory: async (
-                configService: ConfigService,
-            ): Promise<RedisConfig> => {
+            useFactory: (configService: ConfigService): RedisConfig => {
                 return configService.get<RedisConfig>('redis')!;
             },
         }),
@@ -55,12 +53,12 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentRankClientModule,
         KoreaInvestmentAccountModule,
         StockRepositoryModule,
+        IndexRepositoryModule,
         NewsModule,
         CrawlerModule,
-        NaverNewsCrawlerModule,
-        StockPlusNewsCrawlerModule,
-        KoreaInvestmentNewsCrawlerModule,
+        NewsCrawlerModule,
         KoreaInvestmentAccountCrawlerModule,
+        KoreaInvestmentIndexCrawlerModule,
     ],
     controllers: [
         AssetController,

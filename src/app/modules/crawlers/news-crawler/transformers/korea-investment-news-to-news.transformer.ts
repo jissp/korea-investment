@@ -1,6 +1,6 @@
 import { Nullable } from '@common/types';
 import { NewsCategory, NewsItem } from '@app/modules/news';
-import { KoreaInvestmentNewsItem } from './korea-investment-news-crawler.types';
+import { KoreaInvestmentNewsItem } from '../news-crawler.interface';
 
 export class KoreaInvestmentNewsToNewsTransformer {
     private readonly stockCodeFields: (keyof KoreaInvestmentNewsItem)[] = [

@@ -8,8 +8,8 @@ export class StockPlusNewsToNewsTransformer {
         string,
         (stockCode: string) => string
     > = {
-        US: this.toNormalizeStockCodeByUsaStockCode,
-        KOREA: this.toNormalizeStockCodeByKoreaStockCode,
+        US: this.toNormalizeStockCodeByUsaStockCode.bind(this),
+        KOREA: this.toNormalizeStockCodeByKoreaStockCode.bind(this),
     };
 
     public transform(stockPlusNews: StockPlusNews): NewsItem {
@@ -19,7 +19,7 @@ export class StockPlusNewsToNewsTransformer {
             title: stockPlusNews.title,
             description: stockPlusNews.summaries[0],
             stockCodes: stockPlusNews.assets
-                .map(this.mapAssetCodeToStockCode, this)
+                .map((asset) => this.mapAssetCodeToStockCode(asset))
                 .filter(Boolean) as string[],
             createdAt: new Date(stockPlusNews.publishedAt).toISOString(),
         };

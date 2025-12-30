@@ -17,14 +17,14 @@ export class RedisHelper {
     /**
      * @param key
      */
-    public createZSet(...key: string[]) {
-        return new RedisZset(this.redis, key.join(':'));
+    public createZSet<T = string>(...key: string[]) {
+        return new RedisZset<T>(this.redis, key.join(':'));
     }
 
     /**
      * @param key
      */
-    public createHash(...key: string[]) {
-        return new RedisHash(this.redis, key.join(':'));
+    public createHash<T = string>(...key: string[]) {
+        return new RedisHash<T>(this.redis, key.join(':'));
     }
 }

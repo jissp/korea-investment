@@ -5,12 +5,12 @@ import { OnQueueProcessor } from '@modules/queue';
 import { NaverApiClient } from '@modules/naver';
 import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
 import { NewsService } from '@app/modules/news';
-import { NaverNewsCrawlerQueueType } from './naver-news-crawler.types';
-import { NaverNewsToNewsTransformer } from './naver-news-to-news.transformer';
+import { NewsCrawlerQueueType } from '../news-crawler.types';
+import { NaverNewsToNewsTransformer } from '../transformers/naver-news-to-news.transformer';
 
 @Injectable()
-export class NaverNewsCrawlerProcessor {
-    private readonly logger = new Logger(NaverNewsCrawlerProcessor.name);
+export class NaverNewsProcessor {
+    private readonly logger = new Logger(NaverNewsProcessor.name);
     private readonly transformer = new NaverNewsToNewsTransformer();
 
     constructor(
@@ -19,7 +19,7 @@ export class NaverNewsCrawlerProcessor {
         private readonly newsService: NewsService,
     ) {}
 
-    @OnQueueProcessor(NaverNewsCrawlerQueueType.CrawlingNaverNews)
+    @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNews)
     public async processCrawlingNaverNews(job: Job) {
         const { keyword } = job.data;
 
@@ -33,19 +33,8 @@ export class NaverNewsCrawlerProcessor {
             sort: 'date',
         });
 
-        const transformedNews = response.items.map(
-            this.transformer.transform,
-            this.transformer,
-        );
-        const newsScore = transformedNews.reduce(
-            (previousValue, news) => {
-                previousValue[news.articleId] = new Date(
-                    news.createdAt,
-                ).getTime();
-
-                return previousValue;
-            },
-            {} as Record<string, number>,
+        const transformedNews = response.items.map((item) =>
+            this.transformer.transform(item),
         );
         const populatedNews = transformedNews.map((news) => ({
             ...news,
@@ -57,19 +46,11 @@ export class NaverNewsCrawlerProcessor {
             await Promise.allSettled([
                 ...chunk.map((news) => this.newsService.addNews(news)),
                 ...chunk.map((news) =>
-                    this.newsService.setKeywordNewsScore(
-                        keyword,
-                        news.articleId,
-                        newsScore[news.articleId],
-                    ),
+                    this.newsService.addKeywordNews(keyword, news),
                 ),
                 ...chunk.flatMap((news) =>
                     stockCodes.map((stockCode) =>
-                        this.newsService.setStockNewsScore(
-                            stockCode,
-                            news.articleId,
-                            newsScore[news.articleId],
-                        ),
+                        this.newsService.addStockNews(stockCode, news),
                     ),
                 ),
             ]);

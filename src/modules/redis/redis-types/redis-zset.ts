@@ -5,7 +5,7 @@ import { Logger } from '@nestjs/common';
  * Redis ZSet을 사용하여 데이터를 관리합니다.
  * @see https://redis.io/topics/data-types#sorted-sets
  */
-export class RedisZset {
+export class RedisZset<T = string> {
     private readonly logger: Logger = new Logger(RedisZset.name);
 
     constructor(
@@ -16,8 +16,27 @@ export class RedisZset {
     /**
      * ZSet에서 내림차순으로 데이터를 조회합니다.
      */
-    public async list(limit: number = 100): Promise<string[]> {
-        return this.redis.zrevrange(this.key, 0, limit - 1);
+    public async list(
+        limit: number = 100,
+        options?: {
+            isParse: boolean;
+        },
+    ): Promise<T[]> {
+        const items = await this.redis.zrevrange(this.key, 0, limit - 1);
+
+        if (!items) {
+            return [];
+        }
+
+        if (!options?.isParse) {
+            return items as T[];
+        }
+
+        try {
+            return items.map((index) => JSON.parse(index) as T);
+        } catch {
+            return [];
+        }
     }
 
     /**

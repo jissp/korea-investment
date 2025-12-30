@@ -2,7 +2,7 @@ import { Cluster } from 'ioredis';
 import { Logger } from '@nestjs/common';
 import { Nullable } from '@common/types';
 
-export class RedisHash {
+export class RedisHash<T = string> {
     private readonly logger: Logger = new Logger(RedisHash.name);
 
     constructor(
@@ -13,9 +13,28 @@ export class RedisHash {
     /**
      * Hash에서 필드 데이터를 조회합니다.
      * @param field
+     * @param options
      */
-    public async get(field: string): Promise<Nullable<string>> {
-        return this.redis.hget(this.key, field);
+    public async get(
+        field: string,
+        options?: {
+            isParse: boolean;
+        },
+    ): Promise<Nullable<T>> {
+        const item = await this.redis.hget(this.key, field);
+        if (!item) {
+            return null;
+        }
+
+        if (!options?.isParse) {
+            return item as T;
+        }
+
+        try {
+            return JSON.parse(item) as T;
+        } catch {
+            return null;
+        }
     }
 
     /**
@@ -73,7 +92,7 @@ export class RedisHash {
      * @returns boolean
      */
     public async exists(field: string) {
-        return this.redis.hexists(this.key, field) !== null;
+        return this.redis.hexists(this.key, field);
     }
 
     /**

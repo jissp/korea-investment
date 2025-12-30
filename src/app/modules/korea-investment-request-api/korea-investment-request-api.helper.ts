@@ -267,17 +267,15 @@ export class KoreaInvestmentRequestApiHelper {
                 KoreaInvestmentCallApiResult<Params, Response>
             >();
 
-        return Object.values(childrenValues).map((v) => v.response);
+        return Object.values(childrenValues);
     }
 
     /**
      * @param job
      */
-    public async getChildMultiResponses<
-        Params,
-        Response,
-        Response2 = unknown | null,
-    >(job: Job) {
+    public async getChildMultiResponses<Params, Response, Response2 = unknown>(
+        job: Job,
+    ) {
         const childrenValues =
             await job.getChildrenValues<
                 KoreaInvestmentCallApiMultiResult<Params, Response, Response2>

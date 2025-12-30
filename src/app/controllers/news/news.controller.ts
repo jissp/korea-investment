@@ -29,11 +29,10 @@ export class NewsController {
     })
     @Get()
     public async getNews(): Promise<NewsResponse> {
-        const newsIds = await this.newsService.getNewsIds();
-        const news = await this.newsService.populateNews(newsIds);
+        const newsList = await this.newsService.getNewsList();
 
         return {
-            data: news,
+            data: newsList,
         };
     }
 
@@ -51,12 +50,9 @@ export class NewsController {
 
         const results = await Promise.allSettled(
             keywords.map(async (keyword) => {
-                const newsIds =
-                    await this.newsService.getKeywordNewsScore(keyword);
-
                 return {
                     keyword,
-                    news: await this.newsService.populateNews(newsIds),
+                    news: await this.newsService.getKeywordNewsList(keyword),
                 };
             }),
         );
@@ -82,13 +78,10 @@ export class NewsController {
 
         const results = await Promise.allSettled(
             stockCodes.map(async (stockCode) => {
-                const newsIds =
-                    await this.newsService.getStockNewsScore(stockCode);
-
                 return {
                     stockCode: stockCode,
                     stockName: getStockName(stockCode),
-                    news: await this.newsService.populateNews(newsIds),
+                    news: await this.newsService.getStockNewsList(stockCode),
                 };
             }),
         );

@@ -5,14 +5,12 @@ import { OnQueueProcessor } from '@modules/queue';
 import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
 import { NewsService } from '@app/modules/news';
-import {
-    KoreaInvestmentNewsCrawlerType,
-    RequestDomesticNewsTitleResponse,
-} from './korea-investment-news-crawler.types';
-import { KoreaInvestmentNewsToNewsTransformer } from './korea-investment-news-to-news.transformer';
+import { KoreaInvestmentNewsToNewsTransformer } from '../transformers/korea-investment-news-to-news.transformer';
+import { NewsCrawlerQueueType } from '../news-crawler.types';
+import { RequestDomesticNewsTitleResponse } from '../news-crawler.interface';
 
 @Injectable()
-export class KoreaInvestmentNewsCrawlerProcessor {
+export class KoreaInvestmentNewsProcessor {
     private transformer = new KoreaInvestmentNewsToNewsTransformer();
 
     constructor(
@@ -21,7 +19,7 @@ export class KoreaInvestmentNewsCrawlerProcessor {
         private readonly newsService: NewsService,
     ) {}
 
-    @OnQueueProcessor(KoreaInvestmentNewsCrawlerType.RequestDomesticNewsTitle)
+    @OnQueueProcessor(NewsCrawlerQueueType.RequestDomesticNewsTitle)
     async processRequestDomesticNewsTitle(job: Job) {
         const childrenResponse =
             await this.koreaInvestmentRequestApiHelper.getChildResponses<
@@ -29,7 +27,7 @@ export class KoreaInvestmentNewsCrawlerProcessor {
                 RequestDomesticNewsTitleResponse
             >(job);
         const childrenResults = childrenResponse.flatMap(
-            (response) => response.output,
+            ({ response }) => response.output,
         );
 
         const settingStockCodes = await this.settingService.getStockCodes();
@@ -48,11 +46,7 @@ export class KoreaInvestmentNewsCrawlerProcessor {
                     );
 
                     return filteredStockCodes.map((stockCode) =>
-                        this.newsService.setStockNewsScore(
-                            stockCode,
-                            news.articleId,
-                            new Date(news.createdAt).getTime(),
-                        ),
+                        this.newsService.addStockNews(stockCode, news),
                     );
                 }),
             ]);

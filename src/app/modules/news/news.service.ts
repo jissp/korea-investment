@@ -1,38 +1,35 @@
-import * as _ from 'lodash';
 import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { RedisHash, RedisHelper, RedisZset } from '@modules/redis';
-import { NewsEvent, NewsItem, NewsRedisKey } from './news.types';
+import { RedisHelper, RedisSet, RedisZset } from '@modules/redis';
+import { NewsItem, NewsRedisKey } from './news.types';
 
 @Injectable()
 export class NewsService {
     private readonly logger = new Logger(NewsService.name);
 
-    private readonly newsHash: RedisHash;
-    private readonly newsScore: RedisZset;
+    private readonly newsZSet: RedisZset<NewsItem>;
+    private readonly newsSet: RedisSet;
 
-    constructor(
-        private readonly redisHelper: RedisHelper,
-        private readonly eventEmitter: EventEmitter2,
-    ) {
-        this.newsHash = redisHelper.createHash(NewsRedisKey.News);
-        this.newsScore = redisHelper.createZSet(NewsRedisKey.NewsScore);
+    constructor(private readonly redisHelper: RedisHelper) {
+        this.newsSet = redisHelper.createSet(NewsRedisKey.News, 'Set');
+        this.newsZSet = redisHelper.createZSet<NewsItem>(NewsRedisKey.News);
     }
 
     /**
      * News를 추가합니다.
      * @param news
      */
-    public async addNews(news: NewsItem) {
+    public async addNews(news: NewsItem): Promise<boolean> {
         try {
-            const isAdded = await this.newsHash.add(
-                news.articleId,
-                JSON.stringify(news),
-            );
-
-            if (isAdded) {
-                this.eventEmitter.emit(NewsEvent.AddedNews, news);
+            if (await this.newsSet.exists(news.articleId)) {
+                return true;
             }
+
+            const timestamp = new Date(news.createdAt).getTime();
+            const serializedNews = JSON.stringify(news);
+
+            await this.newsSet.add(news.articleId);
+
+            return this.newsZSet.add(serializedNews, timestamp);
         } catch (error) {
             this.logger.error(error);
 
@@ -41,117 +38,114 @@ export class NewsService {
     }
 
     /**
-     * News 점수를 설정합니다.
-     * @param newsId
-     * @param score
-     */
-    public async setNewsScore(newsId: string, score: number) {
-        return this.newsScore.add(newsId, score);
-    }
-
-    /**
-     * News Id 목록을 조회합니다.
+     * News 목록을 조회합니다.
      * @param limit
      */
-    public async getNewsIds(limit: number = 100) {
-        return this.newsScore.list(limit);
+    public async getNewsList(limit: number = 20) {
+        return this.newsZSet.list(limit, {
+            isParse: true,
+        });
     }
 
     /**
-     * 종목별 News 점수를 설정합니다.
+     * 종목별 News를 추가합니다.
      * @param stockCode
-     * @param newsId
-     * @param score
+     * @param news
      */
-    public async setStockNewsScore(
-        stockCode: string,
-        newsId: string,
-        score: number,
-    ) {
+    public async addStockNews(stockCode: string, news: NewsItem) {
+        const set = this.getNewsByStockCodeSet(stockCode);
+        if (await set.exists(news.articleId)) {
+            return;
+        }
+
+        await set.add(news.articleId);
         const zSet = this.getNewsByStockCodeZSet(stockCode);
 
-        return zSet.add(newsId, score);
+        return zSet.add(
+            JSON.stringify(news),
+            new Date(news.createdAt).getTime(),
+        );
     }
 
     /**
-     * 종목별 News Id 목록을 조회합니다.
+     * 종목별 News 목록을 조회합니다.
      * @param stockCode
      * @param limit
      */
-    public async getStockNewsScore(stockCode: string, limit: number = 100) {
+    public async getStockNewsList(stockCode: string, limit: number = 20) {
         const zSet = this.getNewsByStockCodeZSet(stockCode);
 
-        return zSet.list(limit);
+        return zSet.list(limit, {
+            isParse: true,
+        });
     }
 
     /**
-     * 키워드별 News 점수를 설정합니다.
+     * 키워드별 News를 추가합니다.
      * @param keyword
-     * @param newsId
-     * @param score
+     * @param news
      */
-    public async setKeywordNewsScore(
-        keyword: string,
-        newsId: string,
-        score: number,
-    ) {
+    public async addKeywordNews(keyword: string, news: NewsItem) {
+        const set = this.getNewsByKeywordSet(keyword);
+        if (await set.exists(news.articleId)) {
+            return;
+        }
+
+        await set.add(news.articleId);
         const zSet = this.getNewsByKeywordZSet(keyword);
 
-        return zSet.add(newsId, score);
+        return zSet.add(
+            JSON.stringify(news),
+            new Date(news.createdAt).getTime(),
+        );
     }
 
     /**
-     * 키워드별 News Id 목록을 조회합니다.
+     * 키워드별 News 목록을 조회합니다.
      * @param keyword
      * @param limit
      */
-    public async getKeywordNewsScore(keyword: string, limit: number = 100) {
+    public async getKeywordNewsList(keyword: string, limit: number = 20) {
         const zSet = this.getNewsByKeywordZSet(keyword);
 
-        return zSet.list(limit);
+        return zSet.list(limit, {
+            isParse: true,
+        });
     }
 
     /**
-     * News 데이터를 Populate하여 응답합니다.
-     * @param newsIds
-     */
-    public async populateNews(newsIds: string[]) {
-        if (newsIds.length === 0) {
-            return [];
-        }
-
-        const encodedNews = await this.newsHash.mget(newsIds);
-        const filteredEncodedNews = encodedNews.filter(Boolean) as string[];
-        if (filteredEncodedNews.length === 0) {
-            return [];
-        }
-
-        const news = filteredEncodedNews.map((news) =>
-            JSON.parse(news),
-        ) as NewsItem[];
-        const newsMap = _.keyBy(news, 'articleId');
-
-        return newsIds.map((newsId) => newsMap[newsId]);
-    }
-
-    /**
-     * 키워드 네이버 News 점수를 제거합니다.
+     * 키워드별 News를 제거합니다.
      * @param keyword
      */
     public async deleteKeywordNews(keyword: string) {
+        const set = this.getNewsByKeywordSet(keyword);
         const zSet = this.getNewsByKeywordZSet(keyword);
 
-        return zSet.clear();
+        return Promise.all([set.clear(), zSet.clear()]);
     }
 
     /**
-     * 종목 코드별 네이버 News 점수를 제거합니다.
+     * 종목 코드별 News를 제거합니다.
      * @param stockCode
      */
     public async deleteNaverNewsByStockCode(stockCode: string) {
+        const set = this.getNewsByStockCodeSet(stockCode);
         const zSet = this.getNewsByStockCodeZSet(stockCode);
 
-        return zSet.clear();
+        return Promise.all([set.clear(), zSet.clear()]);
+    }
+
+    /**
+     * 키워드별 News의 Set을 생성합니다.
+     * @param keyword
+     * @private
+     */
+    private getNewsByKeywordSet(keyword: string) {
+        return this.redisHelper.createSet(
+            NewsRedisKey.NewsByKeyword,
+            'Set',
+            keyword,
+        );
     }
 
     /**
@@ -160,7 +154,23 @@ export class NewsService {
      * @private
      */
     private getNewsByKeywordZSet(keyword: string) {
-        return this.redisHelper.createZSet(NewsRedisKey.NewsByKeyword, keyword);
+        return this.redisHelper.createZSet<NewsItem>(
+            NewsRedisKey.NewsByKeyword,
+            keyword,
+        );
+    }
+
+    /**
+     * 종목 코드별 News의 Set을 생성합니다.
+     * @param stockCode
+     * @private
+     */
+    private getNewsByStockCodeSet(stockCode: string) {
+        return this.redisHelper.createSet(
+            NewsRedisKey.NewsByStockCode,
+            'Set',
+            stockCode,
+        );
     }
 
     /**
@@ -169,7 +179,7 @@ export class NewsService {
      * @private
      */
     private getNewsByStockCodeZSet(stockCode: string) {
-        return this.redisHelper.createZSet(
+        return this.redisHelper.createZSet<NewsItem>(
             NewsRedisKey.NewsByStockCode,
             stockCode,
         );

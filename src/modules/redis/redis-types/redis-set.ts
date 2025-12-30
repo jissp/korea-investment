@@ -70,4 +70,10 @@ export class RedisSet {
     public async count() {
         return this.redis.scard(this.key);
     }
+
+    /**
+     */
+    public async clear() {
+        return this.redis.del(this.key);
+    }
 }
