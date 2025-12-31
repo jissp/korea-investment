@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { isDelistedStockByName } from '@app/common';
 import {
     KeywordType,
     KoreaInvestmentKeywordSettingEvent,
@@ -17,67 +16,27 @@ export class KoreaInvestmentKeywordListener {
         private readonly newsService: NewsService,
     ) {}
 
-    @OnEvent(KoreaInvestmentKeywordSettingEvent.UpdatedKeyword)
-    public async handleUpdatedKeyword() {
-        try {
-            const keywordsChunk = await Promise.all(
-                [
-                    KeywordType.Manual,
-                    KeywordType.Possess,
-                    KeywordType.StockGroup,
-                ].map((keywordType) =>
-                    this.keywordSettingService.getKeywordsByType(keywordType),
-                ),
-            );
-
-            const uniqueKeywords = Array.from(
-                new Set(keywordsChunk.flat()),
-            ).filter((keyword) => !isDelistedStockByName(keyword));
-
-            await this.keywordSettingService.setKeywords(uniqueKeywords);
-        } catch (error) {
-            this.logger.error(error);
-        }
-    }
-
     @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedKeyword)
     public async handleDeletedKeyword({ keyword }: { keyword: string }) {
         try {
             const stockCodes =
-                await this.keywordSettingService.getStockCodesFromKeyword(
+                await this.keywordSettingService.getStockCodesByKeyword(
                     keyword,
                 );
 
             // 키워드 정보 제거
             await Promise.all([
                 ...stockCodes.map((stockCode) =>
-                    this.keywordSettingService.deleteKeywordFromStock(
-                        stockCode,
-                        keyword,
-                    ),
+                    this.keywordSettingService.deleteKeywordFromStock({
+                        stockCode: stockCode,
+                        keyword: keyword,
+                    }),
                 ),
                 this.newsService.deleteKeywordNews(keyword),
             ]);
         } catch (error) {
             this.logger.error(error);
         }
-    }
-
-    @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedStockCode)
-    public async handleDeletedStockCode({ stockCode }: { stockCode: string }) {
-        const keywords =
-            await this.keywordSettingService.getKeywordsByStockCode(stockCode);
-
-        // 키워드 정보 제거
-        await Promise.all([
-            ...keywords.map((keyword) =>
-                this.keywordSettingService.deleteStockCodeFromKeyword(
-                    keyword,
-                    stockCode,
-                ),
-            ),
-            this.newsService.deleteNaverNewsByStockCode(stockCode),
-        ]);
     }
 
     @OnEvent(KoreaInvestmentKeywordSettingEvent.AddedStockKeyword)
@@ -89,14 +48,14 @@ export class KoreaInvestmentKeywordListener {
         keyword: string;
     }) {
         await Promise.all([
-            this.keywordSettingService.addKeywordsByType(
+            this.keywordSettingService.addKeywordByType(
                 KeywordType.Manual,
                 keyword,
             ),
-            this.keywordSettingService.addStockCodeToKeyword(
-                stockCode,
-                keyword,
-            ),
+            this.keywordSettingService.addStockCodeToKeyword({
+                keyword: stockCode,
+                stockCode: keyword,
+            }),
         ]);
     }
 
@@ -108,10 +67,10 @@ export class KoreaInvestmentKeywordListener {
         stockCode: string;
         keyword: string;
     }) {
-        await this.keywordSettingService.deleteStockCodeFromKeyword(
-            keyword,
-            stockCode,
-        );
+        await this.keywordSettingService.deleteStockCodeFromKeyword({
+            keyword: keyword,
+            stockCode: stockCode,
+        });
 
         const count =
             await this.keywordSettingService.getStockCodeCountFromKeyword(
@@ -120,7 +79,7 @@ export class KoreaInvestmentKeywordListener {
         if (count === 0) {
             // 키워드와 뉴스 제거
             await Promise.all([
-                this.keywordSettingService.deleteKeywordsByType(
+                this.keywordSettingService.deleteKeywordByType(
                     KeywordType.Manual,
                     keyword,
                 ),

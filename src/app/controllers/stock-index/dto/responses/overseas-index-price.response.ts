@@ -1,84 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OverseasQuotationInquireDailyChartPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { OverseasIndexItem } from '@app/modules/repositories';
 
-class OverseasIndexPrice implements OverseasQuotationInquireDailyChartPriceOutput {
+class OverseasIndexPrice implements OverseasIndexItem {
     @ApiProperty({
-        description: '전일 대비',
+        description: '지수 코드',
     })
-    ovrs_nmix_prdy_vrss: string;
-
+    code: string;
     @ApiProperty({
-        description: '전일 대비 부호',
+        description: '지수명',
     })
-    prdy_vrss_sign: string;
-
+    name: string;
     @ApiProperty({
-        description: '전일 대비율',
+        description: '지수 현재가',
     })
-    prdy_ctrt: string;
-
+    price: number;
     @ApiProperty({
-        description: '전일 종가',
+        description: '지수 전일 대비',
     })
-    ovrs_nmix_prdy_clpr: string;
-
+    change: number;
     @ApiProperty({
-        description: '누적 거래량',
+        description: '지수 전일 대비율',
     })
-    acml_vol: string;
-
-    @ApiProperty({
-        description: 'HTS 한글 종목명',
-    })
-    hts_kor_isnm: string;
-
-    @ApiProperty({
-        description: '현재가',
-    })
-    ovrs_nmix_prpr: string;
-
-    @ApiProperty({
-        description: '단축 종목코드',
-    })
-    stck_shrn_iscd: string;
-
-    @ApiProperty({
-        description: '전일 거래량',
-    })
-    prdy_vol: string;
-
-    @ApiProperty({
-        description: '시가',
-    })
-    ovrs_prod_oprc: string;
-
-    @ApiProperty({
-        description: '최고가',
-    })
-    ovrs_prod_hgpr: string;
-
-    @ApiProperty({
-        description: '최저가',
-    })
-    ovrs_prod_lwpr: string;
-}
-
-export class OverseasIndexPriceWithKey {
-    @ApiProperty({
-        type: String,
-    })
-    key: string;
-
-    @ApiProperty({
-        type: OverseasIndexPrice,
-    })
-    data: OverseasIndexPrice;
+    changeRate: number;
 }
 
 export class OverseasIndexPriceResponse {
     @ApiProperty({
-        type: OverseasIndexPriceWithKey,
+        type: OverseasIndexPrice,
         isArray: true,
     })
-    data: OverseasIndexPriceWithKey[];
+    data: OverseasIndexPrice[];
 }

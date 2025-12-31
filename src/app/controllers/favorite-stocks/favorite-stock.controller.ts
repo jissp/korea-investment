@@ -20,6 +20,7 @@ import { GetCodesResponse } from '@app/common';
 import {
     KoreaInvestmentSettingEvent,
     KoreaInvestmentSettingService,
+    StockCodeType,
 } from '@app/modules/korea-investment-setting';
 import { UpsertFavoriteStockBody } from './dto';
 
@@ -47,7 +48,18 @@ export class FavoriteStockController {
         try {
             assertStockCode(stockCode);
 
-            await this.settingService.addStockCode(stockCode);
+            await this.settingService.addStockCodeByType(
+                StockCodeType.Favorite,
+                stockCode,
+            );
+
+            this.eventEmitter.emit(
+                KoreaInvestmentSettingEvent.UpdatedStockCode,
+                {
+                    stockCode,
+                    stockCodeType: StockCodeType.Favorite,
+                },
+            );
         } catch (error) {
             this.logger.error(error);
 
@@ -72,7 +84,10 @@ export class FavoriteStockController {
         try {
             assertStockCode(stockCode);
 
-            await this.settingService.deleteStockCode(stockCode);
+            await this.settingService.deleteStockCodeByType(
+                StockCodeType.Favorite,
+                stockCode,
+            );
 
             this.eventEmitter.emit(
                 KoreaInvestmentSettingEvent.DeletedStockCode,
@@ -97,7 +112,9 @@ export class FavoriteStockController {
     @Get()
     public async getFavoriteStockCodes(): Promise<GetCodesResponse> {
         try {
-            const codes = await this.settingService.getStockCodes();
+            const codes = await this.settingService.getStockCodesByType(
+                StockCodeType.Favorite,
+            );
 
             return {
                 data: codes.map((code) => ({

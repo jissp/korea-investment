@@ -8,20 +8,11 @@ import {
     getQueueToken,
 } from '@nestjs/bullmq';
 import { RedisConnection } from '@modules/redis';
+import { getDefaultJobOptions } from './domains/get-default-job-options';
 import { QueueProvider } from './queue.types';
 import { QueueExplorer } from './queue.explorer';
 
-export const defaultJobOptions: DefaultJobOptions = {
-    removeOnComplete: true,
-    removeOnFail: {
-        age: 86400,
-        count: 100,
-    },
-};
-
 export class QueueModule {
-    /**
-     */
     public static forRootAsync(): DynamicModule {
         return {
             module: QueueModule,
@@ -29,7 +20,7 @@ export class QueueModule {
                 DiscoveryModule,
                 BullModule.forRootAsync({
                     inject: [RedisConnection],
-                    useFactory: async (redis: Cluster) => {
+                    useFactory: (redis: Cluster) => {
                         return {
                             connection: redis,
                         };
@@ -41,7 +32,7 @@ export class QueueModule {
                 {
                     provide: QueueProvider.BullOptions,
                     inject: [RedisConnection],
-                    useFactory: async (redis: Cluster) => {
+                    useFactory: (redis: Cluster) => {
                         return {
                             connection: redis,
                         };
@@ -54,6 +45,7 @@ export class QueueModule {
     /**
      * @param queueTypes
      * @param flowTypes
+     * @param jobOptions
      */
     public static forFeature({
         queueTypes = [],
@@ -74,7 +66,7 @@ export class QueueModule {
 
         const assignedJobOptions = Object.assign(
             {},
-            defaultJobOptions,
+            getDefaultJobOptions(),
             jobOptions,
         );
 
@@ -107,6 +99,9 @@ export class QueueModule {
         }));
     }
 
+    /**
+     * @param flowTypes
+     */
     public static getFlowProviders(flowTypes: string[]): Provider[] {
         if (!flowTypes.length) {
             return [];
@@ -115,7 +110,7 @@ export class QueueModule {
         return flowTypes.map((flowType) => ({
             provide: flowType,
             inject: [getFlowProducerToken(flowType)],
-            useFactory: (queue: any) => queue,
+            useFactory: (queue: Queue) => queue,
         }));
     }
 

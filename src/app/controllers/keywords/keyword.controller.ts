@@ -7,12 +7,10 @@ import {
     ApiOperation,
     ApiParam,
 } from '@nestjs/swagger';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { assertStockCode, getStockName } from '@common/domains';
 import { GetCodesResponse } from '@app/common';
 import {
     KeywordType,
-    KoreaInvestmentKeywordSettingEvent,
     KoreaInvestmentKeywordSettingService,
 } from '@app/modules/korea-investment-setting';
 import { UpsertKeywordBody, UpsertKeywordByStockCodeBody } from './dto';
@@ -21,7 +19,6 @@ import { UpsertKeywordBody, UpsertKeywordByStockCodeBody } from './dto';
 export class KeywordController {
     constructor(
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
-        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     @ApiOperation({
@@ -53,13 +50,9 @@ export class KeywordController {
     @ApiCreatedResponse()
     @Post()
     public async registerKeyword(@Body() { keyword }: UpsertKeywordBody) {
-        await this.keywordSettingService.addKeywordsByType(
+        await this.keywordSettingService.addKeywordByType(
             KeywordType.Manual,
             keyword,
-        );
-
-        this.eventEmitter.emit(
-            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
         );
     }
 
@@ -75,13 +68,9 @@ export class KeywordController {
     @ApiCreatedResponse()
     @Delete(':keyword')
     public async deleteKeyword(@Param('keyword') keyword: string) {
-        await this.keywordSettingService.deleteKeywordsByType(
+        await this.keywordSettingService.deleteKeywordByType(
             KeywordType.Manual,
             keyword,
-        );
-
-        this.eventEmitter.emit(
-            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
         );
     }
 
@@ -131,7 +120,7 @@ export class KeywordController {
         @Param('keyword') keyword: string,
     ): Promise<GetCodesResponse> {
         const stockCodes =
-            await this.keywordSettingService.getStockCodesFromKeyword(keyword);
+            await this.keywordSettingService.getStockCodesByKeyword(keyword);
 
         return {
             data: stockCodes.map((stockCode) => ({
@@ -163,20 +152,19 @@ export class KeywordController {
         assertStockCode(stockCode);
 
         await Promise.all([
-            this.keywordSettingService.addKeywordsByType(
+            this.keywordSettingService.addKeywordByType(
                 KeywordType.Manual,
                 keyword,
             ),
-            this.keywordSettingService.addKeywordToStock(stockCode, keyword),
-            this.keywordSettingService.addStockCodeToKeyword(
+            this.keywordSettingService.addKeywordToStock({
+                stockCode,
+                keyword,
+            }),
+            this.keywordSettingService.addStockCodeToKeyword({
                 keyword,
                 stockCode,
-            ),
+            }),
         ]);
-
-        this.eventEmitter.emit(
-            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
-        );
     }
 
     @ApiOperation({
@@ -201,13 +189,9 @@ export class KeywordController {
     ) {
         assertStockCode(stockCode);
 
-        await this.keywordSettingService.deleteStockCodeFromKeyword(
+        await this.keywordSettingService.deleteStockCodeFromKeyword({
             keyword,
             stockCode,
-        );
-
-        this.eventEmitter.emit(
-            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
-        );
+        });
     }
 }

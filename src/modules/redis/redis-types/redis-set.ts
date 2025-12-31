@@ -24,7 +24,11 @@ export class RedisSet {
      * Set에 데이터를 추가합니다.
      * @param value
      */
-    public async add(value: string) {
+    public async add(...value: string[]) {
+        if (!value.length) {
+            return true;
+        }
+
         try {
             await this.redis.sadd(this.key, value);
 
@@ -40,7 +44,11 @@ export class RedisSet {
      * Set에서 데이터를 제거합니다.
      * @param value
      */
-    public async remove(value: string) {
+    public async remove(...value: string[]) {
+        if (!value.length) {
+            return true;
+        }
+
         try {
             await this.redis.srem(this.key, value);
 

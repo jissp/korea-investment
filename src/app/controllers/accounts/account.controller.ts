@@ -1,12 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { KoreaInvestmentAccountService } from '@app/modules/korea-investment-account';
 import { GetAccountsResponse } from './dto';
+import { AccountRepository } from '@app/modules/repositories';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 
 @Controller('v1/accounts')
 export class AccountController {
     constructor(
-        private readonly accountService: KoreaInvestmentAccountService,
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
+        private readonly accountRepository: AccountRepository,
     ) {}
 
     @ApiOperation({
@@ -18,17 +20,22 @@ export class AccountController {
     })
     @Get()
     public async getAccounts(): Promise<GetAccountsResponse> {
-        const accountNumbers = await this.accountService.getAccountNumbers();
+        const accountNumbers =
+            await this.koreaInvestmentSettingService.getAccountNumbers();
 
         const accountData = await Promise.all(
             accountNumbers.map(async (accountNumber) => {
                 const accountStocks =
-                    await this.accountService.getAccountStocks(accountNumber);
+                    await this.accountRepository.getAccountStocks(
+                        accountNumber,
+                    );
 
                 return {
                     accountNumber,
                     accountInfo:
-                        await this.accountService.getAccountInfo(accountNumber),
+                        await this.accountRepository.getAccountInfo(
+                            accountNumber,
+                        ),
                     accountStocks: accountStocks.filter(
                         (stock) => Number(stock.hldg_qty) > 0,
                     ),

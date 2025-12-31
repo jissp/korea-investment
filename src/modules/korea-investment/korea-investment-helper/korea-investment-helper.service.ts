@@ -148,6 +148,7 @@ export class KoreaInvestmentHelperService {
         const year = date.getFullYear();
         const month = this.formatTwoDigits(date.getMonth() + 1);
         const day = this.formatTwoDigits(date.getDate());
+
         return `${year}${month}${day}`;
     }
 
@@ -158,6 +159,39 @@ export class KoreaInvestmentHelperService {
         const hour = this.formatTwoDigits(date.getHours());
         const minute = this.formatTwoDigits(date.getMinutes());
         const seconds = this.formatTwoDigits(date.getSeconds());
+
         return `${hour}${minute}${seconds}`;
+    }
+
+    /**
+     * 한국투자증권 dateDt 포맷 형식을 Y, M, D 로 분리한다.
+     * @param dateDt
+     */
+    public splitDateDt(dateDt: string) {
+        const dateMatch = dateDt.match(/(\d{4})(\d{2})(\d{2})/);
+
+        if (!dateMatch) {
+            throw new Error(`Invalid date format: ${dateDt}`);
+        }
+
+        const [, year, month, day] = dateMatch;
+
+        return [year, month, day];
+    }
+
+    /**
+     * 한국투자증권 timeDt 포맷 형식을 H, M, S 로 분리한다.
+     * @param dateTm
+     */
+    public splitTimeDt(dateTm: string) {
+        const timeMatch = dateTm.match(/(\d{2})(\d{2})(\d{2})/);
+
+        if (!timeMatch) {
+            throw new Error(`Invalid date format: ${dateTm}`);
+        }
+
+        const [, hour, minute, second] = timeMatch;
+
+        return [hour, minute, second];
     }
 }
