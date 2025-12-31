@@ -24,7 +24,7 @@ export class NaverNewsProcessor {
         const { keyword } = job.data;
 
         const stockCodes =
-            await this.keywordSettingService.getStockCodesFromKeyword(keyword);
+            await this.keywordSettingService.getStockCodesByKeyword(keyword);
 
         const response = await this.client.getNews({
             query: keyword,

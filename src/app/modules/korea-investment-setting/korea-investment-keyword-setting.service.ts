@@ -5,6 +5,11 @@ import {
     KoreaInvestmentKeywordSettingKey,
 } from './korea-investment-keyword-setting.types';
 
+type KeywordWithStockCodeArgs = {
+    keyword: string;
+    stockCode: string;
+};
+
 @Injectable()
 export class KoreaInvestmentKeywordSettingService {
     private readonly logger = new Logger(
@@ -33,19 +38,18 @@ export class KoreaInvestmentKeywordSettingService {
      * 키워드 목록을 조회합니다.
      */
     public async getKeywords(): Promise<string[]> {
-        const keywords = await this.redisService.get(
-            KoreaInvestmentKeywordSettingKey.Keywords,
+        const keywordTypes = Object.values(KeywordType);
+
+        const keywordGroups = await Promise.all(
+            keywordTypes.map((type) => this.getKeywordsByType(type)),
         );
-        if (!keywords) {
+
+        const keywords = keywordGroups.flat();
+        if (!keywords.length) {
             return [];
         }
 
-        try {
-            return JSON.parse(keywords);
-        } catch (error) {
-            this.logger.error(error);
-            throw error;
-        }
+        return Array.from(new Set(keywords));
     }
 
     /**
@@ -61,8 +65,8 @@ export class KoreaInvestmentKeywordSettingService {
      * @param type
      * @param keyword
      */
-    public async addKeywordsByType(type: KeywordType, keyword: string) {
-        return this.getKeywordSetByType(type).add(keyword);
+    public async addKeywordByType(type: KeywordType, ...keyword: string[]) {
+        return this.getKeywordSetByType(type).add(...keyword);
     }
 
     /**
@@ -70,8 +74,8 @@ export class KoreaInvestmentKeywordSettingService {
      * @param type
      * @param keyword
      */
-    public async deleteKeywordsByType(type: KeywordType, keyword: string) {
-        return this.getKeywordSetByType(type).remove(keyword);
+    public async deleteKeywordByType(type: KeywordType, ...keyword: string[]) {
+        return this.getKeywordSetByType(type).remove(...keyword);
     }
 
     /**
@@ -89,7 +93,10 @@ export class KoreaInvestmentKeywordSettingService {
      * @param stockCode
      * @param keyword
      */
-    public async addKeywordToStock(stockCode: string, keyword: string) {
+    public async addKeywordToStock({
+        stockCode,
+        keyword,
+    }: KeywordWithStockCodeArgs) {
         const stockKeywordSet = this.getKeywordsByStockSet(stockCode);
 
         return stockKeywordSet.add(keyword);
@@ -100,20 +107,50 @@ export class KoreaInvestmentKeywordSettingService {
      * @param stockCode
      * @param keyword
      */
-    public async deleteKeywordFromStock(stockCode: string, keyword: string) {
+    public async deleteKeywordFromStock({
+        stockCode,
+        keyword,
+    }: KeywordWithStockCodeArgs) {
         const stockKeywordSet = this.getKeywordsByStockSet(stockCode);
 
         return stockKeywordSet.remove(keyword);
     }
 
     /**
+     * 종목 키워드 키를 삭제합니다.
+     * @param stockCode
+     */
+    public async clearKeywordByStock(stockCode: string) {
+        const stockKeywordSet = this.getKeywordsByStockSet(stockCode);
+
+        return stockKeywordSet.clear();
+    }
+
+    /**
      * 키워드에 등록된 종목들을 조회합니다.
      * @param keyword
      */
-    public async getStockCodesFromKeyword(keyword: string) {
+    public async getStockCodesByKeyword(keyword: string) {
         const stockKeywordMapSet = this.getStocksByKeywordSet(keyword);
 
         return stockKeywordMapSet.list();
+    }
+
+    /**
+     * @param keyword
+     * @param stockCode
+     */
+    public async addKeywordWithStockCodeMap({
+        keyword,
+        stockCode,
+    }: KeywordWithStockCodeArgs) {
+        return Promise.all([
+            this.addStockCodeToKeyword({
+                keyword: keyword,
+                stockCode: stockCode,
+            }),
+            this.addKeywordToStock({ stockCode: stockCode, keyword: keyword }),
+        ]);
     }
 
     /**
@@ -121,7 +158,10 @@ export class KoreaInvestmentKeywordSettingService {
      * @param keyword
      * @param stockCode
      */
-    public async addStockCodeToKeyword(keyword: string, stockCode: string) {
+    public async addStockCodeToKeyword({
+        keyword,
+        stockCode,
+    }: KeywordWithStockCodeArgs) {
         const stockKeywordMapSet = this.getStocksByKeywordSet(keyword);
 
         return stockKeywordMapSet.add(stockCode);
@@ -132,10 +172,10 @@ export class KoreaInvestmentKeywordSettingService {
      * @param keyword
      * @param stockCode
      */
-    public async deleteStockCodeFromKeyword(
-        keyword: string,
-        stockCode: string,
-    ) {
+    public async deleteStockCodeFromKeyword({
+        keyword,
+        stockCode,
+    }: KeywordWithStockCodeArgs) {
         const stockKeywordMapSet = this.getStocksByKeywordSet(keyword);
 
         return stockKeywordMapSet.remove(stockCode);

@@ -40,7 +40,7 @@ export class NewsCrawlerProcessor {
         const { keyword } = job.data;
 
         const stockCodes =
-            await this.keywordSettingService.getStockCodesFromKeyword(keyword);
+            await this.keywordSettingService.getStockCodesByKeyword(keyword);
 
         const response = await this.naverClient.getNews({
             query: keyword,

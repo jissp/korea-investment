@@ -2,11 +2,11 @@ import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { getDefaultJobOptions } from '@modules/queue';
-import { AccountStockGroup } from '@app/modules/korea-investment-account';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
+import { AccountStockGroup } from '@app/modules/repositories';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,

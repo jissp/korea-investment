@@ -5,11 +5,7 @@ import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-r
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { CrawlerFlowType } from './crawler.types';
-import {
-    ChartSchedule,
-    RankingSchedule,
-    StockIndexSchedule,
-} from './schedules';
+import { ChartSchedule, RankingSchedule } from './schedules';
 import { KoreaInvestmentFlowProcessor } from './processors';
 
 const flowTypes = [
@@ -18,13 +14,10 @@ const flowTypes = [
     CrawlerFlowType.RequestDomesticHtsTopView,
     CrawlerFlowType.RequestRefreshPopulatedHtsTopView,
     CrawlerFlowType.RequestDailyItemChartPrice,
-    CrawlerFlowType.RequestKoreaIndex,
-    CrawlerFlowType.RequestOverseasIndex,
-    CrawlerFlowType.RequestOverseasGovernmentBond,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
 const processors = [KoreaInvestmentFlowProcessor];
-const schedules = [RankingSchedule, ChartSchedule, StockIndexSchedule];
+const schedules = [RankingSchedule, ChartSchedule];
 
 @Module({
     imports: [

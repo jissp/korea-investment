@@ -3,21 +3,17 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OnQueueProcessor } from '@modules/queue';
-import { BaseMultiResponse } from '@modules/korea-investment/common';
-import { isDelistedStockByName } from '@app/common';
+import { isDelistedStockByName, toKeywordType } from '@app/common';
 import {
     KeywordType,
-    KoreaInvestmentKeywordSettingEvent,
     KoreaInvestmentKeywordSettingService,
     KoreaInvestmentSettingService,
+    StockCodeType,
 } from '@app/modules/korea-investment-setting';
-import { KoreaInvestmentAccountService } from '@app/modules/korea-investment-account';
 import {
-    KoreaInvestmentAccountOutput,
     KoreaInvestmentAccountOutput2,
     KoreaInvestmentAccountParam,
     KoreaInvestmentAccountStockOutput,
-    KoreaInvestmentAccountStockOutput2,
     KoreaInvestmentAccountStockParam,
     KoreaInvestmentInterestGroupListOutput,
     KoreaInvestmentInterestGroupListParam,
@@ -26,16 +22,19 @@ import {
     KoreaInvestmentInterestStockListByGroupParam,
     KoreaInvestmentRequestApiHelper,
 } from '@app/modules/korea-investment-request-api';
+import { AccountRepository } from '@app/modules/repositories';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
 } from './korea-investment-account-crawler.types';
 
+type StockInfo = { name: string; stockCode: string };
+
 @Injectable()
 export class KoreaInvestmentAccountCrawlerProcessor {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentAccountService: KoreaInvestmentAccountService,
+        private readonly accountRepository: AccountRepository,
         private readonly settingService: KoreaInvestmentSettingService,
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         private readonly eventEmitter: EventEmitter2,
@@ -50,13 +49,13 @@ export class KoreaInvestmentAccountCrawlerProcessor {
         const childrenResponses =
             await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
                 KoreaInvestmentAccountParam,
-                KoreaInvestmentAccountOutput[],
+                unknown[],
                 KoreaInvestmentAccountOutput2
             >(job);
 
         await Promise.all(
             childrenResponses.map(({ request: { params }, response }) =>
-                this.koreaInvestmentAccountService.setAccountInfo(
+                this.accountRepository.setAccountInfo(
                     this.buildAccountNumber(params.CANO, params.ACNT_PRDT_CD),
                     response.output2,
                 ),
@@ -74,20 +73,33 @@ export class KoreaInvestmentAccountCrawlerProcessor {
             await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
                 KoreaInvestmentAccountStockParam,
                 KoreaInvestmentAccountStockOutput[],
-                KoreaInvestmentAccountStockOutput2[]
+                unknown
             >(job);
 
         for (const {
-            request: { params },
-            response,
+            request,
+            response: { output1 },
         } of childrenResponses) {
-            await this.koreaInvestmentAccountService.setAccountStocks(
-                this.buildAccountNumber(params.CANO, params.ACNT_PRDT_CD),
-                response.output1,
+            const { CANO, ACNT_PRDT_CD } = request.params;
+
+            const accountStockItems = output1.filter(
+                (output) => !isDelistedStockByName(output.prdt_name),
             );
 
-            // 보유 종목 키워드 업데이트
-            await this.updatePossessKeywordByResponse(response);
+            await this.accountRepository.setAccountStocks(
+                this.buildAccountNumber(CANO, ACNT_PRDT_CD),
+                accountStockItems,
+            );
+
+            await this.updateStockKeywords(
+                StockCodeType.Favorite,
+                accountStockItems.map(
+                    (output): StockInfo => ({
+                        name: output.prdt_name,
+                        stockCode: output.pdno,
+                    }),
+                ),
+            );
         }
     }
 
@@ -103,17 +115,16 @@ export class KoreaInvestmentAccountCrawlerProcessor {
         const childrenResponses =
             await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
                 KoreaInvestmentInterestGroupListParam,
-                null,
+                unknown,
                 KoreaInvestmentInterestGroupListOutput[]
             >(job);
 
-        for (const { response } of childrenResponses) {
-            await this.koreaInvestmentAccountService.setAccountStockGroups(
-                userId,
-                response.output2,
-            );
+        for (const {
+            response: { output2 },
+        } of childrenResponses) {
+            await this.accountRepository.setAccountStockGroups(userId, output2);
 
-            response.output2.forEach((output) => {
+            output2.forEach((output) => {
                 this.eventEmitter.emit(
                     KoreaInvestmentAccountCrawlerEventType.UpdatedStockGroup,
                     { userId, output },
@@ -137,24 +148,40 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 KoreaInvestmentInterestStockListByGroupOutput2[]
             >(job);
 
-        let isUpdatedKeyword: boolean = false;
         for (const { response } of childrenResponses) {
-            const groupName = response.output1.inter_grp_name;
+            const { output1, output2 } = response;
+            const groupName = output1.inter_grp_name;
 
-            await this.koreaInvestmentAccountService.setAccountStocksByGroup(
-                response.output1.inter_grp_name,
-                response.output2,
+            await this.accountRepository.setAccountStocksByGroup(
+                groupName,
+                output2,
             );
 
-            if (groupName.includes('키워드')) {
-                await this.updateStockGroupKeywordByResponse(response);
-                isUpdatedKeyword = true;
+            if (!groupName.includes('키워드')) {
+                continue;
             }
-        }
 
-        if (isUpdatedKeyword) {
-            this.eventEmitter.emit(
-                KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
+            const accountStockItems = output2.filter(
+                (output) => !isDelistedStockByName(output.hts_kor_isnm),
+            );
+
+            const stockInfoList = accountStockItems.map(
+                (output): StockInfo => ({
+                    name: output.hts_kor_isnm,
+                    stockCode: output.jong_code,
+                }),
+            );
+            await Promise.all(
+                stockInfoList.map(({ stockCode }) =>
+                    this.settingService.addStockCodeByType(
+                        StockCodeType.StockGroup,
+                        stockCode,
+                    ),
+                ),
+            );
+            await this.updateStockKeywords(
+                StockCodeType.StockGroup,
+                stockInfoList,
             );
         }
     }
@@ -169,106 +196,90 @@ export class KoreaInvestmentAccountCrawlerProcessor {
     }
 
     /**
-     * 보유 종목 키워드 업데이트
-     * @param response
+     * 키워드 설정을 업데이트합니다.
+     * @param stockCodeType
+     * @param stockInfoList
      * @private
      */
-    private async updatePossessKeywordByResponse(
-        response: BaseMultiResponse<
-            KoreaInvestmentAccountStockOutput[],
-            KoreaInvestmentAccountStockOutput2[]
-        >,
-    ): Promise<void> {
-        const stockInfoList = response.output1
-            .map((output) => ({
-                name: output.prdt_name,
-                code: output.pdno,
-            }))
-            .filter((stockInfo) => !isDelistedStockByName(stockInfo.name));
-
-        const possessKeywords = stockInfoList.map(
-            (stockInfo) => stockInfo.name,
-        );
-        const addedPossessKeywords =
-            await this.keywordSettingService.getKeywordsByType(
-                KeywordType.Possess,
-            );
-
-        const newPossessKeywords = _.difference(
-            possessKeywords,
-            addedPossessKeywords,
-        );
-        const removedPossessKeywords = _.difference(
-            addedPossessKeywords,
-            possessKeywords,
-        );
-
-        await Promise.all([
-            ...newPossessKeywords.map((keyword) =>
-                this.keywordSettingService.addKeywordsByType(
-                    KeywordType.Possess,
-                    keyword,
-                ),
-            ),
-            ...removedPossessKeywords.map((keyword) =>
-                this.keywordSettingService.deleteKeywordsByType(
-                    KeywordType.Possess,
-                    keyword,
-                ),
-            ),
-            ...stockInfoList.map(({ code }) =>
-                this.settingService.addStockCode(code),
-            ),
-        ]);
-
-        this.eventEmitter.emit(
-            KoreaInvestmentKeywordSettingEvent.UpdatedKeyword,
-        );
-    }
-
-    /**
-     * 키워드 알람 그룹 키워드 업데이트
-     * @param response
-     * @private
-     */
-    private async updateStockGroupKeywordByResponse(
-        response: BaseMultiResponse<
-            KoreaInvestmentInterestStockListByGroupOutput,
-            KoreaInvestmentInterestStockListByGroupOutput2[]
-        >,
-    ): Promise<void> {
-        const stockInfo = response.output2.map((output) => ({
-            name: output.hts_kor_isnm,
-            code: output.jong_code,
-        }));
-        const keywords = stockInfo.map((stockInfo) => stockInfo.name);
+    private async updateStockKeywords(
+        stockCodeType: StockCodeType,
+        stockInfoList: StockInfo[],
+    ) {
+        const keywords = stockInfoList.map(({ name }) => name);
         const addedKeywords =
             await this.keywordSettingService.getKeywordsByType(
                 KeywordType.StockGroup,
             );
 
-        const newKeywords = _.difference(keywords, addedKeywords);
-        const removedPossessKeywords = _.difference(addedKeywords, keywords);
+        // 키워드 동기화
+        await this.syncKeywordsByType(
+            toKeywordType(stockCodeType),
+            keywords,
+            addedKeywords,
+        );
 
-        await Promise.all([
-            ...newKeywords.map((keyword) =>
-                this.keywordSettingService.addKeywordsByType(
-                    KeywordType.StockGroup,
-                    keyword,
-                ),
+        // 종목별 키워드 추가
+        return Promise.all(
+            stockInfoList.map(({ name, stockCode }) =>
+                this.keywordSettingService.addKeywordWithStockCodeMap({
+                    keyword: name,
+                    stockCode,
+                }),
             ),
-            ...removedPossessKeywords.map((keyword) =>
-                this.keywordSettingService.deleteKeywordsByType(
-                    KeywordType.StockGroup,
-                    keyword,
-                ),
-            ),
-            ...stockInfo.map(({ name, code }) =>
-                this.keywordSettingService.addStockCodeToKeyword(name, code),
-            ),
-            ...stockInfo.map(({ name, code }) =>
-                this.keywordSettingService.addKeywordToStock(code, name),
-            ),
-        ]);
+        );
+        // await Promise.all(
+        //     stockInfoList.flatMap(({ name, stockCode }) => {
+        //         return [
+        //             this.settingService.addStockCodeByType(
+        //                 stockCodeType,
+        //                 stockCode,
+        //             ),
+        //             this.keywordSettingService.addKeywordWithStockCodeMap({
+        //                 keyword: name,
+        //                 stockCode,
+        //             }),
+        //         ];
+        //     }),
+        // );
+    }
+
+    /**
+     * 키워드 차이를 구합니다.
+     * @param keywords
+     * @param addedKeywords
+     * @private
+     */
+    private diffKeywords(keywords: string[], addedKeywords: string[]) {
+        const removedKeywords = _.difference(addedKeywords, keywords);
+        const newKeywords = _.difference(keywords, addedKeywords);
+
+        return { removedKeywords, newKeywords };
+    }
+
+    /**
+     * 키워드를 동기화합니다.
+     * @param keywordType
+     * @param keywords
+     * @param addedKeywords
+     * @private
+     */
+    private async syncKeywordsByType(
+        keywordType: KeywordType,
+        keywords: string[],
+        addedKeywords: string[],
+    ) {
+        const { removedKeywords, newKeywords } = this.diffKeywords(
+            keywords,
+            addedKeywords,
+        );
+
+        await this.keywordSettingService.deleteKeywordByType(
+            keywordType,
+            ...removedKeywords,
+        );
+        await this.keywordSettingService.addKeywordByType(
+            keywordType,
+            ...newKeywords,
+        );
     }
 }

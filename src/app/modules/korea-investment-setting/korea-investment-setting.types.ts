@@ -1,7 +1,15 @@
 export enum KoreaInvestmentSettingKey {
-    StockCodes = 'Setting:StockCodes',
+    Accounts = 'setting:accounts',
+
+    StockCodes = 'setting:stock-codes',
+    ManualStockCodes = 'setting:stock-codes:manual',
+    PossessStockCodes = 'setting:stock-codes:possess',
+    StockGroupStockCodes = 'setting:stock-codes:stock-group',
+    FavoriteStockCodes = 'setting:stock-codes:favorite',
 }
 
 export enum KoreaInvestmentSettingEvent {
-    DeletedStockCode = 'DeletedStockCode',
+    AllStockCodeEvent = 'KoreaInvestmentSettingEvent.StockCode.*',
+    UpdatedStockCode = 'KoreaInvestmentSettingEvent.StockCode.Updated',
+    DeletedStockCode = 'KoreaInvestmentSettingEvent.StockCode.Deleted',
 }

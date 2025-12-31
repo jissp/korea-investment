@@ -3,12 +3,13 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
-import { KoreaInvestmentAccountService } from '@app/modules/korea-investment-account';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
+import { AccountRepository } from '@app/modules/repositories';
 import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 
 @Injectable()
 export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
@@ -17,9 +18,10 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     );
 
     constructor(
+        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         private readonly koreaInvestmentConfigService: KoreaInvestmentConfigService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentAccountService: KoreaInvestmentAccountService,
+        private readonly accountRepository: AccountRepository,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccount)
         private readonly requestKoreaInvestmentAccountFlow: FlowProducer,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccountStocks)
@@ -37,14 +39,10 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/1 * * * *')
     async handleCrawlingKoreaInvestmentAccounts() {
         try {
-            const queueName = KoreaInvestmentAccountCrawlerType.RequestAccount;
-            const queuesOption = {
-                defaultJobOptions: getDefaultJobOptions(),
-            };
-
             const accounts =
-                await this.koreaInvestmentAccountService.getAccountNumbers();
+                await this.koreaInvestmentSettingService.getAccountNumbers();
 
+            const queueName = KoreaInvestmentAccountCrawlerType.RequestAccount;
             await this.requestKoreaInvestmentAccountFlow.add(
                 {
                     name: queueName,
@@ -64,9 +62,12 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                 },
                 {
                     queuesOptions: {
-                        [KoreaInvestmentAccountCrawlerType.RequestAccount]:
-                            queuesOption,
-                        [KoreaInvestmentRequestApiType]: queuesOption,
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [KoreaInvestmentRequestApiType]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
                     },
                 },
             );
@@ -78,15 +79,11 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/30 * * * * *')
     async handleCrawlingKoreaInvestmentAccountStocks() {
         try {
+            const accounts =
+                await this.koreaInvestmentSettingService.getAccountNumbers();
+
             const queueName =
                 KoreaInvestmentAccountCrawlerType.RequestAccountStocks;
-            const queuesOption = {
-                defaultJobOptions: getDefaultJobOptions(),
-            };
-
-            const accounts =
-                await this.koreaInvestmentAccountService.getAccountNumbers();
-
             await this.requestKoreaInvestmentAccountStockFlow.add(
                 {
                     name: queueName,
@@ -113,9 +110,12 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                 },
                 {
                     queuesOptions: {
-                        [KoreaInvestmentAccountCrawlerType.RequestAccountStocks]:
-                            queuesOption,
-                        [KoreaInvestmentRequestApiType]: queuesOption,
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [KoreaInvestmentRequestApiType]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
                     },
                 },
             );
@@ -127,14 +127,10 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/3 * * * *')
     async handleCrawlingKoreaInvestmentAccountStockGroups() {
         try {
-            const queueName =
-                KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups;
-            const queuesOption = {
-                defaultJobOptions: getDefaultJobOptions(),
-            };
-
             const userId = this.koreaInvestmentConfigService.getUserId();
 
+            const queueName =
+                KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups;
             await this.requestAccountStockGroupsFlow.add(
                 {
                     name: queueName,
@@ -150,9 +146,12 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                 },
                 {
                     queuesOptions: {
-                        [KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups]:
-                            queuesOption,
-                        [KoreaInvestmentRequestApiType]: queuesOption,
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [KoreaInvestmentRequestApiType]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
                     },
                 },
             );
@@ -164,14 +163,10 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/3 * * * *')
     async handleCrawlingKoreaInvestmentAccountFavoriteStocksByGroup() {
         try {
-            const queueName =
-                KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup;
-            const queuesOption = {
-                defaultJobOptions: getDefaultJobOptions(),
-            };
-
             const userId = this.koreaInvestmentConfigService.getUserId();
 
+            const queueName =
+                KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup;
             await this.requestAccountStockGroupsFlow.add(
                 {
                     name: queueName,
@@ -187,9 +182,12 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                 },
                 {
                     queuesOptions: {
-                        [KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup]:
-                            queuesOption,
-                        [KoreaInvestmentRequestApiType]: queuesOption,
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [KoreaInvestmentRequestApiType]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
                     },
                 },
             );

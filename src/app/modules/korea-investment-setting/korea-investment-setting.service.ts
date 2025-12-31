@@ -1,45 +1,98 @@
-import { Injectable } from '@nestjs/common';
-import { RedisHelper, RedisSet } from '@modules/redis';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { RedisHelper, RedisService, RedisSet } from '@modules/redis';
 import { KoreaInvestmentSettingKey } from './korea-investment-setting.types';
+import { StockCodeType } from './korea-investment-keyword-setting.types';
 
 @Injectable()
 export class KoreaInvestmentSettingService {
-    private readonly stockCodeSet: RedisSet;
+    private readonly logger = new Logger(KoreaInvestmentSettingService.name);
 
-    constructor(private readonly redisHelper: RedisHelper) {
-        this.stockCodeSet = redisHelper.createSet(
-            KoreaInvestmentSettingKey.StockCodes,
+    private readonly accountSet: RedisSet;
+
+    constructor(
+        private readonly redisHelper: RedisHelper,
+        private readonly redisService: RedisService,
+        @Inject('StockCodeSetMap')
+        private readonly stockCodeSetMap: Map<StockCodeType, RedisSet>,
+    ) {
+        this.accountSet = redisHelper.createSet(
+            KoreaInvestmentSettingKey.Accounts,
         );
     }
 
     /**
-     * 종목 코드를 조회합니다.
+     * 계좌 목록을 조회합니다.
      */
-    public async getStockCodes() {
-        return this.stockCodeSet.list();
+    public async getAccountNumbers() {
+        return this.accountSet.list();
     }
 
     /**
-     * 종목 코드가 존재하는지 확인합니다.
-     * @param stockCode
+     * 타입에 맞는 종목 코드 RedisSet을 반환합니다.
+     * @param type
+     * @private
      */
-    public async existsStockCode(stockCode: string) {
-        return this.stockCodeSet.exists(stockCode);
+    private getStockCodeSetByType(type: StockCodeType): RedisSet {
+        if (!this.stockCodeSetMap.has(type)) {
+            throw new Error('Invalid StockCode Type');
+        }
+
+        return this.stockCodeSetMap.get(type)!;
     }
 
     /**
-     * 종목 코드를 추가합니다.
-     * @param stockCode
+     * 종목 코드 목록을 설정합니다.
+     * @param stockCodes
      */
-    public async addStockCode(stockCode: string) {
-        return this.stockCodeSet.add(stockCode);
+    public async setStockCodes(stockCodes: string[]) {
+        return this.redisService.set(
+            KoreaInvestmentSettingKey.StockCodes,
+            JSON.stringify(stockCodes),
+        );
     }
 
     /**
-     * 종목 코드를 삭제합니다.
+     * 종목 코드 목록을 조회합니다.
+     */
+    public async getStockCodes(): Promise<string[]> {
+        const stockCodes = await this.redisService.get(
+            KoreaInvestmentSettingKey.StockCodes,
+        );
+        if (!stockCodes) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(stockCodes) as string[];
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * 타입에 맞는 종목 코드 목록을 조회합니다.
+     * @param type
+     */
+    public async getStockCodesByType(type: StockCodeType) {
+        return this.getStockCodeSetByType(type).list();
+    }
+
+    /**
+     * 타입에 맞는 종목 코드를 추가합니다.
+     * @param type
      * @param stockCode
      */
-    public async deleteStockCode(stockCode: string) {
-        return this.stockCodeSet.remove(stockCode);
+    public async addStockCodeByType(type: StockCodeType, stockCode: string) {
+        return this.getStockCodeSetByType(type).add(stockCode);
+    }
+
+    /**
+     * 타입에 맞는 종목 코드를 삭제합니다.
+     * @param type
+     * @param stockCode
+     */
+    public async deleteStockCodeByType(type: StockCodeType, stockCode: string) {
+        return this.getStockCodeSetByType(type).remove(stockCode);
     }
 }

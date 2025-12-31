@@ -2,29 +2,17 @@ import * as _ from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
-import {
-    KoreaIndexItem,
-    OverseasGovernmentBondItem,
-    OverseasIndexItem,
-    StockRepository,
-} from '@app/modules/stock-repository';
+import { StockRepository } from '@app/modules/stock-repository';
 import {
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
 import {
-    DomesticStockQuotationInquireIndexPriceOutput,
-    DomesticStockQuotationInquireIndexPriceParam,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
-    OverseasQuotationInquireDailyChartPriceOutput,
-    OverseasQuotationInquireDailyChartPriceOutput2,
-    OverseasQuotationInquireDailyChartPriceParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
-    KoreaInvestmentCallApiMultiResult,
-    KoreaInvestmentCallApiResult,
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
@@ -100,7 +88,7 @@ export class KoreaInvestmentFlowProcessor {
                     DomesticStockQuotationVolumeRankOutput[]
                 >(job);
             const childrenResults = childrenResponses.flatMap(
-                (response) => response.output,
+                ({ response }) => response.output,
             );
 
             await this.stockRepository.setVolumeRank(childrenResults);
@@ -146,7 +134,7 @@ export class KoreaInvestmentFlowProcessor {
                     DomesticStockQuotationsIntstockMultPriceOutput[]
                 >(job);
             const childrenResults = childrenResponses.flatMap(
-                (response) => response.output,
+                ({ response }) => response.output,
             );
 
             const intStockMultiPriceMap = _.keyBy(
@@ -184,7 +172,7 @@ export class KoreaInvestmentFlowProcessor {
                     DomesticStockQuotationsIntstockMultPriceOutput[]
                 >(job);
             const childrenResults = childrenResponses.flatMap(
-                (response) => response.output,
+                ({ response }) => response.output,
             );
 
             const intStockMultiPriceMap = _.keyBy(
@@ -234,94 +222,6 @@ export class KoreaInvestmentFlowProcessor {
                 output: response.output1,
                 output2: response.output2,
             });
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
-    }
-
-    @OnQueueProcessor(CrawlerFlowType.RequestKoreaIndex)
-    async processRequestKoreaIndex(job: Job) {
-        try {
-            const childrenValues =
-                await job.getChildrenValues<
-                    KoreaInvestmentCallApiResult<
-                        DomesticStockQuotationInquireIndexPriceParam,
-                        DomesticStockQuotationInquireIndexPriceOutput
-                    >
-                >();
-
-            const childrenResults = Object.values(childrenValues);
-            const indexContents = Object.fromEntries(
-                childrenResults.map(({ request, response }) => [
-                    request.params.FID_INPUT_ISCD,
-                    response.output,
-                ]),
-            ) as Record<string, KoreaIndexItem>;
-
-            await this.stockRepository.setKoreaIndex(indexContents);
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
-    }
-
-    @OnQueueProcessor(CrawlerFlowType.RequestOverseasIndex)
-    async processRequestOverseasIndex(job: Job) {
-        try {
-            const childrenValues =
-                await job.getChildrenValues<
-                    KoreaInvestmentCallApiMultiResult<
-                        DomesticStockQuotationInquireIndexPriceParam,
-                        OverseasQuotationInquireDailyChartPriceOutput,
-                        OverseasQuotationInquireDailyChartPriceOutput2
-                    >
-                >();
-
-            const childrenResults = Object.values(childrenValues);
-            const indexContents = Object.fromEntries(
-                childrenResults.map(({ request, response }) => [
-                    request.params.FID_INPUT_ISCD,
-                    response.output1,
-                ]),
-            ) as Record<string, OverseasIndexItem>;
-
-            await this.stockRepository.setOverseasIndex(indexContents);
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
-    }
-
-    @OnQueueProcessor(CrawlerFlowType.RequestOverseasGovernmentBond)
-    async processRequestOverseasGovernmentBond(job: Job) {
-        try {
-            const childrenValues =
-                await job.getChildrenValues<
-                    KoreaInvestmentCallApiMultiResult<
-                        OverseasQuotationInquireDailyChartPriceParam,
-                        OverseasQuotationInquireDailyChartPriceOutput,
-                        OverseasQuotationInquireDailyChartPriceOutput2[]
-                    >
-                >();
-
-            const childrenResults = Object.values(childrenValues);
-            const indexContents = Object.fromEntries(
-                childrenResults.map(({ request, response }) => [
-                    request.params.FID_INPUT_ISCD,
-                    {
-                        output: response.output1,
-                        output2: response.output2,
-                    },
-                ]),
-            ) as Record<string, OverseasGovernmentBondItem>;
-
-            await this.stockRepository.setOverseasGovernmentBonds(
-                indexContents,
-            );
         } catch (error) {
             this.logger.error(error);
 

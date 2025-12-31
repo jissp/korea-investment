@@ -41,8 +41,8 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         this.handleCrawlingStockPlusNews();
     }
 
-    @PreventConcurrentExecution()
     @Cron('*/1 * * * *')
+    @PreventConcurrentExecution()
     async handleCrawlingKoreaInvestmentNewsByStockCode() {
         try {
             const stockCodes = await this.settingService.getStockCodes();
@@ -91,8 +91,8 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @PreventConcurrentExecution()
     @Cron('*/1 * * * *')
+    @PreventConcurrentExecution()
     async requestNaverNewsCrawling() {
         try {
             const keywords = await this.keywordSettingService.getKeywords();
@@ -116,8 +116,8 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @PreventConcurrentExecution()
     @Cron('*/1 * * * *')
+    @PreventConcurrentExecution()
     async handleCrawlingStockPlusNews() {
         try {
             await this.stockPlusNewsQueue.add(
