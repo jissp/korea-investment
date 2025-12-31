@@ -3,7 +3,7 @@ import { RedisModule } from '@modules/redis';
 import { StockRepository } from './stock.repository';
 
 @Module({
-    imports: [RedisModule],
+    imports: [RedisModule.forFeature()],
     providers: [StockRepository],
     exports: [StockRepository],
 })

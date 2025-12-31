@@ -2,14 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Nullable } from '@common/types';
 import { RedisService } from '@modules/redis';
 import {
-    KoreaIndexItem,
     KoreaInvestmentDailyItemChartPrice,
     KoreaInvestmentHtsTopViewItem,
     KoreaInvestmentPopulatedHtsTopViewItem,
     KoreaInvestmentPopulatedVolumeRankItem,
     KoreaInvestmentVolumeRankItem,
-    OverseasGovernmentBondItem,
-    OverseasIndexItem,
 } from './stock-repository.types';
 
 enum StockRepositoryKey {
@@ -18,9 +15,6 @@ enum StockRepositoryKey {
     KoreaInvestmentPopulatedHtsTopView = 'KoreaInvestmentPopulatedHtsTopView',
     KoreaInvestmentPopulatedVolumeRank = 'KoreaInvestmentPopulatedVolumeRank',
     DailyStockChart = 'DailyStockChart',
-    KoreaIndex = 'KoreaIndex',
-    OverseasIndex = 'OverseasIndex',
-    OverseasGovernmentBond = 'OverseasGovernmentBond',
 }
 
 @Injectable()
@@ -158,68 +152,5 @@ export class StockRepository {
             `${StockRepositoryKey.DailyStockChart}:${iscd}`,
             null,
         );
-    }
-
-    /**
-     * 국내 업종 시세를 저장합니다. (코스피, 코스닥 지수 등)
-     * @param data
-     */
-    public async setKoreaIndex(data: Record<string, KoreaIndexItem>) {
-        return this.setData(StockRepositoryKey.KoreaIndex, data, 60 * 60 * 2);
-    }
-
-    /**
-     * 국내 업종 시세를 조회합니다. (코스피, 코스닥 지수 등)
-     */
-    public async getKoreaIndex() {
-        return this.getData<Nullable<Record<string, KoreaIndexItem>>>(
-            StockRepositoryKey.KoreaIndex,
-            null,
-        );
-    }
-
-    /**
-     * 해외 업종 시세를 저장합니다. (다우존스 산업지수, 나스닥, S&P500 등)
-     * @param data
-     */
-    public async setOverseasIndex(data: Record<string, OverseasIndexItem>) {
-        return this.setData(
-            StockRepositoryKey.OverseasIndex,
-            data,
-            60 * 60 * 2,
-        );
-    }
-
-    /**
-     * 해외 업종 시세를 조회합니다. (다우존스 산업지수, 나스닥, S&P500 등)
-     */
-    public async getOverseasIndex() {
-        return this.getData<Nullable<Record<string, OverseasIndexItem>>>(
-            StockRepositoryKey.OverseasIndex,
-            null,
-        );
-    }
-
-    /**
-     * 미국 국채 정보를 저장합니다.
-     * @param data
-     */
-    public async setOverseasGovernmentBonds(
-        data: Record<string, OverseasGovernmentBondItem>,
-    ) {
-        return this.setData(
-            StockRepositoryKey.OverseasGovernmentBond,
-            data,
-            60 * 60 * 2,
-        );
-    }
-
-    /**
-     * 미국 국채 정보를 조회합니다.
-     */
-    public async getOverseasGovernmentBonds() {
-        return this.getData<
-            Nullable<Record<string, OverseasGovernmentBondItem>>
-        >(StockRepositoryKey.OverseasGovernmentBond, null);
     }
 }

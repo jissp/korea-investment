@@ -1,10 +1,7 @@
 import {
-    DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsIntstockMultPriceOutput,
-    OverseasQuotationInquireDailyChartPriceOutput,
-    OverseasQuotationInquireDailyChartPriceOutput2,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     DomesticStockQuotationVolumeRankOutput,
@@ -26,10 +23,4 @@ export type KoreaInvestmentPopulatedVolumeRankItem = {
 export type KoreaInvestmentDailyItemChartPrice = {
     output: DomesticStockQuotationsInquireDailyItemChartPriceOutput;
     output2: DomesticStockQuotationsInquireDailyItemChartPriceOutput2[];
-};
-export type KoreaIndexItem = DomesticStockQuotationInquireIndexPriceOutput;
-export type OverseasIndexItem = OverseasQuotationInquireDailyChartPriceOutput;
-export type OverseasGovernmentBondItem = {
-    output: OverseasQuotationInquireDailyChartPriceOutput;
-    output2: OverseasQuotationInquireDailyChartPriceOutput2[];
 };
