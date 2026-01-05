@@ -25,7 +25,7 @@ export class KoreaInvestmentBeGateway
     /**
      * @param client
      */
-    async handleConnection(client: Socket) {
+    handleConnection(client: Socket) {
         this.logger.log(`Client connected: ${client.id}`);
     }
 

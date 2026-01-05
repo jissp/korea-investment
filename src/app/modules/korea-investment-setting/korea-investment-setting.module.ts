@@ -1,6 +1,6 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { RedisHelper, RedisModule, RedisSet } from '@modules/redis';
-import { NewsModule } from '@app/modules/news';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import {
     KeywordType,
     KoreaInvestmentKeywordSettingKey,
@@ -16,7 +16,7 @@ export class KoreaInvestmentSettingModule {
         return {
             module: KoreaInvestmentSettingModule,
             global: true,
-            imports: [RedisModule.forFeature(), NewsModule],
+            imports: [RedisModule.forFeature(), NewsRepositoryModule],
             providers: [
                 {
                     provide: 'KeywordSetMap',

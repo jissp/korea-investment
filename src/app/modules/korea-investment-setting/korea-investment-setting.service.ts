@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { RedisHelper, RedisService, RedisSet } from '@modules/redis';
+import { RedisHelper, RedisSet } from '@modules/redis';
 import { KoreaInvestmentSettingKey } from './korea-investment-setting.types';
 import { StockCodeType } from './korea-investment-keyword-setting.types';
 
@@ -10,8 +10,7 @@ export class KoreaInvestmentSettingService {
     private readonly accountSet: RedisSet;
 
     constructor(
-        private readonly redisHelper: RedisHelper,
-        private readonly redisService: RedisService,
+        redisHelper: RedisHelper,
         @Inject('StockCodeSetMap')
         private readonly stockCodeSetMap: Map<StockCodeType, RedisSet>,
     ) {
@@ -41,33 +40,17 @@ export class KoreaInvestmentSettingService {
     }
 
     /**
-     * 종목 코드 목록을 설정합니다.
-     * @param stockCodes
-     */
-    public async setStockCodes(stockCodes: string[]) {
-        return this.redisService.set(
-            KoreaInvestmentSettingKey.StockCodes,
-            JSON.stringify(stockCodes),
-        );
-    }
-
-    /**
      * 종목 코드 목록을 조회합니다.
      */
     public async getStockCodes(): Promise<string[]> {
-        const stockCodes = await this.redisService.get(
-            KoreaInvestmentSettingKey.StockCodes,
+        const stockCodeTypes = Object.values(StockCodeType);
+        const stockCodesChunk = await Promise.all(
+            stockCodeTypes.map((stockCodeType) =>
+                this.getStockCodesByType(stockCodeType),
+            ),
         );
-        if (!stockCodes) {
-            return [];
-        }
 
-        try {
-            return JSON.parse(stockCodes) as string[];
-        } catch (error) {
-            this.logger.error(error);
-            throw error;
-        }
+        return stockCodesChunk.flat();
     }
 
     /**

@@ -44,7 +44,11 @@ export class KoreaInvestmentWsFactory {
         messageSubject: Subject<TransformResult>,
     ) {
         const onMessage = (message: ws.Data) => {
-            const encodedMessage = message.toString('utf-8');
+            if (messageSubject.closed) {
+                return;
+            }
+
+            const encodedMessage = this.convertMessageToString(message);
 
             if (this.isJson(encodedMessage)) {
                 const jsonDecodedMessage = JSON.parse(encodedMessage);
@@ -73,20 +77,48 @@ export class KoreaInvestmentWsFactory {
             this.logger.warn('Korea Investment WebSocket closed');
 
             webSocket.removeAllListeners();
-            messageSubject.complete();
+            if (!messageSubject.closed) {
+                messageSubject.complete();
+            }
         };
 
         const onError = (error: Error) => {
             this.logger.error(
                 `Korea Investment WebSocket error: ${error.message}`,
             );
-            messageSubject.error(error);
+            // messageSubject.error(error);
             messageSubject.unsubscribe();
         };
 
         webSocket.on('message', onMessage);
         webSocket.on('close', onClose);
         webSocket.on('error', onError);
+    }
+
+    /**
+     * WebSocket 메시지를 안전하게 문자열로 변환
+     * @param message WebSocket에서 받은 메시지 데이터
+     * @returns 변환된 문자열
+     * @private
+     */
+    private convertMessageToString(message: ws.Data): string {
+        if (typeof message === 'string') {
+            return message;
+        }
+
+        if (Buffer.isBuffer(message)) {
+            return message.toString('utf-8');
+        }
+
+        if (message instanceof ArrayBuffer) {
+            return Buffer.from(message).toString('utf-8');
+        }
+
+        if (Array.isArray(message)) {
+            return Buffer.concat(message).toString('utf-8');
+        }
+
+        throw new Error(`Unsupported message type: ${typeof message}`);
     }
 
     /**

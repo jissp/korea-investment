@@ -91,13 +91,24 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 accountStockItems,
             );
 
+            const stockInfoList = accountStockItems.map(
+                (output): StockInfo => ({
+                    name: output.prdt_name,
+                    stockCode: output.pdno,
+                }),
+            );
+
             await this.updateStockKeywords(
-                StockCodeType.Favorite,
-                accountStockItems.map(
-                    (output): StockInfo => ({
-                        name: output.prdt_name,
-                        stockCode: output.pdno,
-                    }),
+                StockCodeType.Possess,
+                stockInfoList,
+            );
+
+            await Promise.all(
+                stockInfoList.map(({ stockCode }) =>
+                    this.settingService.addStockCodeByType(
+                        StockCodeType.Possess,
+                        stockCode,
+                    ),
                 ),
             );
         }
@@ -227,20 +238,6 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 }),
             ),
         );
-        // await Promise.all(
-        //     stockInfoList.flatMap(({ name, stockCode }) => {
-        //         return [
-        //             this.settingService.addStockCodeByType(
-        //                 stockCodeType,
-        //                 stockCode,
-        //             ),
-        //             this.keywordSettingService.addKeywordWithStockCodeMap({
-        //                 keyword: name,
-        //                 stockCode,
-        //             }),
-        //         ];
-        //     }),
-        // );
     }
 
     /**
