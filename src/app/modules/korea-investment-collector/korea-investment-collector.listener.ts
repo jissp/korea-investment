@@ -30,7 +30,7 @@ export class KoreaInvestmentCollectorListener {
     @OnEvent(
         KoreaInvestmentCollectorEventType.MessageReceivedFromKoreaInvestment,
     )
-    public async handleReceiveMessage({ tradeId, records }: TransformResult) {
+    public handleReceiveMessage({ tradeId, records }: TransformResult) {
         try {
             const pipe = this.helperService.getPipe(tradeId);
 

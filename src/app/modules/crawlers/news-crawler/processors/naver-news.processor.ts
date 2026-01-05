@@ -2,9 +2,16 @@ import * as _ from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
-import { NaverApiClient } from '@modules/naver';
+import {
+    NaverApiClientFactory,
+    NaverApiNewsResponse,
+    NaverAppName,
+} from '@modules/naver/naver-api';
 import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
-import { NewsService } from '@app/modules/news';
+import {
+    NewsItem,
+    NewsRepository,
+} from '@app/modules/repositories/news-repository';
 import { NewsCrawlerQueueType } from '../news-crawler.types';
 import { NaverNewsToNewsTransformer } from '../transformers/naver-news-to-news.transformer';
 
@@ -14,46 +21,92 @@ export class NaverNewsProcessor {
     private readonly transformer = new NaverNewsToNewsTransformer();
 
     constructor(
-        private readonly client: NaverApiClient,
+        private readonly naverApiClientFactory: NaverApiClientFactory,
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
-        private readonly newsService: NewsService,
+        private readonly newsRepository: NewsRepository,
     ) {}
 
     @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNews)
     public async processCrawlingNaverNews(job: Job) {
         const { keyword } = job.data;
 
-        const stockCodes =
-            await this.keywordSettingService.getStockCodesByKeyword(keyword);
-
-        const response = await this.client.getNews({
+        const client = this.naverApiClientFactory.create(NaverAppName.KEYWORD);
+        const response = await client.getNews({
             query: keyword,
             start: 1,
             display: 100,
             sort: 'date',
         });
 
-        const transformedNews = response.items.map((item) =>
-            this.transformer.transform(item),
-        );
-        const populatedNews = transformedNews.map((news) => ({
-            ...news,
-            stockCodes,
-        }));
+        await this.transformWithSave(response, keyword);
+    }
 
-        const chunks = _.chunk(populatedNews, 10);
+    @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNewsForStockCode)
+    public async processCrawlingNaverNewsForStockCode(job: Job) {
+        const { keyword } = job.data;
+
+        const client = this.naverApiClientFactory.create(NaverAppName.NEWS);
+
+        const response = await client.getNews({
+            query: keyword,
+            start: 1,
+            display: 100,
+            sort: 'date',
+        });
+
+        await this.transformWithSave(response, keyword);
+    }
+
+    /**
+     *
+     * @param response
+     * @param keyword
+     * @private
+     */
+    private async transformWithSave(
+        response: NaverApiNewsResponse,
+        keyword: string,
+    ) {
+        const stockCodes =
+            await this.keywordSettingService.getStockCodesByKeyword(keyword);
+
+        const transformedNewsItems = this.transformNews(response, stockCodes);
+
+        const chunks = _.chunk(transformedNewsItems, 10);
         for (const chunk of chunks) {
             await Promise.allSettled([
-                ...chunk.map((news) => this.newsService.addNews(news)),
+                ...chunk.map((news) => this.newsRepository.addNews(news)),
                 ...chunk.map((news) =>
-                    this.newsService.addKeywordNews(keyword, news),
+                    this.newsRepository.addKeywordNews(keyword, news),
                 ),
                 ...chunk.flatMap((news) =>
                     stockCodes.map((stockCode) =>
-                        this.newsService.addStockNews(stockCode, news),
+                        this.newsRepository.addStockNews(stockCode, news),
                     ),
                 ),
             ]);
         }
+    }
+
+    /**
+     * Naver News API 응답을 News 모델로 변환합니다.
+     * @param response
+     * @param stockCodes
+     * @private
+     */
+    private transformNews(
+        response: NaverApiNewsResponse,
+        stockCodes: string[],
+    ): NewsItem[] {
+        const transformedNews = response.items.map((item) =>
+            this.transformer.transform(item),
+        );
+
+        return transformedNews.map(
+            (news): NewsItem => ({
+                ...news,
+                stockCodes,
+            }),
+        );
     }
 }

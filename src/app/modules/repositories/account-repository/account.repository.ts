@@ -4,7 +4,7 @@ import {
     Logger,
     NotFoundException,
 } from '@nestjs/common';
-import { getRedisKey, RedisHelper, RedisService } from '@modules/redis';
+import { getRedisKey, RedisService } from '@modules/redis';
 import {
     AccountInfo,
     AccountStock,
@@ -17,10 +17,7 @@ import {
 export class AccountRepository {
     private readonly logger = new Logger(AccountRepository.name);
 
-    constructor(
-        redisHelper: RedisHelper,
-        private readonly redisService: RedisService,
-    ) {}
+    constructor(private readonly redisService: RedisService) {}
 
     /**
      * 계좌 정보를 저장합니다.

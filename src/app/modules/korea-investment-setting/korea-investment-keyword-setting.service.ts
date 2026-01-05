@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { RedisHelper, RedisService, RedisSet } from '@modules/redis';
+import { RedisHelper, RedisSet } from '@modules/redis';
 import {
     KeywordType,
     KoreaInvestmentKeywordSettingKey,
@@ -18,28 +18,16 @@ export class KoreaInvestmentKeywordSettingService {
 
     constructor(
         private readonly redisHelper: RedisHelper,
-        private readonly redisService: RedisService,
         @Inject('KeywordSetMap')
         private readonly keywordSetMap: Map<KeywordType, RedisSet>,
     ) {}
 
     /**
-     * 키워드 목록을 설정합니다.
-     * @param keywords
-     */
-    public async setKeywords(keywords: string[]) {
-        return this.redisService.set(
-            KoreaInvestmentKeywordSettingKey.Keywords,
-            JSON.stringify(keywords),
-        );
-    }
-
-    /**
      * 키워드 목록을 조회합니다.
      */
-    public async getKeywords(): Promise<string[]> {
-        const keywordTypes = Object.values(KeywordType);
-
+    public async getKeywords(
+        keywordTypes: KeywordType[] = Object.values(KeywordType),
+    ): Promise<string[]> {
         const keywordGroups = await Promise.all(
             keywordTypes.map((type) => this.getKeywordsByType(type)),
         );

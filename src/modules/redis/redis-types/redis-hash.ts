@@ -47,10 +47,17 @@ export class RedisHash<T = string> {
 
     /**
      * Hash의 모든 필드 데이터를 조회합니다.
+     * @param options
      * @returns []
      */
-    public async list(): Promise<string[]> {
-        return this.redis.hvals(this.key);
+    public async list(options?: { isParse: boolean }): Promise<T[]> {
+        const list = await this.redis.hvals(this.key);
+
+        if (!options?.isParse) {
+            return list as T[];
+        }
+
+        return list.map((item): T => JSON.parse(item) as T);
     }
 
     /**

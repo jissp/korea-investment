@@ -5,7 +5,7 @@ import {
     KoreaInvestmentKeywordSettingEvent,
     KoreaInvestmentKeywordSettingService,
 } from '@app/modules/korea-investment-setting';
-import { NewsService } from '@app/modules/news';
+import { NewsRepository } from '@app/modules/repositories/news-repository';
 
 @Injectable()
 export class KoreaInvestmentKeywordListener {
@@ -13,7 +13,7 @@ export class KoreaInvestmentKeywordListener {
 
     constructor(
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
-        private readonly newsService: NewsService,
+        private readonly newsRepository: NewsRepository,
     ) {}
 
     @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedKeyword)
@@ -32,7 +32,7 @@ export class KoreaInvestmentKeywordListener {
                         keyword: keyword,
                     }),
                 ),
-                this.newsService.deleteKeywordNews(keyword),
+                this.newsRepository.deleteKeywordNews(keyword),
             ]);
         } catch (error) {
             this.logger.error(error);
@@ -83,7 +83,7 @@ export class KoreaInvestmentKeywordListener {
                     KeywordType.Manual,
                     keyword,
                 ),
-                this.newsService.deleteKeywordNews(keyword),
+                this.newsRepository.deleteKeywordNews(keyword),
             ]);
         }
     }

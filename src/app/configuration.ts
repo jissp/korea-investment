@@ -23,16 +23,31 @@ export interface IConfiguration {
         port: string;
     };
     naver: {
+        app: {
+            search1: {
+                host: string;
+                key: string;
+                secret: string;
+            };
+            search2: {
+                host: string;
+                key: string;
+                secret: string;
+            };
+            search3: {
+                host: string;
+                key: string;
+                secret: string;
+            };
+        };
         api: {
             host: string;
             key: string;
             secret: string;
         };
     };
-    google: {
-        ai: {
-            key: string;
-        };
+    gemini: {
+        model: string;
     };
 }
 
@@ -66,11 +81,26 @@ export default (): IConfiguration => ({
             key: getEnv('NAVER_APP_CLIENT_ID'),
             secret: getEnv('NAVER_APP_CLIENT_SECRET'),
         },
-    },
-    google: {
-        ai: {
-            key: getEnv('GOOGLE_AI_API_KEY'),
+        app: {
+            search1: {
+                host: getEnv('NAVER_APP_HOST'),
+                key: getEnv('NAVER_APP_CLIENT_ID'),
+                secret: getEnv('NAVER_APP_CLIENT_SECRET'),
+            },
+            search2: {
+                host: getEnv('NAVER_APP_HOST'),
+                key: getEnv('NAVER_APP_SEARCH_2_CLIENT_ID'),
+                secret: getEnv('NAVER_APP_SEARCH_2_CLIENT_SECRET'),
+            },
+            search3: {
+                host: getEnv('NAVER_APP_HOST'),
+                key: getEnv('NAVER_APP_SEARCH_3_CLIENT_ID'),
+                secret: getEnv('NAVER_APP_SEARCH_3_CLIENT_SECRET'),
+            },
         },
+    },
+    gemini: {
+        model: getEnv('GEMINI_CLI_MODEL'),
     },
 });
 
@@ -79,5 +109,5 @@ function getEnv(key: string): string {
         throw new Error(`Missing required environment variable: ${key}`);
     }
 
-    return process.env[key] as string;
+    return process.env[key];
 }

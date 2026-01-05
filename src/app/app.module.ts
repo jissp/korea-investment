@@ -9,16 +9,20 @@ import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-co
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { NewsModule } from '@app/modules/news';
+import { GeminiCliModule } from '@modules/gemini-cli';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { StockRepositoryModule } from '@app/modules/stock-repository';
 import {
     AccountRepositoryModule,
+    AnalysisRepositoryModule,
     IndexRepositoryModule,
 } from '@app/modules/repositories';
 import { CrawlerModule } from '@app/modules/crawlers/crawler';
 import { NewsCrawlerModule } from '@app/modules/crawlers/news-crawler';
 import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-index-crawler';
 import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
+import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
+import { AppServiceModule } from '@app/modules/services';
 import configuration from './configuration';
 import {
     KoreaInvestmentKeywordListener,
@@ -54,6 +58,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
             wildcard: true,
         }),
         ScheduleModule.forRoot(),
+        GeminiCliModule,
         KoreaInvestmentCollectorModule.forRoot(),
         KoreaInvestmentSettingModule.forRoot(),
         KoreaInvestmentQuotationClientModule,
@@ -61,11 +66,14 @@ import { KoreaInvestmentBeGateway } from './gateways';
         StockRepositoryModule,
         IndexRepositoryModule,
         AccountRepositoryModule,
-        NewsModule,
+        AnalysisRepositoryModule,
+        NewsRepositoryModule,
         CrawlerModule,
         NewsCrawlerModule,
         KoreaInvestmentAccountCrawlerModule,
         KoreaInvestmentIndexCrawlerModule,
+        StockAnalyzerModule,
+        AppServiceModule,
     ],
     controllers: [
         AssetController,

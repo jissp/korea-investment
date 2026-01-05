@@ -9,7 +9,6 @@ export enum KoreaInvestmentSettingKey {
 }
 
 export enum KoreaInvestmentSettingEvent {
-    AllStockCodeEvent = 'KoreaInvestmentSettingEvent.StockCode.*',
     UpdatedStockCode = 'KoreaInvestmentSettingEvent.StockCode.Updated',
     DeletedStockCode = 'KoreaInvestmentSettingEvent.StockCode.Deleted',
 }

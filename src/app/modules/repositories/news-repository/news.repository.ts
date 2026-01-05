@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RedisHelper, RedisSet, RedisZset } from '@modules/redis';
-import { NewsItem, NewsRedisKey } from './news.types';
+import { NewsItem, NewsRedisKey } from './news-repository.types';
 
 @Injectable()
-export class NewsService {
-    private readonly logger = new Logger(NewsService.name);
+export class NewsRepository {
+    private readonly logger = new Logger(NewsRepository.name);
 
     private readonly newsZSet: RedisZset<NewsItem>;
     private readonly newsSet: RedisSet;
@@ -105,7 +105,10 @@ export class NewsService {
      * @param keyword
      * @param limit
      */
-    public async getKeywordNewsList(keyword: string, limit: number = 20) {
+    public async getKeywordNewsList(
+        keyword: string,
+        limit: number = 20,
+    ): Promise<NewsItem[]> {
         const zSet = this.getNewsByKeywordZSet(keyword);
 
         return zSet.list(limit, {

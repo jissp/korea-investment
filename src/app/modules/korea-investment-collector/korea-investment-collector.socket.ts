@@ -26,8 +26,8 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         private readonly queue: Queue<KoreaInvestmentRequestRealTimeJobPayload>,
     ) {}
 
-    async onModuleInit() {
-        await this.connect();
+    onModuleInit() {
+        this.connect();
     }
 
     /**
@@ -40,7 +40,7 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     /**
      * socket을 연결합니다.
      */
-    public async connect() {
+    public connect() {
         if (isConnected(this.socket)) {
             return;
         }
@@ -79,10 +79,10 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     /**
      * socket을 재연결합니다.
      */
-    public async reconnect() {
+    public reconnect() {
         // TODO 추후 기존 구독 내역을 자동으로 복원할 수 있어야 한다. RedisSet을 통해서 구현하는게 쉬울지도.
         this.disconnect();
-        await this.connect();
+        this.connect();
     }
 
     /**
@@ -90,7 +90,9 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
      * @param message
      */
     public send<T>(message: T) {
-        this.socket.send(JSON.stringify(message));
+        if (this.socket.readyState === this.socket.OPEN) {
+            this.socket.send(JSON.stringify(message));
+        }
     }
 
     /**
