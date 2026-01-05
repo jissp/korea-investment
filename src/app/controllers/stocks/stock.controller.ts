@@ -1,4 +1,10 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    InternalServerErrorException,
+    Param,
+    Post,
+} from '@nestjs/common';
 import {
     ApiNoContentResponse,
     ApiOkResponse,
@@ -6,15 +12,17 @@ import {
     ApiParam,
 } from '@nestjs/swagger';
 import { assertStockCode } from '@common/domains';
-import { StockRepository } from '@app/modules/stock-repository';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
-import { KoreaInvestmentDailyItemChartPriceResponse } from './dto';
+import { StockAnalyzerService } from '@app/modules/stock-analyzer';
+import { AnalysisRepository } from '@app/modules/repositories/analysis-repository';
+import { GetAiAnalysisStockResponse, GetAiAnalysisStocksResponse } from './dto';
 
 @Controller('v1/stocks')
 export class StockController {
     constructor(
         private readonly koreaInvestmentCollectorSocket: KoreaInvestmentCollectorSocket,
-        private readonly stockRepository: StockRepository,
+        private readonly analysisRepository: AnalysisRepository,
+        private readonly stockAnalyzerService: StockAnalyzerService,
     ) {}
 
     @ApiOperation({
@@ -50,33 +58,63 @@ export class StockController {
     }
 
     @ApiOperation({
-        summary: '주식일별분봉조회',
+        summary: '종목 AI 분석 요청',
+        description:
+            'Gemini를 통해 주식 뉴스 기반 분석을 비동기로 요청합니다. 결과는 이벤트로 처리됩니다.',
     })
     @ApiParam({
         name: 'stockCode',
         type: String,
-        description: '종목 코드',
+        description: '종목 코드(005930)',
+        example: '005930',
+    })
+    @ApiNoContentResponse()
+    @Post(':stockCode/analysis/ai')
+    public async requestAIAnalysisStock(@Param('stockCode') stockCode: string) {
+        assertStockCode(stockCode);
+
+        try {
+            await this.stockAnalyzerService.requestAnalyzeStock(stockCode);
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    @ApiOperation({
+        summary: '종목 AI 분석 조회',
+        description: 'Gemini를 통해 분석된 주식 정보를 조회합니다.',
+    })
+    @ApiParam({
+        name: 'stockCode',
+        type: String,
+        description: '종목 코드(005930)',
+        example: '005930',
     })
     @ApiOkResponse({
-        type: KoreaInvestmentDailyItemChartPriceResponse,
+        type: GetAiAnalysisStockResponse,
     })
-    @Get('daily-prices/:stockCode')
-    public async getStockDailyPrices(
+    @Get(':stockCode/analysis/ai')
+    public async getAIAnalysisStock(
         @Param('stockCode') stockCode: string,
-    ): Promise<KoreaInvestmentDailyItemChartPriceResponse> {
-        const dailyStockChart =
-            await this.stockRepository.getDailyStockChart(stockCode);
-        if (!dailyStockChart) {
-            return {
-                data: null,
-            };
-        }
+    ): Promise<GetAiAnalysisStockResponse> {
+        assertStockCode(stockCode);
 
         return {
-            data: {
-                data1: dailyStockChart.output,
-                data2: dailyStockChart.output2,
-            },
+            data: await this.analysisRepository.getAIAnalysisStock(stockCode),
+        };
+    }
+
+    @ApiOperation({
+        summary: '종목 AI 분석 조회',
+        description: 'Gemini를 통해 분석된 주식 정보들을 조회합니다.',
+    })
+    @ApiOkResponse({
+        type: GetAiAnalysisStocksResponse,
+    })
+    @Get('analysis/ai')
+    public async getAIAnalysisStocks(): Promise<GetAiAnalysisStocksResponse> {
+        return {
+            data: await this.analysisRepository.getAIAnalysisStocks(),
         };
     }
 }
