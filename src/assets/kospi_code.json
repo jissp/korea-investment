@@ -140,36 +140,6 @@
     "name": "키움히어로즈유럽오피스부동산4호 C-I"
   },
   {
-    "shortCode": "F71901BBC",
-    "code": "KR571901BBC8",
-    "name": "KB국민참여뉴딜2A"
-  },
-  {
-    "shortCode": "F71902BBC",
-    "code": "KR571902BBC6",
-    "name": "KB국민참여뉴딜2C"
-  },
-  {
-    "shortCode": "F72501BBC",
-    "code": "KR572501BBC5",
-    "name": "신한국민참여정책형뉴딜혼합자산2호 C1"
-  },
-  {
-    "shortCode": "F72502BBC",
-    "code": "KR572502BBC3",
-    "name": "신한국민참여정책형뉴딜혼합자산2호 A1"
-  },
-  {
-    "shortCode": "F72801BBC",
-    "code": "KR572801BBC9",
-    "name": "한화국민참여정책형뉴딜2A"
-  },
-  {
-    "shortCode": "F72802BBC",
-    "code": "KR572802BBC7",
-    "name": "한화국민참여정책형뉴딜2C"
-  },
-  {
     "shortCode": "F73400006",
     "code": "KR5734000064",
     "name": "코레이트하이일드공모주만기형2호 A"
@@ -193,16 +163,6 @@
     "shortCode": "F73400010",
     "code": "KR5734000106",
     "name": "코레이트하이일드공모주만기형3호 Ae"
-  },
-  {
-    "shortCode": "F73501BBC",
-    "code": "KR573501BBC4",
-    "name": "GB뉴딜기업2호A"
-  },
-  {
-    "shortCode": "F73502BBC",
-    "code": "KR573502BBC2",
-    "name": "GB뉴딜기업2호Ae"
   },
   {
     "shortCode": "F74201773",
@@ -275,16 +235,6 @@
     "name": "현대유퍼스트부동산30호[파생형] C-i"
   },
   {
-    "shortCode": "F75801BBC",
-    "code": "KR575801BBC6",
-    "name": "IBK국민참여정책형뉴딜혼합자산2호A"
-  },
-  {
-    "shortCode": "F75802BBC",
-    "code": "KR575802BBC4",
-    "name": "IBK국민참여정책형뉴딜혼합자산2호C"
-  },
-  {
     "shortCode": "F76201BC5",
     "code": "KR576201BC53",
     "name": "이탈리아물류1호 종류A"
@@ -318,6 +268,36 @@
     "shortCode": "F77200010",
     "code": "KR5772000109",
     "name": "한국밸류AI혁신소부장2호(C-F)"
+  },
+  {
+    "shortCode": "F77200017",
+    "code": "KR5772000174",
+    "name": "한국밸류라이프V파워1(A)"
+  },
+  {
+    "shortCode": "F77200018",
+    "code": "KR5772000182",
+    "name": "한국밸류라이프V파워1(A-e)"
+  },
+  {
+    "shortCode": "F77200019",
+    "code": "KR5772000190",
+    "name": "한국밸류라이프V파워1(C-F)"
+  },
+  {
+    "shortCode": "F77200020",
+    "code": "KR5772000208",
+    "name": "한국밸류라이프V파워2(A)"
+  },
+  {
+    "shortCode": "F77200021",
+    "code": "KR5772000216",
+    "name": "한국밸류라이프V파워2(A-e)"
+  },
+  {
+    "shortCode": "F77200022",
+    "code": "KR5772000224",
+    "name": "한국밸류라이프V파워2(C-F)"
   },
   {
     "shortCode": "F77300005",
@@ -3045,11 +3025,6 @@
     "name": "웰바이오텍"
   },
   {
-    "shortCode": "010620",
-    "code": "KR7010620003",
-    "name": "HD현대미포"
-  },
-  {
     "shortCode": "010640",
     "code": "KR7010640001",
     "name": "진양폴리"
@@ -3360,6 +3335,11 @@
     "name": "TIGER 미국AI전력SMR"
   },
   {
+    "shortCode": "0123S0",
+    "code": "KR70123S0004",
+    "name": "HANARO 26-12 은행채(AA+이상)액티브"
+  },
+  {
     "shortCode": "012450",
     "code": "KR7012450003",
     "name": "한화에어로스페이스"
@@ -3485,6 +3465,11 @@
     "name": "계룡건설"
   },
   {
+    "shortCode": "0135Y0",
+    "code": "KR70135Y0002",
+    "name": "ITF 중기종합채권(AA-이상)액티브"
+  },
+  {
     "shortCode": "013700",
     "code": "KR7013700000",
     "name": "까뮤이앤씨"
@@ -3510,9 +3495,29 @@
     "name": "지누스"
   },
   {
+    "shortCode": "0138D0",
+    "code": "KR70138D0004",
+    "name": "RISE 동학개미"
+  },
+  {
+    "shortCode": "0138T0",
+    "code": "KR70138T0006",
+    "name": "RISE 미국S&P500데일리고정커버드콜"
+  },
+  {
+    "shortCode": "0138Y0",
+    "code": "KR70138Y0009",
+    "name": "PLUS 금채권혼합"
+  },
+  {
     "shortCode": "0139F0",
     "code": "KR70139F0001",
     "name": "TIGER 12월자동연장금융채(AA-이상)액티브"
+  },
+  {
+    "shortCode": "0139P0",
+    "code": "KR70139P0009",
+    "name": "ACE 고배당주"
   },
   {
     "shortCode": "014130",
@@ -3523,6 +3528,16 @@
     "shortCode": "014160",
     "code": "KR7014160006",
     "name": "대영포장"
+  },
+  {
+    "shortCode": "0141S0",
+    "code": "KR70141S0002",
+    "name": "SOL 조선기자재"
+  },
+  {
+    "shortCode": "0141T0",
+    "code": "KR70141T0001",
+    "name": "SOL 중기종합채권(AA-이상)액티브"
   },
   {
     "shortCode": "014280",
@@ -3543,6 +3558,16 @@
     "shortCode": "014440",
     "code": "KR7014440002",
     "name": "영보화학"
+  },
+  {
+    "shortCode": "0144L0",
+    "code": "KR70144L0006",
+    "name": "KODEX 미국성장커버드콜액티브"
+  },
+  {
+    "shortCode": "0144M0",
+    "code": "KR70144M0005",
+    "name": "KODEX 미국드론UAM TOP10"
   },
   {
     "shortCode": "014530",
@@ -4935,11 +4960,6 @@
     "name": "CJ제일제당 우"
   },
   {
-    "shortCode": "098560",
-    "code": "KR7098560006",
-    "name": "TIGER 방송통신"
-  },
-  {
     "shortCode": "099140",
     "code": "KR7099140006",
     "name": "KODEX 차이나H"
@@ -5958,6 +5978,11 @@
     "shortCode": "215620",
     "code": "KR7215620006",
     "name": "HK S&P코리아로우볼"
+  },
+  {
+    "shortCode": "217590",
+    "code": "KR7217590009",
+    "name": "티엠씨"
   },
   {
     "shortCode": "217770",
@@ -7627,7 +7652,7 @@
   {
     "shortCode": "367760",
     "code": "KR7367760006",
-    "name": "RISE 5G테크"
+    "name": "RISE 네트워크인프라"
   },
   {
     "shortCode": "367770",
@@ -7698,11 +7723,6 @@
     "shortCode": "373490",
     "code": "KR7373490002",
     "name": "KODEX 코리아혁신성장액티브"
-  },
-  {
-    "shortCode": "373530",
-    "code": "KR7373530005",
-    "name": "PLUS 신흥국MSCI인버스(합성 H)"
   },
   {
     "shortCode": "373790",
@@ -7792,7 +7812,7 @@
   {
     "shortCode": "380340",
     "code": "KR7380340000",
-    "name": "ACE Fn5G플러스"
+    "name": "ACE 코리아AI테크핵심산업"
   },
   {
     "shortCode": "381170",
@@ -7892,7 +7912,7 @@
   {
     "shortCode": "388280",
     "code": "KR7388280000",
-    "name": "RISE 컨택트대표"
+    "name": "RISE K엔터&여행레저"
   },
   {
     "shortCode": "388420",
@@ -8322,7 +8342,7 @@
   {
     "shortCode": "427120",
     "code": "KR7427120001",
-    "name": "RISE 플랫폼테마"
+    "name": "RISE AI플랫폼"
   },
   {
     "shortCode": "428510",
@@ -8822,7 +8842,7 @@
   {
     "shortCode": "451060",
     "code": "KR7451060008",
-    "name": "1Q K200액티브"
+    "name": "1Q 200액티브"
   },
   {
     "shortCode": "451150",
@@ -9098,11 +9118,6 @@
     "shortCode": "458760",
     "code": "KR7458760006",
     "name": "TIGER 미국배당다우존스타겟커버드콜2호"
-  },
-  {
-    "shortCode": "459370",
-    "code": "KR7459370003",
-    "name": "SOL 유럽탄소배출권선물인버스ICE(H)"
   },
   {
     "shortCode": "459560",
@@ -10070,11 +10085,6 @@
     "name": "WON 미국빌리어네어"
   },
   {
-    "shortCode": "489570",
-    "code": "KR7489570002",
-    "name": "HANARO 25-12 은행채(AA+이상)액티브"
-  },
-  {
     "shortCode": "489790",
     "code": "KR7489790006",
     "name": "한화비전"
@@ -10118,11 +10128,6 @@
     "shortCode": "491010",
     "code": "KR7491010005",
     "name": "TIGER 글로벌AI전력인프라액티브"
-  },
-  {
-    "shortCode": "491080",
-    "code": "KR7491080008",
-    "name": "KODEX 25-12 은행채(AAA)액티브"
   },
   {
     "shortCode": "491090",
@@ -10248,11 +10253,6 @@
     "shortCode": "494890",
     "code": "KR7494890007",
     "name": "KODEX 200액티브"
-  },
-  {
-    "shortCode": "494900",
-    "code": "KR7494900004",
-    "name": "TIGER 25-12 금융채(AA-이상)"
   },
   {
     "shortCode": "495040",
@@ -10435,11 +10435,6 @@
     "name": "유니슨 15WR"
   },
   {
-    "shortCode": "J0188801F",
-    "code": "KRA0188801F6",
-    "name": "한온시스템 8R"
-  },
-  {
     "shortCode": "J0669721F",
     "code": "KRA0669721F4",
     "name": "엘앤에프 7WR"
@@ -10463,26 +10458,6 @@
     "shortCode": "J2901221D",
     "code": "KRA2901221D4",
     "name": "DH오토리드 9WR"
-  },
-  {
-    "shortCode": "J3409301F",
-    "code": "KRA3409301F4",
-    "name": "유일에너테크 8R"
-  },
-  {
-    "shortCode": "J4123501F",
-    "code": "KRA4123501F2",
-    "name": "레이저쎌 15R"
-  },
-  {
-    "shortCode": "J4186202F",
-    "code": "KRA4186202F1",
-    "name": "E8 12R"
-  },
-  {
-    "shortCode": "J4292701F",
-    "code": "KRA4292701F3",
-    "name": "시지트로닉스 4R"
   },
   {
     "shortCode": "Q500061",
@@ -10755,11 +10730,6 @@
     "name": "미래에셋 인버스 코스닥150 선물 ETN"
   },
   {
-    "shortCode": "Q520043",
-    "code": "KRG520000438",
-    "name": "미래에셋 S&P 유럽탄소배출권 선물 ETN"
-  },
-  {
     "shortCode": "Q520046",
     "code": "KRG520000461",
     "name": "미래에셋 레버리지 옥수수 선물 ETN"
@@ -10795,11 +10765,6 @@
     "name": "미래에셋 인버스 2X 코스닥150 선물 ETN"
   },
   {
-    "shortCode": "Q520061",
-    "code": "KRG520000610",
-    "name": "미래에셋 인도네시아 Top5 ETN"
-  },
-  {
     "shortCode": "Q520064",
     "code": "KRG520000644",
     "name": "미래에셋 2X 미국채울트라30년 선물 ETN"
@@ -10823,16 +10788,6 @@
     "shortCode": "Q520069",
     "code": "KRG520000693",
     "name": "미래에셋 -2X 홍콩H 선물 ETN(H)"
-  },
-  {
-    "shortCode": "Q520070",
-    "code": "KRG520000701",
-    "name": "미래에셋 0.5X 코스피200 선물 ETN"
-  },
-  {
-    "shortCode": "Q520071",
-    "code": "KRG520000719",
-    "name": "미래에셋 0.5X 코스닥150 선물 ETN"
   },
   {
     "shortCode": "Q520072",
@@ -10953,11 +10908,6 @@
     "shortCode": "Q520009",
     "code": "KRG522100095",
     "name": "미래에셋 레버리지 원유선물혼합 ETN(H)"
-  },
-  {
-    "shortCode": "Q520011",
-    "code": "KRG522100111",
-    "name": "미래에셋 인버스 원유선물혼합 ETN(H)"
   },
   {
     "shortCode": "Q530083",
@@ -11278,11 +11228,6 @@
     "shortCode": "Q550085",
     "code": "KRG550000852",
     "name": "N2 코스닥 150 TR ETN"
-  },
-  {
-    "shortCode": "Q550086",
-    "code": "KRG550000860",
-    "name": "N2 미국달러 SOFR금리 플러스 ETN"
   },
   {
     "shortCode": "Q550087",
@@ -11643,16 +11588,6 @@
     "shortCode": "Q570023",
     "code": "KRG572100235",
     "name": "한투 인버스 2X S&P500 선물 ETN(H)"
-  },
-  {
-    "shortCode": "Q580014",
-    "code": "KRG580000146",
-    "name": "KB 인버스 2X 나스닥 100 ETN"
-  },
-  {
-    "shortCode": "Q580015",
-    "code": "KRG580000153",
-    "name": "KB 레버리지 나스닥 100 ETN"
   },
   {
     "shortCode": "Q580016",
