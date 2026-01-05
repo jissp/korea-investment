@@ -1,5 +1,5 @@
 import { Nullable } from '@common/types';
-import { NewsCategory, NewsItem } from '@app/modules/news';
+import { NewsCategory, NewsItem } from '@app/modules/repositories/news-repository';
 import { KoreaInvestmentNewsItem } from '../news-crawler.interface';
 
 export class KoreaInvestmentNewsToNewsTransformer {

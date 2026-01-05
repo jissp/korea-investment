@@ -1,5 +1,8 @@
-import { NewsCategory, NewsItem } from '@app/modules/news';
-import { NaverApiNewsItem } from '@modules/naver';
+import { NaverApiNewsItem } from '@modules/naver/naver-api';
+import {
+    NewsCategory,
+    NewsItem,
+} from '@app/modules/repositories/news-repository';
 
 export class NaverNewsToNewsTransformer {
     public transform(naverNewsItem: NaverApiNewsItem): NewsItem {

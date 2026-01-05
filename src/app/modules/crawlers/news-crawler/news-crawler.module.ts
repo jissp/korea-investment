@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { StockPlusModule } from '@modules/stock-plus';
-import { NewsModule } from '@app/modules/news';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { QueueModule } from '@modules/queue';
-import { NaverApiModule } from '@modules/naver';
+import { NaverApiModule } from '@modules/naver/naver-api';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { NewsCrawlerQueueType } from './news-crawler.types';
@@ -11,6 +11,7 @@ import { NewsCrawlerSchedule } from './news-crawler.schedule';
 
 const queueTypes = [
     NewsCrawlerQueueType.CrawlingNaverNews,
+    NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
     NewsCrawlerQueueType.CrawlingStockPlusNews,
     NewsCrawlerQueueType.RequestDomesticNewsTitle,
 ];
@@ -23,18 +24,16 @@ const processors = [KoreaInvestmentNewsProcessor, NaverNewsProcessor];
             queueTypes,
             jobOptions: {
                 removeOnComplete: {
-                    age: 86400,
                     count: 3,
                 },
                 removeOnFail: {
-                    age: 86400,
-                    count: 10,
+                    count: 5,
                 },
             },
         }),
         KoreaInvestmentHelperModule,
         KoreaInvestmentRequestApiModule,
-        NewsModule,
+        NewsRepositoryModule,
         NaverApiModule,
         StockPlusModule,
     ],

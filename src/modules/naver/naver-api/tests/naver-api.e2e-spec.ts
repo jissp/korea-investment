@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { NaverApiClient, NaverApiModule } from '@modules/naver';
+import { NaverApiClient, NaverApiModule } from '@modules/naver/naver-api';
 import { ConfigModule } from '@nestjs/config';
 import configuration from '@app/configuration';
 

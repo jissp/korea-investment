@@ -6,6 +6,7 @@ import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
+    KeywordType,
     KoreaInvestmentKeywordSettingService,
     KoreaInvestmentSettingService,
 } from '@app/modules/korea-investment-setting';
@@ -14,8 +15,8 @@ import {
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
 import {
+    CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
-    RequestDomesticNewsTitleJobPayload,
 } from './news-crawler.types';
 
 @Injectable()
@@ -30,14 +31,17 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         @Inject(NewsCrawlerQueueType.RequestDomesticNewsTitle)
         private readonly requestDomesticNewsTitleFlow: FlowProducer,
         @Inject(NewsCrawlerQueueType.CrawlingNaverNews)
-        private readonly queue: Queue<RequestDomesticNewsTitleJobPayload>,
+        private readonly crawlingNaverNewsQueue: Queue<CrawlingNaverNewsJobPayload>,
+        @Inject(NewsCrawlerQueueType.CrawlingNaverNewsForStockCode)
+        private readonly crawlingNaverNewsForStockCode: Queue<CrawlingNaverNewsJobPayload>,
         @Inject(NewsCrawlerQueueType.CrawlingStockPlusNews)
         private readonly stockPlusNewsQueue: Queue,
     ) {}
 
     onModuleInit() {
         this.handleCrawlingKoreaInvestmentNewsByStockCode();
-        this.requestNaverNewsCrawling();
+        this.requestNaverNewsCrawlingForKeyword();
+        this.requestNaverNewsCrawlingForStockCode();
         this.handleCrawlingStockPlusNews();
     }
 
@@ -91,20 +95,53 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @Cron('*/1 * * * *')
+    @Cron('*/3 * * * *')
     @PreventConcurrentExecution()
-    async requestNaverNewsCrawling() {
+    async requestNaverNewsCrawlingForKeyword() {
         try {
-            const keywords = await this.keywordSettingService.getKeywords();
+            const keywords = await this.keywordSettingService.getKeywords([
+                KeywordType.Manual,
+            ]);
             if (!keywords.length) {
                 return;
             }
 
-            await this.queue.addBulk(
-                keywords.map((keyword) => {
+            const uniqueKeywords = Array.from(new Set(keywords));
+
+            await this.crawlingNaverNewsQueue.addBulk(
+                uniqueKeywords.map((keyword) => {
                     return {
                         name: NewsCrawlerQueueType.CrawlingNaverNews,
                         queueName: NewsCrawlerQueueType.CrawlingNaverNews,
+                        data: {
+                            keyword,
+                        },
+                    };
+                }),
+            );
+        } catch (error) {
+            this.logger.error(error);
+        }
+    }
+
+    @Cron('*/3 * * * *')
+    @PreventConcurrentExecution()
+    async requestNaverNewsCrawlingForStockCode() {
+        try {
+            const keywords = await this.keywordSettingService.getKeywords([
+                KeywordType.StockGroup,
+                KeywordType.Possess,
+                KeywordType.Favorite,
+            ]);
+
+            const uniqueKeywords = Array.from(new Set(keywords));
+
+            await this.crawlingNaverNewsForStockCode.addBulk(
+                uniqueKeywords.map((keyword) => {
+                    return {
+                        name: NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
+                        queueName:
+                            NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
                         data: {
                             keyword,
                         },
@@ -123,6 +160,14 @@ export class NewsCrawlerSchedule implements OnModuleInit {
             await this.stockPlusNewsQueue.add(
                 NewsCrawlerQueueType.CrawlingStockPlusNews,
                 {},
+                {
+                    removeOnComplete: {
+                        count: 3,
+                    },
+                    removeOnFail: {
+                        count: 5,
+                    },
+                },
             );
         } catch (error) {
             this.logger.error(error);

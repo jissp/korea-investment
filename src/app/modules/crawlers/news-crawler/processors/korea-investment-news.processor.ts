@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
-import { NewsService } from '@app/modules/news';
+import { NewsRepository } from '@app/modules/repositories/news-repository';
 import { KoreaInvestmentNewsToNewsTransformer } from '../transformers/korea-investment-news-to-news.transformer';
 import { NewsCrawlerQueueType } from '../news-crawler.types';
 import { RequestDomesticNewsTitleResponse } from '../news-crawler.interface';
@@ -16,7 +16,7 @@ export class KoreaInvestmentNewsProcessor {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly settingService: KoreaInvestmentSettingService,
-        private readonly newsService: NewsService,
+        private readonly newsRepository: NewsRepository,
     ) {}
 
     @OnQueueProcessor(NewsCrawlerQueueType.RequestDomesticNewsTitle)
@@ -38,7 +38,7 @@ export class KoreaInvestmentNewsProcessor {
         const chunks = _.chunk(transformedNewsItems, 10);
         for (const chunk of chunks) {
             await Promise.allSettled([
-                ...chunk.map((news) => this.newsService.addNews(news)),
+                ...chunk.map((news) => this.newsRepository.addNews(news)),
                 ...chunk.flatMap((news) => {
                     // 설정된 종목 코드에 해당하는 종목만 종목 뉴스에 추가합니다.
                     const filteredStockCodes = news.stockCodes.filter(
@@ -46,7 +46,7 @@ export class KoreaInvestmentNewsProcessor {
                     );
 
                     return filteredStockCodes.map((stockCode) =>
-                        this.newsService.addStockNews(stockCode, news),
+                        this.newsRepository.addStockNews(stockCode, news),
                     );
                 }),
             ]);

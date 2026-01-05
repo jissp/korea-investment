@@ -1,13 +1,11 @@
 import { AxiosInstance } from 'axios';
-import { Inject, Injectable } from '@nestjs/common';
 import {
     NaverApiNewsParams,
     NaverApiNewsResponse,
-} from '@modules/naver/naver-api/naver-api.types';
+} from '@modules/naver/naver-api/naver-api.interface';
 
-@Injectable()
 export class NaverApiClient {
-    constructor(@Inject('Client') private readonly client: AxiosInstance) {}
+    constructor(private readonly client: AxiosInstance) {}
 
     /**
      * @param params

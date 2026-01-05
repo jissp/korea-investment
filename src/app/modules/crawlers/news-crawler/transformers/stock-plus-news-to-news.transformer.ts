@@ -1,4 +1,4 @@
-import { NewsCategory, NewsItem } from '@app/modules/news';
+import { NewsCategory, NewsItem } from '@app/modules/repositories/news-repository';
 import { StockPlusAsset, StockPlusNews } from '@modules/stock-plus';
 
 export class StockPlusNewsToNewsTransformer {
