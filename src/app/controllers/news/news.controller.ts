@@ -19,7 +19,9 @@ export class NewsController {
     })
     @Get()
     public async getNews(): Promise<NewsResponse> {
-        const newsList = await this.newsService.getAllNews();
+        const newsList = await this.newsService.getAllNews({
+            limit: 100,
+        });
 
         return {
             data: newsList,

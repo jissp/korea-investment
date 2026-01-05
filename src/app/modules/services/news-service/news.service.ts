@@ -25,8 +25,8 @@ export class NewsService {
     /**
      * 모든 뉴스를 조회합니다.
      */
-    public async getAllNews() {
-        return this.newsRepository.getNewsList();
+    public async getAllNews({ limit = 100 }: { limit: number }) {
+        return this.newsRepository.getNewsList(limit);
     }
 
     /**
