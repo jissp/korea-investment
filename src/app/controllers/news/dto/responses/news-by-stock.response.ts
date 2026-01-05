@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { NewsCategory, NewsItem } from '@app/modules/repositories/news-repository';
+import {
+    NewsCategory,
+    NewsItem,
+} from '@app/modules/repositories/news-repository';
 
 class News implements NewsItem {
     @ApiProperty({

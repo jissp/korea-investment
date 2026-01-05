@@ -1,5 +1,3 @@
-
-
 export interface NaverApiNewsParams {
     /**
      * 검색어.
