@@ -1,19 +1,14 @@
-import * as _ from 'lodash';
 import { Injectable, Logger } from '@nestjs/common';
 import { getStockName } from '@common/domains';
-import { GeminiCliService } from '@modules/gemini-cli';
-import {
-    NaverApiClientFactory,
-    NaverApiNewsItem,
-    NaverApiNewsResponse,
-    NaverAppName,
-} from '@modules/naver/naver-api';
-import { StockAnalyzerEventType } from './stock-analyzer.types';
-import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
 import { uniqueValues } from '@common/utils';
-
-const MAX_NEWS_ITEMS = 30;
-const MAX_NEWS_ITEMS_FOR_GROUP = 100;
+import { GeminiCliService } from '@modules/gemini-cli';
+import { NaverApiClientFactory, NaverAppName } from '@modules/naver/naver-api';
+import { MarketDivCode } from '@modules/korea-investment/common';
+import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
+import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
+import { StockAnalyzerEventType } from './stock-analyzer.types';
+import { AnalyzeStockPromptTransformer } from './transformers/analyze-stock-prompt.transformer';
+import { AnalyzeKeywordGroupPromptTransformer } from './transformers/analyze-keyword-group-prompt.transformer';
 
 @Injectable()
 export class StockAnalyzerService {
@@ -23,6 +18,7 @@ export class StockAnalyzerService {
         private readonly geminiCliService: GeminiCliService,
         private readonly naverApiClientFactory: NaverApiClientFactory,
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
+        private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
     ) {}
 
     /**
@@ -32,24 +28,14 @@ export class StockAnalyzerService {
     public async requestAnalyzeStock(stockCode: string) {
         try {
             const keywords = await this.getKeywords(stockCode);
+            const naverNewsItems = await this.getNaverNewsItems(keywords);
+            const stockInvestors =
+                await this.koreaInvestmentQuotationClient.inquireInvestor({
+                    FID_INPUT_ISCD: stockCode,
+                    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
+                });
 
-            const client = this.naverApiClientFactory.create(
-                NaverAppName.SEARCH,
-            );
-
-            const newsResponses = await Promise.all(
-                keywords.map((keyword) =>
-                    client.getNews({
-                        query: keyword,
-                    }),
-                ),
-            );
-
-            const newsItems = this.extractNewsItems(newsResponses);
-
-            const newsPrompt = this.buildNewsPrompt(
-                newsItems.slice(0, MAX_NEWS_ITEMS),
-            );
+            const transformer = new AnalyzeStockPromptTransformer();
 
             this.geminiCliService.requestPrompt({
                 callbackEvent: {
@@ -58,9 +44,10 @@ export class StockAnalyzerService {
                         stockCode,
                     },
                 },
-                prompt: this.buildPromptForAnalysisStock({
+                prompt: transformer.transform({
                     stockName: getStockName(stockCode),
-                    newsPrompt,
+                    stockInvestors,
+                    naverNewsItems,
                 }),
             });
         } catch (error) {
@@ -78,28 +65,9 @@ export class StockAnalyzerService {
         try {
             const keywords =
                 await this.keywordSettingService.getKeywordsByGroup(groupName);
+            const naverNewsItems = await this.getNaverNewsItems(keywords);
 
-            const client = this.naverApiClientFactory.create(
-                NaverAppName.SEARCH,
-            );
-
-            const newsResponses = await Promise.all(
-                keywords.map((keyword) =>
-                    client.getNews({
-                        query: keyword,
-                        start: 1,
-                        display: 100,
-                        sort: 'date',
-                    }),
-                ),
-            );
-
-            const newsItems = this.extractNewsItems(newsResponses);
-
-            const newsPrompt = this.buildNewsPrompt(
-                newsItems.slice(0, MAX_NEWS_ITEMS_FOR_GROUP),
-            );
-
+            const transformer = new AnalyzeKeywordGroupPromptTransformer();
             this.geminiCliService.requestPrompt({
                 callbackEvent: {
                     eventName:
@@ -108,9 +76,9 @@ export class StockAnalyzerService {
                         groupName,
                     },
                 },
-                prompt: this.buildPromptForAnalysisKeywordGroup({
+                prompt: transformer.transform({
                     groupName,
-                    newsPrompt,
+                    naverNewsItems,
                 }),
             });
         } catch (error) {
@@ -136,135 +104,22 @@ export class StockAnalyzerService {
     }
 
     /**
-     * 실시간으로 검색된 뉴스 정보를 추출합니다.
-     * @param newsResponses
+     * 실시간으로 네이버 뉴스를 조회합니다.
+     * @param keywords
      * @private
      */
-    private extractNewsItems(newsResponses: NaverApiNewsResponse[]) {
-        const newsItems = newsResponses.flatMap(({ items }) => items);
-        if (newsItems.length === 0) {
-            throw new Error('실시간으로 검색된 뉴스 정보가 없습니다.');
-        }
-
-        return _.sortBy(newsItems, (newsItem) =>
-            new Date(newsItem.pubDate).getTime(),
-        ).reverse();
-    }
-
-    /**
-     * 뉴스 정보를 문자열로 변환합니다.
-     * @private
-     * @param newsItems
-     */
-    private buildNewsPrompt(newsItems: NaverApiNewsItem[]): string {
-        return newsItems
-            .map((newsItem) => {
-                return `- 제목: ${newsItem.title}, 내용: ${newsItem.description}, 링크: ${newsItem.link}`;
-            })
-            .join('\n');
-    }
-
-    /**
-     * 주식 정보를 분석하는 프롬프트를 생성합니다.
-     * @param stockName
-     * @param newsPrompt
-     * @private
-     */
-    private buildPromptForAnalysisStock({
-        stockName,
-        newsPrompt,
-    }: {
-        stockName: string;
-        newsPrompt: string;
-    }) {
-        return `당신은 뉴스 정보를 통해 주가의 흐름을 분석하고 예측하는 전문 주식 분석가이자 투자자입니다.
-아래 지침을 따라 "${stockName}" 종목에 대해 분석하세요.
-
-# 지침
-1. 제공된 뉴스 정보를 분석합니다.
-${newsPrompt}
-2. 분석한 뉴스 정보를 통해 주가 흐름을 예측하고 분석하세요.
-3. 추가로 참고하면 좋을 정보들을 제공하세요.
-- 관련 주제, 테마, 섹터 등 주가에 영향을 줄만한 최신 정보면 좋습니다.
-4. 분석 결과는 반드시 분석 결과 응답 형식으로 답변하세요.
-5. 분석 결과는 핵심만 간결하게 작성하세요.
-
-# 분석 결과 응답 형식
-## 최근 주식 동향
-[설명]
-
-## 주가 전망
-- **상방 요인**: [상방 요인 설명]
-- **하방 요인**: [하방 요인 설명]
-
-## 추가로 참고하면 좋을 정보
-[정보]
-
-## 연관 주식 종목 목록
-- **[종목명]**: [사유]
-- ...
-
-## 핵심 키워드
-- **[키워드명]**: [사유]
-- ...
-
-## 추천하는 포지션과 사유
-- **[포지션]**
-- [사유]
-`;
-    }
-
-    /**
-     * 주식 정보를 분석하는 프롬프트를 생성합니다.
-     * @param groupName
-     * @param newsPrompt
-     * @private
-     */
-    private buildPromptForAnalysisKeywordGroup({
-        groupName,
-        newsPrompt,
-    }: {
-        groupName: string;
-        newsPrompt: string;
-    }) {
-        return `당신은 뉴스 정보를 통해 주가의 흐름을 분석하고 예측하는 전문 주식 분석가이자 투자자입니다.
-아래 지침을 따라 뉴스 정보를 분석하여 해당 주제에 대해서 분석을 하세요.
-
-# 지침
-1. 제공된 뉴스 정보를 분석합니다.
-${newsPrompt}
-2. 분석한 뉴스 정보를 통해 해당 주제의 주가 흐름을 예측하고 분석하세요.
-3. 추가로 참고하면 좋을 정보들을 제공하세요.
-- 관련 주제와 관련된 정책, 호재, 악재 등 주가에 영향을 줄만한 최신 정보면 좋습니다.
-4. 분석 결과는 반드시 분석 결과 응답 형식으로 답변하세요.
-5. 분석 결과는 핵심만 간결하게 작성하세요.
-
-# 분석 결과 응답 형식
-## ${groupName} 최근 동향
-[설명]
-
-## 흐름 전망
-- **상방 요인**: [상방 요인 설명]
-- **하방 요인**: [하방 요인 설명]
-
-## 호재 뉴스
-- [제목]
-- ...
-
-## 악재 뉴스
-- [제목]
-- ...
-
-## 추가로 참고하면 좋을 정보
-[정보]
-
-## 관련 주식 종목 목록
-- **[종목명]**: [사유]
-- ...
-
-## 핵심 키워드
-- **[키워드명]**: [사유]
-- ...
-`;
+    private async getNaverNewsItems(keywords: string[]) {
+        const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
+        const newsResponses = await Promise.all(
+            keywords.map((keyword) =>
+                client.getNews({
+                    query: keyword,
+                    start: 1,
+                    display: 100,
+                    sort: 'date',
+                }),
+            ),
+        );
+        return newsResponses.flatMap((response) => response.items);
     }
 }

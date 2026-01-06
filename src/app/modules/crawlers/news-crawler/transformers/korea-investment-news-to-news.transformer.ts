@@ -1,4 +1,9 @@
+import { Logger } from '@nestjs/common';
 import { Nullable } from '@common/types';
+import {
+    toDateByKoreaInvestmentTime,
+    toDateByKoreaInvestmentYmd,
+} from '@common/utils';
 import {
     NewsCategory,
     NewsItem,
@@ -6,6 +11,10 @@ import {
 import { KoreaInvestmentNewsItem } from '../news-crawler.interface';
 
 export class KoreaInvestmentNewsToNewsTransformer {
+    private readonly logger = new Logger(
+        KoreaInvestmentNewsToNewsTransformer.name,
+    );
+
     private readonly stockCodeFields: (keyof KoreaInvestmentNewsItem)[] = [
         'iscd1',
         'iscd2',
@@ -54,16 +63,14 @@ export class KoreaInvestmentNewsToNewsTransformer {
     ): Nullable<string> {
         const { data_dt, data_tm } = koreaInvestmentNews;
 
-        const dateMatch = data_dt.match(/(\d{4})(\d{2})(\d{2})/);
-        const timeMatch = data_tm.match(/(\d{2})(\d{2})(\d{2})/);
+        try {
+            const date = toDateByKoreaInvestmentYmd(data_dt);
+            const time = toDateByKoreaInvestmentTime(data_tm);
 
-        if (!dateMatch || !timeMatch) {
+            return `${date} ${time}`;
+        } catch (error) {
+            this.logger.error('Failed to normalize created at', error);
             return null;
         }
-
-        const [, year, month, day] = dateMatch;
-        const [, hour, minute, second] = timeMatch;
-
-        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     }
 }
