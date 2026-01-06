@@ -16,6 +16,8 @@ import {
     DomesticStockQuotationsInquireIndexDailyPriceOutput2,
     DomesticStockQuotationsInquireIndexDailyPriceParam,
     DomesticStockQuotationsInquireIndexTimePriceOutput,
+    DomesticStockQuotationsInquireInvestorOutput,
+    DomesticStockQuotationsInquireInvestorParam,
     DomesticStockQuotationsInquireMemberOutput,
     DomesticStockQuotationsInquireMemberParam,
     DomesticStockQuotationsInquireTimeItemChartPriceOutput,
@@ -194,6 +196,25 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_ISCD: iscd,
                 FID_INPUT_HOUR_1: timeframe,
             },
+        });
+
+        return response.output;
+    }
+
+    /**
+     * 주식현재가 투자자 동향
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-investor
+     */
+    public async inquireInvestor(
+        params: DomesticStockQuotationsInquireInvestorParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockQuotationsInquireInvestorOutput[]>
+        >({
+            tradeId: 'FHKST01010900',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-investor',
+            params,
         });
 
         return response.output;

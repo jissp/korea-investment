@@ -1,6 +1,6 @@
 import { Controller, Get, Logger } from '@nestjs/common';
+import { isNil } from '@nestjs/common/utils/shared.utils';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
-import { StockRepository } from '@app/modules/stock-repository';
 import {
     DomesticIndexItem,
     IndexRepository,
@@ -17,16 +17,12 @@ import {
     OverseasGovernmentBondsResponse,
     OverseasIndexPriceResponse,
 } from './dto';
-import { isNil } from '@nestjs/common/utils/shared.utils';
 
 @Controller('v1/stocks/indexes')
 export class StockIndexController {
     private readonly logger = new Logger(StockIndexController.name);
 
-    constructor(
-        private readonly stockRepository: StockRepository,
-        private readonly indexRepository: IndexRepository,
-    ) {}
+    constructor(private readonly indexRepository: IndexRepository) {}
 
     @ApiOperation({
         summary: '국내 업종 시세 조회',

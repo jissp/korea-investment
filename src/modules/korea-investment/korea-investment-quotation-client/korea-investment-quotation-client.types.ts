@@ -509,32 +509,39 @@ export interface DomesticStockQuotationsInquireTimeItemChartPriceOutput {
      * 전일 대비 변동 (+-변동차이)
      */
     prdy_vrss: string;
+
     /**
      * 전일 대비 부호
      */
     prdy_vrss_sign: string;
+
     /**
      * 전일 대비율
      * 소수점 두자리까지 제공
      */
     prdy_ctrt: string;
+
     /**
      * 전일대비 종가
      */
     stck_prdy_clpr: string;
+
     /**
      * 누적 거래량
      */
     acml_vol: string;
+
     /**
      * 누적 거래대금
      */
     acml_tr_pbmn: string;
+
     /**
      * 한글 종목명
      * 한글 종목명 (HTS 기준)
      */
     hts_kor_isnm: string;
+
     /**
      * 주식 현재가
      */
@@ -754,50 +761,62 @@ export interface DomesticStockQuotationsInquireIndexDailyPriceOutput2 {
      * 주식 영업 일자
      */
     stck_bsop_date: string;
+
     /**
      * 업종 지수 현재가
      */
     bstp_nmix_prpr: string;
+
     /**
      * 전일 대비 부호
      */
     prdy_vrss_sign: string;
+
     /**
      * 업종 지수 전일 대비
      */
     bstp_nmix_prdy_vrss: string;
+
     /**
      * 업종 지수 전일 대비율
      */
     bstp_nmix_prdy_ctrt: string;
+
     /**
      * 업종 지수 시가2
      */
     bstp_nmix_oprc: string;
+
     /**
      * 업종 지수 최고가
      */
     bstp_nmix_hgpr: string;
+
     /**
      * 업종 지수 최저가
      */
     bstp_nmix_lwpr: string;
+
     /**
      * 누적 거래량 비중
      */
     acml_vol_rlim: string;
+
     /**
      * 누적 거래량
      */
     acml_vol: string;
+
     /**
      * 누적 거래 대금
      */
     acml_tr_pbmn: string;
+
     /**
      * 투자 신 심리도
      */
     invt_new_psdg: string;
+
     /**
      * 20일 이격도
      */
@@ -810,6 +829,7 @@ export interface DomesticStockQuotationsInquireMemberParam {
      * J:KRX, NX:NXT, UN:통합
      */
     FID_COND_MRKT_DIV_CODE: string;
+
     /**
      * FID 입력 종목코드
      * 종목번호 (6자리) ETN의 경우, Q로 시작 (EX. Q500001)
@@ -1978,4 +1998,128 @@ export interface DomesticStockQuotationsInquireDailyItemChartPriceOutput2 {
      * 99:기타
      */
     revl_issu_reas: string;
+}
+
+export interface DomesticStockQuotationsInquireInvestorParam {
+    /**
+     * 조건 시장 분류 코드 (J: KRX, NX: NXT, UN: 통합)
+     */
+    FID_COND_MRKT_DIV_CODE: MarketDivCode;
+
+    /**
+     * 입력 종목코드 (ex 005930 삼성전자)
+     */
+    FID_INPUT_ISCD: string;
+}
+
+export interface DomesticStockQuotationsInquireInvestorOutput {
+    /**
+     * 주식 영업 일자
+     */
+    stck_bsop_date: string;
+
+    /**
+     * 주식 종가
+     */
+    stck_clpr: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 개인 순매수 수량
+     */
+    prsn_ntby_qty: string;
+
+    /**
+     * 외국인 순매수 수량
+     */
+    frgn_ntby_qty: string;
+
+    /**
+     * 기관계 순매수 수량
+     */
+    orgn_ntby_qty: string;
+
+    /**
+     * 개인 순매수 거래 대금
+     */
+    prsn_ntby_tr_pbmn: string;
+
+    /**
+     * 외국인 순매수 거래 대금
+     */
+    frgn_ntby_tr_pbmn: string;
+
+    /**
+     * 기관계 순매수 거래 대금
+     */
+    orgn_ntby_tr_pbmn: string;
+
+    /**
+     * 개인 매수2 거래량
+     */
+    prsn_shnu_vol: string;
+
+    /**
+     * 외국인 매수2 거래량
+     */
+    frgn_shnu_vol: string;
+
+    /**
+     * 기관계 매수2 거래량
+     */
+    orgn_shnu_vol: string;
+
+    /**
+     * 개인 매수2 거래 대금
+     */
+    prsn_shnu_tr_pbmn: string;
+
+    /**
+     * 외국인 매수2 거래 대금
+     */
+    frgn_shnu_tr_pbmn: string;
+
+    /**
+     * 기관계 매수2 거래 대금
+     */
+    orgn_shnu_tr_pbmn: string;
+
+    /**
+     * 개인 매도 거래량
+     */
+    prsn_seln_vol: string;
+
+    /**
+     * 외국인 매도 거래량
+     */
+    frgn_seln_vol: string;
+
+    /**
+     * 기관계 매도 거래량
+     */
+    orgn_seln_vol: string;
+
+    /**
+     * 개인 매도 거래 대금
+     */
+    prsn_seln_tr_pbmn: string;
+
+    /**
+     * 외국인 매도 거래 대금
+     */
+    frgn_seln_tr_pbmn: string;
+
+    /**
+     * 기관계 매도 거래 대금
+     */
+    orgn_seln_tr_pbmn: string;
 }

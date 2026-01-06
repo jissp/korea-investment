@@ -1,9 +1,9 @@
 import { OnEvent } from '@nestjs/event-emitter';
 import { Injectable, Logger } from '@nestjs/common';
+import { getStockName } from '@common/domains';
 import { CallbackEvent } from '@modules/gemini-cli';
 import { AnalysisRepository } from '@app/modules/repositories/analysis-repository';
 import { StockAnalyzerEventType } from './stock-analyzer.types';
-import { getStockName } from '@common/domains';
 
 @Injectable()
 export class StockAnalyzerListener {

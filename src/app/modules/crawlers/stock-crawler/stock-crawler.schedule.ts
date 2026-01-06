@@ -1,31 +1,83 @@
 import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { PreventConcurrentExecution } from '@common/decorators';
 import { getCurrentMarketDivCode } from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
 import { MarketDivCode } from '@modules/korea-investment/common';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import { DomesticStockQuotationsInquireDailyItemChartPriceParam } from '@modules/korea-investment/korea-investment-quotation-client';
+import {
+    DomesticStockQuotationsInquireDailyItemChartPriceParam,
+    DomesticStockQuotationsInquireInvestorParam,
+} from '@modules/korea-investment/korea-investment-quotation-client';
+import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import {
     KoreaInvestmentCallApiParam,
+    KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
-import { CrawlerFlowType } from '../crawler.types';
+import { StockCrawlerFlowType } from './stock-crawler.types';
 
 @Injectable()
-export class ChartSchedule implements OnModuleInit {
-    private readonly logger: Logger = new Logger(ChartSchedule.name);
+export class StockCrawlerSchedule implements OnModuleInit {
+    private readonly logger = new Logger(StockCrawlerSchedule.name);
 
     constructor(
         private readonly settingService: KoreaInvestmentSettingService,
-        private readonly helper: KoreaInvestmentHelperService,
-        @Inject(CrawlerFlowType.RequestDailyItemChartPrice)
+        private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
+        private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
+        @Inject(StockCrawlerFlowType.RequestDailyItemChartPrice)
         private readonly requestDailyItemChartPriceFlow: FlowProducer,
+        @Inject(StockCrawlerFlowType.RequestStockInvestor)
+        private readonly requestStockInvestorFlow: FlowProducer,
     ) {}
 
     onModuleInit() {
+        // this.handleCrawlingStockInvestor();
         this.handleCrawlingStockDailyItemChartPrice();
+    }
+
+    @Cron('0 16 * * *') // 매일 16시에 실행 (장 마감 후)
+    @PreventConcurrentExecution()
+    async handleCrawlingStockInvestor() {
+        // 임시로 처리 안함.
+        return;
+
+        try {
+            const stockCodes = await this.settingService.getStockCodes();
+
+            const queueName = StockCrawlerFlowType.RequestStockInvestor;
+            await this.requestStockInvestorFlow.add(
+                {
+                    name: queueName,
+                    queueName: queueName,
+                    children: stockCodes.map((stockCode) => {
+                        return this.requestApiHelper.generateRequestApi<DomesticStockQuotationsInquireInvestorParam>(
+                            {
+                                url: '/uapi/domestic-stock/v1/quotations/inquire-investor',
+                                tradeId: 'FHKST01010900',
+                                params: {
+                                    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
+                                    FID_INPUT_ISCD: stockCode,
+                                },
+                            },
+                        );
+                    }),
+                },
+                {
+                    queuesOptions: {
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                        [KoreaInvestmentRequestApiType]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                    },
+                },
+            );
+        } catch (error) {
+            this.logger.error(error);
+        }
     }
 
     @Cron('00 */1 * * *')
@@ -37,13 +89,13 @@ export class ChartSchedule implements OnModuleInit {
             const fromDate = new Date(currentDate);
             fromDate.setDate(currentDate.getDate() - 90);
 
+            const queueName = StockCrawlerFlowType.RequestDailyItemChartPrice;
             await Promise.all(
                 stockCodes.map((stockCode) => {
                     return this.requestDailyItemChartPriceFlow.add(
                         {
-                            name: CrawlerFlowType.RequestDailyItemChartPrice,
-                            queueName:
-                                CrawlerFlowType.RequestDailyItemChartPrice,
+                            name: queueName,
+                            queueName,
                             data: {
                                 stockCode,
                             },
@@ -62,11 +114,11 @@ export class ChartSchedule implements OnModuleInit {
                                             FID_PERIOD_DIV_CODE: 'D',
                                             FID_ORG_ADJ_PRC: '1',
                                             FID_INPUT_DATE_1:
-                                                this.helper.formatDateParam(
+                                                this.koreaInvestmentHelperService.formatDateParam(
                                                     fromDate,
                                                 ),
                                             FID_INPUT_DATE_2:
-                                                this.helper.formatDateParam(
+                                                this.koreaInvestmentHelperService.formatDateParam(
                                                     currentDate,
                                                 ),
                                         },
@@ -76,7 +128,7 @@ export class ChartSchedule implements OnModuleInit {
                         },
                         {
                             queuesOptions: {
-                                [CrawlerFlowType.RequestDailyItemChartPrice]: {
+                                [queueName]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
                                 [KoreaInvestmentRequestApiType]: {

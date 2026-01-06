@@ -1,6 +1,6 @@
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
-import { StockRepository } from '@app/modules/stock-repository';
+import { StockRepository } from '@app/modules/repositories';
 import {
     KoreaInvestmentPopulatedHtsTopViewResponse,
     KoreaInvestmentPopulatedVolumeRankResponse,
