@@ -11,7 +11,7 @@ import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea
 import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
 import { GeminiCliModule } from '@modules/gemini-cli';
 import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
-import { StockRepositoryModule } from '@app/modules/stock-repository';
+import { StockRepositoryModule } from '@app/modules/repositories/stock-repository';
 import {
     AccountRepositoryModule,
     AnalysisRepositoryModule,
@@ -20,6 +20,7 @@ import {
 import { CrawlerModule } from '@app/modules/crawlers/crawler';
 import { NewsCrawlerModule } from '@app/modules/crawlers/news-crawler';
 import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-index-crawler';
+import { StockCrawlerModule } from '@app/modules/crawlers/stock-crawler';
 import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
 import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
 import { AppServiceModule } from '@app/modules/services';
@@ -74,6 +75,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         NewsCrawlerModule,
         KoreaInvestmentAccountCrawlerModule,
         KoreaInvestmentIndexCrawlerModule,
+        StockCrawlerModule,
         StockAnalyzerModule,
         AppServiceModule,
     ],

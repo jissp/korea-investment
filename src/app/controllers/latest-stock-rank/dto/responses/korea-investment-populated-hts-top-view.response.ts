@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 import { DomesticStockRankingHtsTopViewOutput } from '@modules/korea-investment/korea-investment-rank-client';
-import { KoreaInvestmentPopulatedHtsTopViewItem } from '@app/modules/stock-repository';
+import { KoreaInvestmentPopulatedHtsTopViewItem } from '@app/modules/repositories/stock-repository';
 
 class DomesticStockRankingHtsTopView implements DomesticStockRankingHtsTopViewOutput {
     @ApiProperty({

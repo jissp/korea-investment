@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentPopulatedVolumeRankItem } from '@app/modules/stock-repository';
+import { KoreaInvestmentPopulatedVolumeRankItem } from '@app/modules/repositories/stock-repository';
 import { DomesticStockQuotationVolumeRankOutput } from '@modules/korea-investment/korea-investment-rank-client';
 
 class DomesticStockQuotationVolumeRank implements DomesticStockQuotationVolumeRankOutput {

@@ -2,16 +2,12 @@ import * as _ from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
-import { StockRepository } from '@app/modules/stock-repository';
+import { StockRepository } from '@app/modules/repositories/stock-repository';
 import {
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockRankingHtsTopViewOutput,
 } from '@modules/korea-investment/korea-investment-rank-client';
-import {
-    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
-    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
-    DomesticStockQuotationsIntstockMultPriceOutput,
-} from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
@@ -193,35 +189,6 @@ export class KoreaInvestmentFlowProcessor {
             await this.stockRepository.setPopulatedVolumeRank(
                 populatedVolumeRanks,
             );
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
-    }
-
-    @OnQueueProcessor(CrawlerFlowType.RequestDailyItemChartPrice)
-    async processRequestDailyItemChartPrice(job: Job) {
-        try {
-            const { stockCode } = job.data;
-
-            const childrenResults =
-                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
-                    any,
-                    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
-                    DomesticStockQuotationsInquireDailyItemChartPriceOutput2[]
-                >(job);
-
-            if (!childrenResults.length) {
-                this.logger.warn(`No data for stock: ${stockCode}`);
-                return;
-            }
-
-            const { response } = childrenResults[0];
-            await this.stockRepository.setDailyStockChart(stockCode, {
-                output: response.output1,
-                output2: response.output2,
-            });
         } catch (error) {
             this.logger.error(error);
 
