@@ -30,9 +30,11 @@ import {
 } from './listeners';
 import {
     AccountController,
+    AnalysisController,
     AssetController,
     FavoriteStockController,
     KeywordController,
+    KeywordGroupController,
     LatestStockRankController,
     NewsController,
     StockController,
@@ -78,12 +80,14 @@ import { KoreaInvestmentBeGateway } from './gateways';
     controllers: [
         AssetController,
         AccountController,
+        AnalysisController,
         NewsController,
         LatestStockRankController,
         StockController,
         StockIndexController,
         FavoriteStockController,
         KeywordController,
+        KeywordGroupController,
     ],
     providers: [
         KoreaInvestmentKeywordListener,

@@ -30,4 +30,23 @@ export class StockAnalyzerListener {
             this.logger.error(error);
         }
     }
+
+    @OnEvent(StockAnalyzerEventType.AnalysisCompletedForKeywordGroup)
+    public async handleCompletedPromptForKeywordGroup(
+        event: CallbackEvent<{
+            groupName: string;
+        }>,
+    ) {
+        try {
+            const { groupName } = event.eventData;
+
+            await this.analysisRepository.setAIAnalysisKeywordGroup({
+                groupName,
+                content: event.prompt.response,
+                updatedAt: new Date(),
+            });
+        } catch (error) {
+            this.logger.error(error);
+        }
+    }
 }

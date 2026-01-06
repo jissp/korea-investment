@@ -25,7 +25,7 @@ export function getStocks() {
  * 종목명을 가져옵니다.
  * @param stockCode
  */
-export function getStockName(stockCode: string) {
+export function getStockName(stockCode: string): string {
     const stock = codeMap[stockCode];
 
     return stock ? stock.name : stockCode;

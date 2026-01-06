@@ -10,8 +10,10 @@ import {
 } from '@modules/naver/naver-api';
 import { StockAnalyzerEventType } from './stock-analyzer.types';
 import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
+import { uniqueValues } from '@common/utils';
 
 const MAX_NEWS_ITEMS = 30;
+const MAX_NEWS_ITEMS_FOR_GROUP = 100;
 
 @Injectable()
 export class StockAnalyzerService {
@@ -69,15 +71,68 @@ export class StockAnalyzerService {
     }
 
     /**
+     * Gemini를 통해 키워드 그룹의 흐름을 분석합니다.
+     * @param groupName
+     */
+    public async requestAnalyzeKeywordGroup(groupName: string) {
+        try {
+            const keywords =
+                await this.keywordSettingService.getKeywordsByGroup(groupName);
+
+            const client = this.naverApiClientFactory.create(
+                NaverAppName.SEARCH,
+            );
+
+            const newsResponses = await Promise.all(
+                keywords.map((keyword) =>
+                    client.getNews({
+                        query: keyword,
+                        start: 1,
+                        display: 100,
+                        sort: 'date',
+                    }),
+                ),
+            );
+
+            const newsItems = this.extractNewsItems(newsResponses);
+
+            const newsPrompt = this.buildNewsPrompt(
+                newsItems.slice(0, MAX_NEWS_ITEMS_FOR_GROUP),
+            );
+
+            this.geminiCliService.requestPrompt({
+                callbackEvent: {
+                    eventName:
+                        StockAnalyzerEventType.AnalysisCompletedForKeywordGroup,
+                    eventData: {
+                        groupName,
+                    },
+                },
+                prompt: this.buildPromptForAnalysisKeywordGroup({
+                    groupName,
+                    newsPrompt,
+                }),
+            });
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    /**
      * 해당 종목을 위한 검색 키워드 목록을 조회합니다.
      * @param stockCode
      * @private
      */
-    private async getKeywords(stockCode: string) {
-        const keywords =
+    private async getKeywords(stockCode: string): Promise<string[]> {
+        const keywords: string[] =
             await this.keywordSettingService.getKeywordsByStockCode(stockCode);
 
-        return Array.from(new Set([getStockName(stockCode), ...keywords]));
+        const stockName = getStockName(stockCode);
+        const allKeywords: string[] = [stockName, ...keywords];
+
+        return uniqueValues(allKeywords);
     }
 
     /**
@@ -156,6 +211,60 @@ ${newsPrompt}
 ## 추천하는 포지션과 사유
 - **[포지션]**
 - [사유]
+`;
+    }
+
+    /**
+     * 주식 정보를 분석하는 프롬프트를 생성합니다.
+     * @param groupName
+     * @param newsPrompt
+     * @private
+     */
+    private buildPromptForAnalysisKeywordGroup({
+        groupName,
+        newsPrompt,
+    }: {
+        groupName: string;
+        newsPrompt: string;
+    }) {
+        return `당신은 뉴스 정보를 통해 주가의 흐름을 분석하고 예측하는 전문 주식 분석가이자 투자자입니다.
+아래 지침을 따라 뉴스 정보를 분석하여 해당 주제에 대해서 분석을 하세요.
+
+# 지침
+1. 제공된 뉴스 정보를 분석합니다.
+${newsPrompt}
+2. 분석한 뉴스 정보를 통해 해당 주제의 주가 흐름을 예측하고 분석하세요.
+3. 추가로 참고하면 좋을 정보들을 제공하세요.
+- 관련 주제와 관련된 정책, 호재, 악재 등 주가에 영향을 줄만한 최신 정보면 좋습니다.
+4. 분석 결과는 반드시 분석 결과 응답 형식으로 답변하세요.
+5. 분석 결과는 핵심만 간결하게 작성하세요.
+
+# 분석 결과 응답 형식
+## ${groupName} 최근 동향
+[설명]
+
+## 흐름 전망
+- **상방 요인**: [상방 요인 설명]
+- **하방 요인**: [하방 요인 설명]
+
+## 호재 뉴스
+- [제목]
+- ...
+
+## 악재 뉴스
+- [제목]
+- ...
+
+## 추가로 참고하면 좋을 정보
+[정보]
+
+## 관련 주식 종목 목록
+- **[종목명]**: [사유]
+- ...
+
+## 핵심 키워드
+- **[키워드명]**: [사유]
+- ...
 `;
     }
 }

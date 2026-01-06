@@ -1,2 +1,1 @@
-export * from './get-ai-analysis-stock.response';
-export * from './get-ai-analysis-stocks.response';
+export * from './korea-investment-daily-item-chart-price.response';

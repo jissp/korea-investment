@@ -1,7 +1,10 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { RedisHelper, RedisSet } from '@modules/redis';
+import { getStockName } from '@common/domains';
 import {
     KeywordType,
+    KoreaInvestmentKeywordSettingEvent,
     KoreaInvestmentKeywordSettingKey,
 } from './korea-investment-keyword-setting.types';
 
@@ -18,9 +21,119 @@ export class KoreaInvestmentKeywordSettingService {
 
     constructor(
         private readonly redisHelper: RedisHelper,
+        private readonly eventEmitter: EventEmitter2,
         @Inject('KeywordSetMap')
         private readonly keywordSetMap: Map<KeywordType, RedisSet>,
     ) {}
+
+    /**
+     * 키워드 그룹 목록을 조회합니다.
+     */
+    public async getKeywordGroupsList(): Promise<string[]> {
+        return this.getKeywordGroupsSet().list();
+    }
+
+    /**
+     * 키워드가 속한 키워드 그룹 목록을 조회합니다.
+     */
+    public async getKeywordGroupsListByKeyword(
+        keyword: string,
+    ): Promise<string[]> {
+        return this.getKeywordGroupsByKeywordSet(keyword).list();
+    }
+
+    /**
+     * 키워드 그룹을 생성합니다.
+     * @param groupName
+     */
+    public async createKeywordGroup(groupName: string) {
+        return this.getKeywordGroupsSet().add(groupName);
+    }
+
+    /**
+     * 키워드 그룹을 삭제합니다.
+     * @param groupName
+     */
+    public async deleteKeywordGroup(groupName: string) {
+        const keywords = await this.getKeywordsByGroup(groupName);
+
+        await this.getKeywordGroupItemSet(groupName).clear();
+
+        await this.getKeywordGroupsSet().remove(groupName);
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.DeletedKeywordGroup,
+            { groupName, keywords },
+        );
+    }
+
+    /**
+     * 그룹 내 키워드 목록을 조회합니다.
+     * @param groupName
+     */
+    public async getKeywordsByGroup(groupName: string): Promise<string[]> {
+        return this.getKeywordGroupItemSet(groupName).list();
+    }
+
+    /**
+     * 키워드 그룹이 지정된 모든 키워드를 조회합니다.
+     */
+    public async getKeywordsFromAllGroups(): Promise<string[]> {
+        const groupNames = await this.getKeywordGroupsList();
+
+        const results = await Promise.all(
+            groupNames.map((groupName) => this.getKeywordsByGroup(groupName)),
+        );
+
+        return Array.from(new Set(results.flat()));
+    }
+
+    /**
+     * 그룹에 키워드를 추가합니다.
+     * @param groupName
+     * @param keyword
+     */
+    public async addKeywordToGroup(groupName: string, keyword: string) {
+        await this.createKeywordGroup(groupName);
+
+        const result =
+            await this.getKeywordGroupItemSet(groupName).add(keyword);
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.AddedKeywordToGroup,
+            { groupName, keyword },
+        );
+
+        return result;
+    }
+
+    /**
+     * 그룹에 종목명(키워드)을 추가합니다.
+     * @param groupName
+     * @param stockCode
+     */
+    public async addStockToGroup(groupName: string, stockCode: string) {
+        const stockName = getStockName(stockCode);
+
+        return this.addKeywordToGroup(groupName, stockName);
+    }
+
+    /**
+     * 그룹에서 키워드를 삭제합니다.
+     * @param groupName
+     * @param keyword
+     */
+    public async deleteKeywordFromGroup(groupName: string, keyword: string) {
+        const result =
+            await this.getKeywordGroupItemSet(groupName).remove(keyword);
+
+        this.eventEmitter.emit(
+            KoreaInvestmentKeywordSettingEvent.DeletedKeywordFromGroup,
+            { groupName, keyword },
+        );
+
+        return result;
+    }
 
     /**
      * 키워드 목록을 조회합니다.
@@ -70,7 +183,7 @@ export class KoreaInvestmentKeywordSettingService {
      * 종목에 등록된 키워드를 조회합니다.
      * @param stockCode
      */
-    public async getKeywordsByStockCode(stockCode: string) {
+    public async getKeywordsByStockCode(stockCode: string): Promise<string[]> {
         const stockKeywordMapSet = this.getKeywordsByStockSet(stockCode);
 
         return stockKeywordMapSet.list();
@@ -213,5 +326,38 @@ export class KoreaInvestmentKeywordSettingService {
         }
 
         return this.keywordSetMap.get(type)!;
+    }
+
+    /**
+     * 키워드가 속해있는 키워드 그룹 목록 Set을 반환합니다.
+     * @param keyword
+     * @private
+     */
+    private getKeywordGroupsByKeywordSet(keyword: string) {
+        return this.redisHelper.createSet(
+            KoreaInvestmentKeywordSettingKey.KeywordGroupsByKeyword,
+            keyword,
+        );
+    }
+
+    /**
+     * 키워드 그룹 목록 Set을 반환합니다.
+     * @private
+     */
+    private getKeywordGroupsSet() {
+        return this.redisHelper.createSet(
+            KoreaInvestmentKeywordSettingKey.KeywordGroups,
+        );
+    }
+
+    /**
+     * 특정 키워드 그룹의 키워드 Set을 반환합니다.
+     * @param groupName
+     * @private
+     */
+    private getKeywordGroupItemSet(groupName: string) {
+        return this.redisHelper.createSet(
+            `${KoreaInvestmentKeywordSettingKey.KeywordGroups}:${groupName}`,
+        );
     }
 }
