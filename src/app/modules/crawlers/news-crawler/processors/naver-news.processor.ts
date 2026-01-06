@@ -69,6 +69,10 @@ export class NaverNewsProcessor {
     ) {
         const stockCodes =
             await this.keywordSettingService.getStockCodesByKeyword(keyword);
+        const keywordGroups =
+            await this.keywordSettingService.getKeywordGroupsListByKeyword(
+                keyword,
+            );
 
         const transformedNewsItems = this.transformNews(response, stockCodes);
 
@@ -76,12 +80,17 @@ export class NaverNewsProcessor {
         for (const chunk of chunks) {
             await Promise.allSettled([
                 ...chunk.map((news) => this.newsRepository.addNews(news)),
-                ...chunk.map((news) =>
-                    this.newsRepository.addKeywordNews(keyword, news),
-                ),
                 ...chunk.flatMap((news) =>
                     stockCodes.map((stockCode) =>
                         this.newsRepository.addStockNews(stockCode, news),
+                    ),
+                ),
+                ...chunk.flatMap((news) =>
+                    keywordGroups.flatMap((groupName) =>
+                        this.newsRepository.addKeywordGroupNews(
+                            groupName,
+                            news,
+                        ),
                     ),
                 ),
             ]);

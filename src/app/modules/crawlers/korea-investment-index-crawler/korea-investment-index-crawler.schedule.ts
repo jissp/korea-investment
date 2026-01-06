@@ -44,7 +44,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
         this.handleCrawlingOverseasGovernmentBond();
     }
 
-    @Cron('*/3 * * * *')
+    @Cron('*/1 * * * *')
     @PreventConcurrentExecution()
     async handleCrawlingKoreaDailyIndex() {
         const fromDate = new Date();

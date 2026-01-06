@@ -2,6 +2,7 @@ export enum NewsRedisKey {
     News = 'news:articles',
     NewsByKeyword = 'news:score:by-keyword',
     NewsByStockCode = 'news:score:by-stock-code',
+    NewsByKeywordGroup = 'news:score:by-keyword-group',
 }
 
 export enum NewsCategory {

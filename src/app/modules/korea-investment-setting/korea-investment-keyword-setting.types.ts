@@ -21,6 +21,9 @@ export enum KoreaInvestmentKeywordSettingKey {
     PossessKeywords = 'setting:keywords:possess',
     StockGroupKeywords = 'setting:keywords:stock-group',
     FavoriteKeywords = 'setting:keywords:favorite',
+
+    KeywordGroups = 'setting:keyword-groups',
+    KeywordGroupsByKeyword = 'setting:keyword-groups:by-keyword',
 }
 
 /**
@@ -30,4 +33,8 @@ export enum KoreaInvestmentKeywordSettingEvent {
     DeletedKeyword = 'DeletedKeyword',
     AddedStockKeyword = 'AddedStockKeyword',
     DeletedStockKeyword = 'DeletedStockKeyword',
+
+    AddedKeywordToGroup = 'AddedKeywordToGroup',
+    DeletedKeywordFromGroup = 'DeletedKeywordFromGroup',
+    DeletedKeywordGroup = 'DeletedKeywordGroup',
 }

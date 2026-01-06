@@ -117,6 +117,42 @@ export class NewsRepository {
     }
 
     /**
+     * 키워드 그룹별 News를 추가합니다.
+     * @param groupName
+     * @param news
+     */
+    public async addKeywordGroupNews(groupName: string, news: NewsItem) {
+        const set = this.getNewsByKeywordGroupSet(groupName);
+        if (await set.exists(news.articleId)) {
+            return;
+        }
+
+        await set.add(news.articleId);
+        const zSet = this.getNewsByKeywordGroupZSet(groupName);
+
+        return zSet.add(
+            JSON.stringify(news),
+            new Date(news.createdAt).getTime(),
+        );
+    }
+
+    /**
+     * 키워드 그룹별 News 목록을 조회합니다.
+     * @param groupName
+     * @param limit
+     */
+    public async getKeywordGroupNewsList(
+        groupName: string,
+        limit: number = 20,
+    ): Promise<NewsItem[]> {
+        const zSet = this.getNewsByKeywordGroupZSet(groupName);
+
+        return zSet.list(limit, {
+            isParse: true,
+        });
+    }
+
+    /**
      * 키워드별 News를 제거합니다.
      * @param keyword
      */
@@ -185,6 +221,31 @@ export class NewsRepository {
         return this.redisHelper.createZSet<NewsItem>(
             NewsRedisKey.NewsByStockCode,
             stockCode,
+        );
+    }
+
+    /**
+     * 키워드 그룹별 News의 Set을 생성합니다.
+     * @param groupName
+     * @private
+     */
+    private getNewsByKeywordGroupSet(groupName: string) {
+        return this.redisHelper.createSet(
+            NewsRedisKey.NewsByKeywordGroup,
+            'Set',
+            groupName,
+        );
+    }
+
+    /**
+     * 키워드 그룹별 News의 ZSet을 생성합니다.
+     * @param groupName
+     * @private
+     */
+    private getNewsByKeywordGroupZSet(groupName: string) {
+        return this.redisHelper.createZSet<NewsItem>(
+            NewsRedisKey.NewsByKeywordGroup,
+            groupName,
         );
     }
 }

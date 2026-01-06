@@ -6,6 +6,8 @@ import {
     KoreaInvestmentKeywordSettingService,
 } from '@app/modules/korea-investment-setting';
 import { NewsRepository } from '@app/modules/repositories/news-repository';
+import { RedisHelper } from '@modules/redis';
+import { KoreaInvestmentKeywordSettingKey } from '@app/modules/korea-investment-setting/korea-investment-keyword-setting.types';
 
 @Injectable()
 export class KoreaInvestmentKeywordListener {
@@ -14,6 +16,7 @@ export class KoreaInvestmentKeywordListener {
     constructor(
         private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         private readonly newsRepository: NewsRepository,
+        private readonly redisHelper: RedisHelper,
     ) {}
 
     @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedKeyword)
@@ -86,5 +89,54 @@ export class KoreaInvestmentKeywordListener {
                 this.newsRepository.deleteKeywordNews(keyword),
             ]);
         }
+    }
+
+    @OnEvent(KoreaInvestmentKeywordSettingEvent.AddedKeywordToGroup)
+    public async handleAddedKeywordToGroup({
+        groupName,
+        keyword,
+    }: {
+        groupName: string;
+        keyword: string;
+    }) {
+        await this.getKeywordGroupsByKeywordSet(keyword).add(groupName);
+    }
+
+    @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedKeywordFromGroup)
+    public async handleDeletedKeywordFromGroup({
+        groupName,
+        keyword,
+    }: {
+        groupName: string;
+        keyword: string;
+    }) {
+        await this.getKeywordGroupsByKeywordSet(keyword).remove(groupName);
+    }
+
+    @OnEvent(KoreaInvestmentKeywordSettingEvent.DeletedKeywordGroup)
+    public async handleDeletedKeywordGroup({
+        groupName,
+        keywords,
+    }: {
+        groupName: string;
+        keywords: string[];
+    }) {
+        await Promise.all(
+            keywords.map((keyword) =>
+                this.getKeywordGroupsByKeywordSet(keyword).remove(groupName),
+            ),
+        );
+    }
+
+    /**
+     * 키워드가 속해있는 키워드 그룹 목록 Set을 반환합니다.
+     * @param keyword
+     * @private
+     */
+    private getKeywordGroupsByKeywordSet(keyword: string) {
+        return this.redisHelper.createSet(
+            KoreaInvestmentKeywordSettingKey.KeywordGroupsByKeyword,
+            keyword,
+        );
     }
 }

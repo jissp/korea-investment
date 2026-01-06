@@ -10,3 +10,8 @@ export type KeywordNewsItem = {
     keyword: string;
     news: NewsItem[];
 };
+
+export type KeywordGroupNewsItem = {
+    groupName: string;
+    news: NewsItem[];
+};

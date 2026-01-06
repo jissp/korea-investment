@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AiAnalysisStockDto } from '@app/controllers/stocks/dto/responses/get-ai-analysis-stock.response';
+import { AiAnalysisStockDto } from './get-ai-analysis-stock.response';
 
 export class GetAiAnalysisStocksResponse {
     @ApiProperty({

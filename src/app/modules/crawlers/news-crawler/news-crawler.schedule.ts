@@ -99,17 +99,14 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async requestNaverNewsCrawlingForKeyword() {
         try {
-            const keywords = await this.keywordSettingService.getKeywords([
-                KeywordType.Manual,
-            ]);
+            const keywords =
+                await this.keywordSettingService.getKeywordsFromAllGroups();
             if (!keywords.length) {
                 return;
             }
 
-            const uniqueKeywords = Array.from(new Set(keywords));
-
             await this.crawlingNaverNewsQueue.addBulk(
-                uniqueKeywords.map((keyword) => {
+                keywords.map((keyword) => {
                     return {
                         name: NewsCrawlerQueueType.CrawlingNaverNews,
                         queueName: NewsCrawlerQueueType.CrawlingNaverNews,
