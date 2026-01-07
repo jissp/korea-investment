@@ -23,6 +23,7 @@ import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-i
 import { StockCrawlerModule } from '@app/modules/crawlers/stock-crawler';
 import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
 import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
+import { StockInvestorModule } from '@app/modules/services/stock-investor';
 import { AppServiceModule } from '@app/modules/services';
 import configuration from './configuration';
 import {
@@ -77,6 +78,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentIndexCrawlerModule,
         StockCrawlerModule,
         StockAnalyzerModule,
+        StockInvestorModule,
         AppServiceModule,
     ],
     controllers: [
