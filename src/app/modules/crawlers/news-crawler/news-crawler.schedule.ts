@@ -19,6 +19,8 @@ import {
     NewsCrawlerQueueType,
 } from './news-crawler.types';
 
+const DEFAULT_CHUNK_SIZE = 5;
+
 @Injectable()
 export class NewsCrawlerSchedule implements OnModuleInit {
     private readonly logger = new Logger(NewsCrawlerSchedule.name);
@@ -60,7 +62,7 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
             const queueName = NewsCrawlerQueueType.RequestDomesticNewsTitle;
 
-            for (const chunk of _.chunk(stockCodes, 5)) {
+            for (const chunk of _.chunk(stockCodes, DEFAULT_CHUNK_SIZE)) {
                 await Promise.allSettled(
                     chunk.map((stockCode) =>
                         this.requestDomesticNewsTitleFlow.add(
@@ -95,33 +97,34 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @Cron('*/3 * * * *')
+    @Cron('*/1 * * * *')
     @PreventConcurrentExecution()
     async requestNaverNewsCrawlingForKeyword() {
         try {
             const keywords =
                 await this.keywordSettingService.getKeywordsFromAllGroups();
-            if (!keywords.length) {
-                return;
-            }
+            const filteredKeywords = keywords.filter(
+                (keyword) => !(keyword.includes('(') && keyword.includes(')')),
+            );
 
-            await this.crawlingNaverNewsQueue.addBulk(
-                keywords.map((keyword) => {
-                    return {
-                        name: NewsCrawlerQueueType.CrawlingNaverNews,
-                        queueName: NewsCrawlerQueueType.CrawlingNaverNews,
-                        data: {
-                            keyword,
-                        },
-                    };
-                }),
+            await Promise.all(
+                _.chunk(filteredKeywords, DEFAULT_CHUNK_SIZE).map(
+                    async (keywords) => {
+                        await this.crawlingNaverNewsQueue.add(
+                            NewsCrawlerQueueType.CrawlingNaverNews,
+                            {
+                                keywords,
+                            },
+                        );
+                    },
+                ),
             );
         } catch (error) {
             this.logger.error(error);
         }
     }
 
-    @Cron('*/3 * * * *')
+    @Cron('*/1 * * * *')
     @PreventConcurrentExecution()
     async requestNaverNewsCrawlingForStockCode() {
         try {
@@ -131,19 +134,28 @@ export class NewsCrawlerSchedule implements OnModuleInit {
                 KeywordType.Favorite,
             ]);
 
-            const uniqueKeywords = Array.from(new Set(keywords));
+            const filteredKeywords = keywords.filter(
+                (keyword) => !(keyword.includes('(') && keyword.includes(')')),
+            );
 
-            await this.crawlingNaverNewsForStockCode.addBulk(
-                uniqueKeywords.map((keyword) => {
-                    return {
-                        name: NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
-                        queueName:
-                            NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
-                        data: {
-                            keyword,
+            const uniqueKeywords = Array.from(new Set(filteredKeywords));
+            // await this.crawlingNaverNewsForStockCode.add(
+            //     NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
+            //     {
+            //         keywords: uniqueKeywords,
+            //     },
+            // );
+
+            await Promise.all(
+                _.chunk(uniqueKeywords, 5).map((keywords) =>
+                    this.crawlingNaverNewsForStockCode.add(
+                        NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
+                        {
+                            keywords,
                         },
-                    };
-                }),
+                        getDefaultJobOptions(),
+                    ),
+                ),
             );
         } catch (error) {
             this.logger.error(error);
@@ -157,14 +169,7 @@ export class NewsCrawlerSchedule implements OnModuleInit {
             await this.stockPlusNewsQueue.add(
                 NewsCrawlerQueueType.CrawlingStockPlusNews,
                 {},
-                {
-                    removeOnComplete: {
-                        count: 3,
-                    },
-                    removeOnFail: {
-                        count: 5,
-                    },
-                },
+                getDefaultJobOptions(),
             );
         } catch (error) {
             this.logger.error(error);

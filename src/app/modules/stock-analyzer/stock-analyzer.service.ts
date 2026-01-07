@@ -109,17 +109,23 @@ export class StockAnalyzerService {
      * @private
      */
     private async getNaverNewsItems(keywords: string[]) {
+        const maxPage = keywords.length < 2 ? 1 : 2;
+        const arr = Array.from({ length: maxPage }, (_, i) => i + 1);
+
+        // 네이버 키워드 검색 - or 조건 적용
+        const mergedKeyword = keywords.join(' | ');
         const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
         const newsResponses = await Promise.all(
-            keywords.map((keyword) =>
+            arr.map((page) =>
                 client.getNews({
-                    query: keyword,
-                    start: 1,
+                    query: mergedKeyword,
+                    start: page,
                     display: 100,
                     sort: 'date',
                 }),
             ),
         );
+
         return newsResponses.flatMap((response) => response.items);
     }
 }

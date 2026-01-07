@@ -4,7 +4,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import {
     NaverApiClientFactory,
-    NaverApiNewsResponse,
+    NaverApiNewsItem,
     NaverAppName,
 } from '@modules/naver/naver-api';
 import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
@@ -12,7 +12,10 @@ import {
     NewsItem,
     NewsRepository,
 } from '@app/modules/repositories/news-repository';
-import { NewsCrawlerQueueType } from '../news-crawler.types';
+import {
+    CrawlingNaverNewsJobPayload,
+    NewsCrawlerQueueType,
+} from '../news-crawler.types';
 import { NaverNewsToNewsTransformer } from '../transformers/naver-news-to-news.transformer';
 
 @Injectable()
@@ -27,87 +30,111 @@ export class NaverNewsProcessor {
     ) {}
 
     @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNews)
-    public async processCrawlingNaverNews(job: Job) {
-        const { keyword } = job.data;
+    public async processCrawlingNaverNews(
+        job: Job<CrawlingNaverNewsJobPayload>,
+    ) {
+        const { keywords } = job.data;
+
+        const joinedKeyword = keywords.join(' | ');
 
         const client = this.naverApiClientFactory.create(NaverAppName.KEYWORD);
-        const response = await client.getNews({
-            query: keyword,
+        const newsResponse = await client.getNews({
+            query: joinedKeyword,
             start: 1,
             display: 100,
             sort: 'date',
         });
 
-        await this.transformWithSave(response, keyword);
+        await this.transformWithSave(newsResponse.items, keywords);
     }
 
     @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNewsForStockCode)
-    public async processCrawlingNaverNewsForStockCode(job: Job) {
-        const { keyword } = job.data;
+    public async processCrawlingNaverNewsForStockCode(
+        job: Job<CrawlingNaverNewsJobPayload>,
+    ) {
+        const { keywords } = job.data;
+
+        const joinedKeyword = keywords.join(' | ');
 
         const client = this.naverApiClientFactory.create(NaverAppName.NEWS);
 
-        const response = await client.getNews({
-            query: keyword,
+        const newsResponse = await client.getNews({
+            query: joinedKeyword,
             start: 1,
             display: 100,
             sort: 'date',
         });
 
-        await this.transformWithSave(response, keyword);
+        await this.transformWithSave(newsResponse.items, keywords);
     }
 
     /**
      *
-     * @param response
-     * @param keyword
+     * @param newsItems
+     * @param keywords
      * @private
      */
     private async transformWithSave(
-        response: NaverApiNewsResponse,
-        keyword: string,
+        newsItems: NaverApiNewsItem[],
+        keywords: string[],
     ) {
-        const stockCodes =
-            await this.keywordSettingService.getStockCodesByKeyword(keyword);
-        const keywordGroups =
-            await this.keywordSettingService.getKeywordGroupsListByKeyword(
-                keyword,
+        for (const keyword of keywords) {
+            const keywordNews = newsItems.filter(
+                ({ title, description }) =>
+                    title.includes(keyword) || description.includes(keyword),
             );
 
-        const transformedNewsItems = this.transformNews(response, stockCodes);
+            if (keywordNews.length === 0) {
+                continue;
+            }
 
-        const chunks = _.chunk(transformedNewsItems, 10);
-        for (const chunk of chunks) {
-            await Promise.allSettled([
-                ...chunk.map((news) => this.newsRepository.addNews(news)),
-                ...chunk.flatMap((news) =>
-                    stockCodes.map((stockCode) =>
-                        this.newsRepository.addStockNews(stockCode, news),
-                    ),
-                ),
-                ...chunk.flatMap((news) =>
-                    keywordGroups.flatMap((groupName) =>
-                        this.newsRepository.addKeywordGroupNews(
-                            groupName,
-                            news,
+            const stockCodes =
+                await this.keywordSettingService.getStockCodesByKeyword(
+                    keyword,
+                );
+            const keywordGroups =
+                await this.keywordSettingService.getKeywordGroupsListByKeyword(
+                    keyword,
+                );
+
+            const transformedNewsItems = this.transformNews(
+                keywordNews,
+                stockCodes,
+            );
+
+            const chunks = _.chunk(transformedNewsItems, 10);
+            for (const chunk of chunks) {
+                await Promise.allSettled([
+                    ...chunk.map((news) => this.newsRepository.addNews(news)),
+                    ...chunk.flatMap((news) =>
+                        stockCodes.map((stockCode) =>
+                            this.newsRepository.addStockNews(stockCode, news),
                         ),
                     ),
-                ),
-            ]);
+                    ...chunk.flatMap((news) =>
+                        keywordGroups.flatMap((groupName) =>
+                            this.newsRepository.addKeywordGroupNews(
+                                groupName,
+                                news,
+                            ),
+                        ),
+                    ),
+                ]);
+            }
         }
     }
 
     /**
      * Naver News API 응답을 News 모델로 변환합니다.
-     * @param response
+     * @param newsItems
      * @param stockCodes
      * @private
      */
     private transformNews(
-        response: NaverApiNewsResponse,
+        newsItems: NaverApiNewsItem[],
         stockCodes: string[],
     ): NewsItem[] {
-        const transformedNews = response.items.map((item) =>
+        const transformedNews = newsItems.map((item) =>
             this.transformer.transform(item),
         );
 

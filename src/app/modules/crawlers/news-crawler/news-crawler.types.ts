@@ -6,5 +6,5 @@ export enum NewsCrawlerQueueType {
 }
 
 export interface CrawlingNaverNewsJobPayload {
-    keyword: string;
+    keywords: string[];
 }
