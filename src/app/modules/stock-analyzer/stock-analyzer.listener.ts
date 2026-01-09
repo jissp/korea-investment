@@ -2,14 +2,20 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Injectable, Logger } from '@nestjs/common';
 import { getStockName } from '@common/domains';
 import { CallbackEvent } from '@modules/gemini-cli';
-import { AnalysisRepository } from '@app/modules/repositories/analysis-repository';
+import {
+    AiAnalysisReportService,
+    ReportType,
+} from '@app/modules/repositories/ai-analysis-report';
+import { KeywordGroup } from '@app/modules/repositories/keyword';
 import { StockAnalyzerEventType } from './stock-analyzer.types';
 
 @Injectable()
 export class StockAnalyzerListener {
     private readonly logger = new Logger(StockAnalyzerListener.name);
 
-    constructor(private readonly analysisRepository: AnalysisRepository) {}
+    constructor(
+        private readonly aiAnalysisReportService: AiAnalysisReportService,
+    ) {}
 
     @OnEvent(StockAnalyzerEventType.AnalysisCompleted)
     public async handleCompletedPrompt(
@@ -19,12 +25,13 @@ export class StockAnalyzerListener {
     ) {
         try {
             const { stockCode } = event.eventData;
+            const stockName = getStockName(stockCode);
 
-            await this.analysisRepository.setAIAnalysisStock({
-                stockCode,
-                stockName: getStockName(stockCode),
+            await this.aiAnalysisReportService.addReport({
+                reportType: ReportType.Stock,
+                reportTarget: stockCode,
+                title: `${stockName} 종목 분석 리포트`,
                 content: event.prompt.response,
-                updatedAt: new Date(),
             });
         } catch (error) {
             this.logger.error(error);
@@ -34,16 +41,17 @@ export class StockAnalyzerListener {
     @OnEvent(StockAnalyzerEventType.AnalysisCompletedForKeywordGroup)
     public async handleCompletedPromptForKeywordGroup(
         event: CallbackEvent<{
-            groupName: string;
+            keywordGroup: KeywordGroup;
         }>,
     ) {
         try {
-            const { groupName } = event.eventData;
+            const { keywordGroup } = event.eventData;
 
-            await this.analysisRepository.setAIAnalysisKeywordGroup({
-                groupName,
+            await this.aiAnalysisReportService.addReport({
+                reportType: ReportType.KeywordGroup,
+                reportTarget: keywordGroup.id.toString(),
+                title: `${keywordGroup.name} 분석 리포트`,
                 content: event.prompt.response,
-                updatedAt: new Date(),
             });
         } catch (error) {
             this.logger.error(error);

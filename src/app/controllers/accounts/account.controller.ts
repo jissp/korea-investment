@@ -1,14 +1,16 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+    AccountService,
+    AccountStockService,
+} from '@app/modules/repositories/account';
 import { GetAccountsResponse } from './dto';
-import { AccountRepository } from '@app/modules/repositories';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 
 @Controller('v1/accounts')
 export class AccountController {
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
-        private readonly accountRepository: AccountRepository,
+        private readonly accountService: AccountService,
+        private readonly accountStockService: AccountStockService,
     ) {}
 
     @ApiOperation({
@@ -20,31 +22,27 @@ export class AccountController {
     })
     @Get()
     public async getAccounts(): Promise<GetAccountsResponse> {
-        const accountNumbers =
-            await this.koreaInvestmentSettingService.getAccountNumbers();
+        const accounts = await this.accountService.getAccounts();
 
-        const accountData = await Promise.all(
-            accountNumbers.map(async (accountNumber) => {
+        const results = await Promise.all(
+            accounts.map(async (account) => {
+                const { accountId } = account;
+
                 const accountStocks =
-                    await this.accountRepository.getAccountStocks(
-                        accountNumber,
-                    );
+                    await this.accountStockService.getAccountStocks(accountId);
 
                 return {
-                    accountNumber,
-                    accountInfo:
-                        await this.accountRepository.getAccountInfo(
-                            accountNumber,
-                        ),
+                    accountNumber: accountId,
+                    accountInfo: account,
                     accountStocks: accountStocks.filter(
-                        (stock) => Number(stock.hldg_qty) > 0,
+                        (stock) => Number(stock.quantity) > 0,
                     ),
                 };
             }),
         );
 
         return {
-            data: accountData,
+            data: results.flat(),
         };
     }
 }

@@ -1,8 +1,10 @@
-import {
-    NewsCategory,
-    NewsItem,
-} from '@app/modules/repositories/news-repository';
 import { StockPlusAsset, StockPlusNews } from '@modules/stock-plus';
+import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+
+export interface StockPlusNewsTransformResult {
+    stockCodes: string[];
+    news: NewsDto;
+}
 
 export class StockPlusNewsToNewsTransformer {
     private readonly koreaStockPatternRegExp = /^A[0-9]{6}$/;
@@ -15,16 +17,20 @@ export class StockPlusNewsToNewsTransformer {
         KOREA: this.toNormalizeStockCodeByKoreaStockCode.bind(this),
     };
 
-    public transform(stockPlusNews: StockPlusNews): NewsItem {
+    public transform(
+        stockPlusNews: StockPlusNews,
+    ): StockPlusNewsTransformResult {
         return {
-            articleId: stockPlusNews.id.toString(),
-            category: NewsCategory.StockPlus,
-            title: stockPlusNews.title,
-            description: stockPlusNews.summaries[0],
             stockCodes: stockPlusNews.assets
                 .map((asset) => this.mapAssetCodeToStockCode(asset))
                 .filter(Boolean) as string[],
-            createdAt: new Date(stockPlusNews.publishedAt).toISOString(),
+            news: {
+                articleId: stockPlusNews.id.toString(),
+                category: NewsCategory.StockPlus,
+                title: stockPlusNews.title,
+                description: stockPlusNews.summaries[0],
+                publishedAt: new Date(stockPlusNews.publishedAt),
+            },
         };
     }
 

@@ -1,12 +1,18 @@
 import { Module } from '@nestjs/common';
-import { StockPlusModule } from '@modules/stock-plus';
-import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { QueueModule } from '@modules/queue';
+import { StockPlusModule } from '@modules/stock-plus';
 import { NaverApiModule } from '@modules/naver/naver-api';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
+import { NewsModule } from '@app/modules/repositories/news';
+import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
+import { KeywordModule } from '@app/modules/repositories/keyword';
 import { NewsCrawlerQueueType } from './news-crawler.types';
-import { KoreaInvestmentNewsProcessor, NaverNewsProcessor } from './processors';
+import {
+    KoreaInvestmentNewsProcessor,
+    NaverNewsProcessor,
+    StockPlusNewsProcessor,
+} from './processors';
 import { NewsCrawlerSchedule } from './news-crawler.schedule';
 
 const queueTypes = [
@@ -16,7 +22,11 @@ const queueTypes = [
     NewsCrawlerQueueType.RequestDomesticNewsTitle,
 ];
 const queueProviders = QueueModule.getQueueProviders(queueTypes);
-const processors = [KoreaInvestmentNewsProcessor, NaverNewsProcessor];
+const processors = [
+    KoreaInvestmentNewsProcessor,
+    NaverNewsProcessor,
+    StockPlusNewsProcessor,
+];
 
 @Module({
     imports: [
@@ -33,9 +43,11 @@ const processors = [KoreaInvestmentNewsProcessor, NaverNewsProcessor];
         }),
         KoreaInvestmentHelperModule,
         KoreaInvestmentRequestApiModule,
-        NewsRepositoryModule,
         NaverApiModule,
         StockPlusModule,
+        NewsModule,
+        FavoriteStockModule,
+        KeywordModule,
     ],
     providers: [...queueProviders, ...processors, NewsCrawlerSchedule],
 })

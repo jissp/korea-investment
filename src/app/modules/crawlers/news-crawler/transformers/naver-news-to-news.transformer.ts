@@ -1,19 +1,15 @@
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
-import {
-    NewsCategory,
-    NewsItem,
-} from '@app/modules/repositories/news-repository';
+import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
 
 export class NaverNewsToNewsTransformer {
-    public transform(naverNewsItem: NaverApiNewsItem): NewsItem {
+    public transform(naverNewsItem: NaverApiNewsItem): NewsDto {
         return {
             articleId: naverNewsItem.link,
             category: NewsCategory.Naver,
             title: naverNewsItem.title,
             description: naverNewsItem.description,
             link: naverNewsItem.link,
-            stockCodes: [],
-            createdAt: new Date(naverNewsItem.pubDate).toISOString(),
+            publishedAt: new Date(naverNewsItem.pubDate),
         };
     }
 }

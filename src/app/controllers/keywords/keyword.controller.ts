@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotFoundException,
+    Param,
+    Post,
+} from '@nestjs/common';
 import {
     ApiBody,
     ApiCreatedResponse,
@@ -7,191 +15,92 @@ import {
     ApiOperation,
     ApiParam,
 } from '@nestjs/swagger';
-import { assertStockCode, getStockName } from '@common/domains';
-import { GetCodesResponse } from '@app/common';
 import {
+    KeywordGroupService,
+    KeywordService,
     KeywordType,
-    KoreaInvestmentKeywordSettingService,
-} from '@app/modules/korea-investment-setting';
-import { UpsertKeywordBody, UpsertKeywordByStockCodeBody } from './dto';
+} from '@app/modules/repositories/keyword';
+import {
+    CreateKeywordBody,
+    DeleteKeywordBody,
+    GetKeywordsResponse,
+} from './dto';
 
 @Controller('v1/keywords')
 export class KeywordController {
     constructor(
-        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
+        private readonly keywordService: KeywordService,
+        private readonly keywordGroupService: KeywordGroupService,
     ) {}
 
     @ApiOperation({
-        summary: '관심있는 키워드 목록 조회',
-        description: '관심있는 키워드 목록을 조회합니다.',
-    })
-    @ApiOkResponse({
-        type: GetCodesResponse,
-    })
-    @Get()
-    public async getKeywords(): Promise<GetCodesResponse> {
-        const keywords = await this.keywordSettingService.getKeywords();
-
-        return {
-            data: keywords.map((keyword) => ({
-                code: keyword,
-                name: keyword,
-            })),
-        };
-    }
-
-    @ApiOperation({
-        summary: '관심있는 키워드 추가',
-        description: '관심있는 키워드를 추가합니다.',
+        summary: '키워드 추가',
+        description: '키워드를 추가합니다.',
     })
     @ApiBody({
-        type: UpsertKeywordBody,
+        type: CreateKeywordBody,
     })
     @ApiCreatedResponse()
     @Post()
-    public async registerKeyword(@Body() { keyword }: UpsertKeywordBody) {
-        await this.keywordSettingService.addKeywordByType(
-            KeywordType.Manual,
-            keyword,
-        );
+    public async createKeyword(
+        @Body() { keyword, keywordGroupId }: CreateKeywordBody,
+    ) {
+        await this.keywordService.createKeyword({
+            type: KeywordType.Manual,
+            name: keyword,
+            keywordGroupId,
+        });
     }
 
     @ApiOperation({
-        summary: '관심있는 키워드 제거',
-        description: '관심있는 키워드를 제거합니다.',
-    })
-    @ApiParam({
-        name: 'keyword',
-        type: String,
-        description: '키워드',
-    })
-    @ApiCreatedResponse()
-    @Delete(':keyword')
-    public async deleteKeyword(@Param('keyword') keyword: string) {
-        await this.keywordSettingService.deleteKeywordByType(
-            KeywordType.Manual,
-            keyword,
-        );
-    }
-
-    @ApiOperation({
-        summary: '종목별 키워드 목록 조회',
-        description: '종목별로 사용중인 키워드 목록을 조회합니다.',
-    })
-    @ApiParam({
-        name: 'stockCode',
-        type: String,
-        description: '종목 코드',
-    })
-    @ApiOkResponse({
-        type: GetCodesResponse,
-    })
-    @Get('by-stock/:stockCode')
-    public async getKeywordsByStock(
-        @Param('stockCode') stockCode: string,
-    ): Promise<GetCodesResponse> {
-        assertStockCode(stockCode);
-
-        const keywords =
-            await this.keywordSettingService.getKeywordsByStockCode(stockCode);
-
-        return {
-            data: keywords.map((keyword) => ({
-                code: keyword,
-                name: keyword,
-            })),
-        };
-    }
-
-    @ApiOperation({
-        summary: '키워드에 등록된 종목 목록 조회',
-        description: '키워드에 등록된 종목 목록을 조회합니다.',
-    })
-    @ApiParam({
-        name: 'keyword',
-        type: String,
-        description: '키워드',
-    })
-    @ApiOkResponse({
-        type: GetCodesResponse,
-    })
-    @Get(':keyword/stocks')
-    public async getStockKeywords(
-        @Param('keyword') keyword: string,
-    ): Promise<GetCodesResponse> {
-        const stockCodes =
-            await this.keywordSettingService.getStockCodesByKeyword(keyword);
-
-        return {
-            data: stockCodes.map((stockCode) => ({
-                code: stockCode,
-                name: getStockName(stockCode),
-            })),
-        };
-    }
-
-    @ApiOperation({
-        summary: '키워드에 종목 추가',
-        description:
-            '키워드에 종목을 추가합니다. 키워드에 등록된 종목는 주기적으로 뉴스 정보 등을 수집하는데 사용됩니다.',
-    })
-    @ApiParam({
-        name: 'keyword',
-        type: String,
-        description: '키워드',
+        summary: '키워드 삭제',
+        description: '키워드를 삭제합니다.',
     })
     @ApiBody({
-        type: UpsertKeywordByStockCodeBody,
+        type: DeleteKeywordBody,
     })
-    @ApiCreatedResponse()
-    @Post(':keyword/stocks')
-    public async addStockKeyword(
+    @ApiNoContentResponse()
+    @Delete(':keyword')
+    public async deleteKeyword(
         @Param('keyword') keyword: string,
-        @Body() { stockCode }: UpsertKeywordByStockCodeBody,
+        @Body() { keywordGroupId }: DeleteKeywordBody,
     ) {
-        assertStockCode(stockCode);
+        if (keywordGroupId) {
+            const keywordGroup =
+                await this.keywordGroupService.getKeywordGroup(keywordGroupId);
+            if (!keywordGroup) {
+                throw new NotFoundException('키워드 그룹이 존재하지 않습니다.');
+            }
+        }
 
-        await Promise.all([
-            this.keywordSettingService.addKeywordByType(
-                KeywordType.Manual,
-                keyword,
-            ),
-            this.keywordSettingService.addKeywordToStock({
-                stockCode,
-                keyword,
-            }),
-            this.keywordSettingService.addStockCodeToKeyword({
-                keyword,
-                stockCode,
-            }),
-        ]);
+        await this.keywordService.deleteKeywordByName({
+            type: KeywordType.Manual,
+            name: keyword,
+            keywordGroupId: keywordGroupId ?? null,
+        });
     }
 
     @ApiOperation({
-        summary: '키워드에 등록된 종목 제거',
-        description: '키워드에 등록된 종목를 제거합니다.',
+        summary: '그룹 내 키워드 목록 조회',
+        description: '특정 그룹에 포함된 키워드 목록을 조회합니다.',
     })
     @ApiParam({
-        name: 'keyword',
-        type: String,
-        description: '키워드에 등록된 종목',
+        name: 'groupId',
+        type: Number,
+        description: '키워드 그룹 이름',
     })
-    @ApiParam({
-        name: 'stockCode',
-        type: String,
-        description: '종목 코드',
+    @ApiOkResponse({
+        type: GetKeywordsResponse,
     })
-    @ApiNoContentResponse()
-    @Delete(':keyword/stocks/:stockCode')
-    public async deleteStockKeyword(
-        @Param('stockCode') stockCode: string,
-        @Param('keyword') keyword: string,
-    ) {
-        assertStockCode(stockCode);
+    @Get('by-group/:groupId')
+    public async getKeywordsByGroup(
+        @Param('groupId') groupId: number,
+    ): Promise<GetKeywordsResponse> {
+        const keywords =
+            await this.keywordService.getKeywordsByGroupId(groupId);
 
-        await this.keywordSettingService.deleteStockCodeFromKeyword({
-            keyword,
-            stockCode,
-        });
+        return {
+            data: keywords,
+        };
     }
 }

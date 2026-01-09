@@ -3,13 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OnQueueProcessor } from '@modules/queue';
-import { isDelistedStockByName, toKeywordType } from '@app/common';
-import {
-    KeywordType,
-    KoreaInvestmentKeywordSettingService,
-    KoreaInvestmentSettingService,
-    StockCodeType,
-} from '@app/modules/korea-investment-setting';
+import { isDelistedStockByName } from '@app/common';
 import {
     KoreaInvestmentAccountOutput2,
     KoreaInvestmentAccountParam,
@@ -22,21 +16,34 @@ import {
     KoreaInvestmentInterestStockListByGroupParam,
     KoreaInvestmentRequestApiHelper,
 } from '@app/modules/korea-investment-request-api';
-import { AccountRepository } from '@app/modules/repositories';
+import {
+    AccountService,
+    AccountStockService,
+} from '@app/modules/repositories/account';
+import {
+    FavoriteStockService,
+    FavoriteType,
+} from '@app/modules/repositories/favorite-stock';
+import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
 } from './korea-investment-account-crawler.types';
+import {
+    KoreaInvestmentAccountStockTransformer,
+    KoreaInvestmentAccountTransformer,
+} from './transformers';
 
-type StockInfo = { name: string; stockCode: string };
+type StockInfo = { stockName: string; stockCode: string };
 
 @Injectable()
 export class KoreaInvestmentAccountCrawlerProcessor {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly accountRepository: AccountRepository,
-        private readonly settingService: KoreaInvestmentSettingService,
-        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
+        private readonly accountService: AccountService,
+        private readonly accountStockService: AccountStockService,
+        private readonly favoriteStockService: FavoriteStockService,
+        private readonly keywordService: KeywordService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
@@ -53,12 +60,23 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 KoreaInvestmentAccountOutput2
             >(job);
 
+        const transformer = new KoreaInvestmentAccountTransformer();
+
+        const transformedAccountInfos = childrenResponses.map(
+            ({ request: { params }, response }) => {
+                return {
+                    accountId: this.buildAccountNumber(
+                        params.CANO,
+                        params.ACNT_PRDT_CD,
+                    ),
+                    accountInfo: transformer.transform(response.output2),
+                };
+            },
+        );
+
         await Promise.all(
-            childrenResponses.map(({ request: { params }, response }) =>
-                this.accountRepository.setAccountInfo(
-                    this.buildAccountNumber(params.CANO, params.ACNT_PRDT_CD),
-                    response.output2,
-                ),
+            transformedAccountInfos.map(({ accountId, accountInfo }) =>
+                this.accountService.updateAccount(accountId, accountInfo),
             ),
         );
     }
@@ -76,41 +94,44 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 unknown
             >(job);
 
+        const transformer = new KoreaInvestmentAccountStockTransformer();
+
         for (const {
             request,
             response: { output1 },
         } of childrenResponses) {
             const { CANO, ACNT_PRDT_CD } = request.params;
 
-            const accountStockItems = output1.filter(
-                (output) => !isDelistedStockByName(output.prdt_name),
-            );
-
-            await this.accountRepository.setAccountStocks(
-                this.buildAccountNumber(CANO, ACNT_PRDT_CD),
-                accountStockItems,
-            );
-
-            const stockInfoList = accountStockItems.map(
-                (output): StockInfo => ({
-                    name: output.prdt_name,
-                    stockCode: output.pdno,
+            const transformedStocks = output1.map((output) =>
+                transformer.transform({
+                    accountId: this.buildAccountNumber(CANO, ACNT_PRDT_CD),
+                    output,
                 }),
             );
+            const possessStocks = transformedStocks
+                .map(({ stockCode, stockName }) => ({
+                    stockCode,
+                    stockName,
+                }))
+                .filter(({ stockName }) => !isDelistedStockByName(stockName));
 
-            await this.updateStockKeywords(
-                StockCodeType.Possess,
-                stockInfoList,
-            );
-
-            await Promise.all(
-                stockInfoList.map(({ stockCode }) =>
-                    this.settingService.addStockCodeByType(
-                        StockCodeType.Possess,
-                        stockCode,
+            await Promise.all([
+                ...transformedStocks.map((transformedStock) =>
+                    this.accountStockService.upsertAccountStock(
+                        transformedStock,
                     ),
                 ),
-            );
+                ...possessStocks.flatMap(({ stockCode, stockName }) => {
+                    return [
+                        this.favoriteStockService.upsert({
+                            type: FavoriteType.Possess,
+                            stockCode,
+                            stockName,
+                        }),
+                    ];
+                }),
+                this.updateStockKeywords(KeywordType.Possess, possessStocks),
+            ]);
         }
     }
 
@@ -133,8 +154,6 @@ export class KoreaInvestmentAccountCrawlerProcessor {
         for (const {
             response: { output2 },
         } of childrenResponses) {
-            await this.accountRepository.setAccountStockGroups(userId, output2);
-
             output2.forEach((output) => {
                 this.eventEmitter.emit(
                     KoreaInvestmentAccountCrawlerEventType.UpdatedStockGroup,
@@ -163,11 +182,6 @@ export class KoreaInvestmentAccountCrawlerProcessor {
             const { output1, output2 } = response;
             const groupName = output1.inter_grp_name;
 
-            await this.accountRepository.setAccountStocksByGroup(
-                groupName,
-                output2,
-            );
-
             if (!groupName.includes('키워드')) {
                 continue;
             }
@@ -178,20 +192,21 @@ export class KoreaInvestmentAccountCrawlerProcessor {
 
             const stockInfoList = accountStockItems.map(
                 (output): StockInfo => ({
-                    name: output.hts_kor_isnm,
+                    stockName: output.hts_kor_isnm,
                     stockCode: output.jong_code,
                 }),
             );
             await Promise.all(
-                stockInfoList.map(({ stockCode }) =>
-                    this.settingService.addStockCodeByType(
-                        StockCodeType.StockGroup,
+                stockInfoList.map(({ stockCode, stockName }) =>
+                    this.favoriteStockService.upsert({
+                        type: FavoriteType.StockGroup,
                         stockCode,
-                    ),
+                        stockName,
+                    }),
                 ),
             );
             await this.updateStockKeywords(
-                StockCodeType.StockGroup,
+                KeywordType.StockGroup,
                 stockInfoList,
             );
         }
@@ -208,35 +223,24 @@ export class KoreaInvestmentAccountCrawlerProcessor {
 
     /**
      * 키워드 설정을 업데이트합니다.
-     * @param stockCodeType
+     * @param keywordType
      * @param stockInfoList
      * @private
      */
     private async updateStockKeywords(
-        stockCodeType: StockCodeType,
+        keywordType: KeywordType,
         stockInfoList: StockInfo[],
     ) {
-        const keywords = stockInfoList.map(({ name }) => name);
-        const addedKeywords =
-            await this.keywordSettingService.getKeywordsByType(
-                KeywordType.StockGroup,
-            );
+        const keywords = stockInfoList.map(({ stockName }) => stockName);
+        const addedKeywords = await this.keywordService.getKeywords({
+            type: keywordType,
+        });
 
         // 키워드 동기화
         await this.syncKeywordsByType(
-            toKeywordType(stockCodeType),
+            keywordType,
             keywords,
-            addedKeywords,
-        );
-
-        // 종목별 키워드 추가
-        return Promise.all(
-            stockInfoList.map(({ name, stockCode }) =>
-                this.keywordSettingService.addKeywordWithStockCodeMap({
-                    keyword: name,
-                    stockCode,
-                }),
-            ),
+            addedKeywords.map(({ name }) => name),
         );
     }
 
@@ -270,13 +274,24 @@ export class KoreaInvestmentAccountCrawlerProcessor {
             addedKeywords,
         );
 
-        await this.keywordSettingService.deleteKeywordByType(
-            keywordType,
-            ...removedKeywords,
+        await Promise.all(
+            removedKeywords.map((keyword) =>
+                this.keywordService.deleteKeywordByName({
+                    type: keywordType,
+                    name: keyword,
+                    keywordGroupId: null,
+                }),
+            ),
         );
-        await this.keywordSettingService.addKeywordByType(
-            keywordType,
-            ...newKeywords,
+
+        await Promise.all(
+            newKeywords.map((keyword) =>
+                this.keywordService.createKeyword({
+                    type: keywordType,
+                    name: keyword,
+                    keywordGroupId: null,
+                }),
+            ),
         );
     }
 }

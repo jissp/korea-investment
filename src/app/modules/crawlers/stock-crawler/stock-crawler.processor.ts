@@ -7,8 +7,8 @@ import {
     DomesticStockQuotationsInquireInvestorOutput,
     DomesticStockQuotationsInquireInvestorParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockRepository } from '@app/modules/repositories/stock-repository';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
+import { StockDailyInvestorService } from '@app/modules/repositories/stock-daily-investor';
 import { StockCrawlerFlowType } from './stock-crawler.types';
 import { DomesticStockInvestorTransformer } from './transformers';
 
@@ -19,7 +19,7 @@ export class StockCrawlerProcessor {
         new DomesticStockInvestorTransformer();
 
     constructor(
-        private readonly stockRepository: StockRepository,
+        private readonly stockDailyInvestorService: StockDailyInvestorService,
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
     ) {}
 
@@ -34,19 +34,29 @@ export class StockCrawlerProcessor {
 
             const stockContents = childrenResponses.map(
                 ({ request, response }) => ({
-                    code: request.params.FID_INPUT_ISCD,
-                    output: response.output,
+                    stockCode: request.params.FID_INPUT_ISCD,
+                    outputs: response.output,
                 }),
             );
 
-            for (const { code, output } of stockContents) {
-                await this.stockRepository.setDailyInvestor(
-                    code,
-                    output.map((item) =>
-                        this.domesticStockInvestorTransformer.transform(item),
+            const transformedStockDailyInvestors = stockContents.flatMap(
+                ({ stockCode, outputs }) =>
+                    outputs.map((output) =>
+                        this.domesticStockInvestorTransformer.transform({
+                            stockCode,
+                            output,
+                        }),
                     ),
-                );
-            }
+            );
+
+            await Promise.all(
+                transformedStockDailyInvestors.map(
+                    (transformedStockDailyInvestor) =>
+                        this.stockDailyInvestorService.upsert(
+                            transformedStockDailyInvestor,
+                        ),
+                ),
+            );
         } catch (error) {
             this.logger.error(error);
 
@@ -71,11 +81,11 @@ export class StockCrawlerProcessor {
                 return;
             }
 
-            const { response } = childrenResults[0];
-            await this.stockRepository.setDailyStockChart(stockCode, {
-                output: response.output1,
-                output2: response.output2,
-            });
+            // const { response } = childrenResults[0];
+            // await this.stockRepository.setDailyStockChart(stockCode, {
+            //     output: response.output1,
+            //     output2: response.output2,
+            // });
         } catch (error) {
             this.logger.error(error);
 

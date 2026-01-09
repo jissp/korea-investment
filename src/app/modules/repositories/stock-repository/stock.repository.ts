@@ -1,12 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Nullable } from '@common/types';
-import { RedisHelper, RedisService } from '@modules/redis';
+import { RedisService } from '@modules/redis';
 import {
     KoreaInvestmentDailyItemChartPrice,
     KoreaInvestmentHtsTopViewItem,
     KoreaInvestmentPopulatedHtsTopViewItem,
     KoreaInvestmentPopulatedVolumeRankItem,
-    KoreaInvestmentStockInvestor,
     KoreaInvestmentVolumeRankItem,
     StockRepositoryRedisKey,
 } from './stock-repository.types';
@@ -15,10 +13,7 @@ import {
 export class StockRepository {
     private readonly logger = new Logger(StockRepository.name);
 
-    constructor(
-        private readonly redisService: RedisService,
-        private readonly redisHelper: RedisHelper,
-    ) {}
+    constructor(private readonly redisService: RedisService) {}
 
     private async getData<T>(key: string, defaultValue: T): Promise<T> {
         return this.redisService.getOrDefaultValue<T>(key, defaultValue);
@@ -139,102 +134,6 @@ export class StockRepository {
             `${StockRepositoryRedisKey.DailyStockChart}:${iscd}`,
             data,
             60 * 60 * 2,
-        );
-    }
-
-    /**
-     * 종목 시세를 조회합니다.
-     * @param stockCode
-     */
-    public async getDailyStockChart(stockCode: string) {
-        return this.getData<Nullable<KoreaInvestmentDailyItemChartPrice>>(
-            `${StockRepositoryRedisKey.DailyStockChart}:${stockCode}`,
-            null,
-        );
-    }
-
-    /**
-     * 종목 투자자 정보를 저장합니다.
-     * Hash와 ZSet에 동시에 저장하여 날짜 기반 조회를 지원합니다.
-     * @param stockCode
-     * @param data
-     */
-    public async setDailyInvestor(
-        stockCode: string,
-        data: KoreaInvestmentStockInvestor[],
-    ) {
-        try {
-            const set = this.getStockInvestorSet(stockCode);
-            const zSet = this.getStockInvestorZSet(stockCode);
-
-            const promises = data.map(async (item) => {
-                const date = item.date;
-
-                const isExists = await set.exists(date);
-                if (isExists) {
-                    return;
-                }
-
-                // 날짜값을 Set에 등록
-                const hashResult = await set.add(date);
-
-                // ZSet에 timestamp를 score로 사용하여 저장
-                const zsetResult = await zSet.add(
-                    JSON.stringify(item),
-                    new Date(date).getTime(),
-                );
-
-                return hashResult && zsetResult;
-            });
-
-            await Promise.all(promises);
-
-            return true;
-        } catch (error) {
-            this.logger.error(error);
-
-            return false;
-        }
-    }
-
-    /**
-     * 종목 투자자 정보를 날짜 순으로 조회합니다.
-     * @param stockCode
-     * @param limit - 조회할 최대 개수 (기본값: 100)
-     */
-    public async getDailyInvestorList(
-        stockCode: string,
-        limit: number = 100,
-    ): Promise<KoreaInvestmentStockInvestor[]> {
-        return this.getStockInvestorZSet(stockCode).list(limit, {
-            isParse: true,
-        });
-    }
-
-    /**
-     * 종목 투자자 정보 Hash를 가져옵니다.
-     * @param stockCode
-     * @private
-     */
-    private getStockInvestorSet(stockCode: string) {
-        return this.redisHelper.createSet(
-            StockRepositoryRedisKey.Stocks,
-            stockCode,
-            'daily-investor',
-            'set',
-        );
-    }
-
-    /**
-     * 종목 투자자 정보 ZSet을 가져옵니다.
-     * @param stockCode
-     * @private
-     */
-    private getStockInvestorZSet(stockCode: string) {
-        return this.redisHelper.createZSet<KoreaInvestmentStockInvestor>(
-            StockRepositoryRedisKey.Stocks,
-            stockCode,
-            'daily-investor',
         );
     }
 }

@@ -2,9 +2,9 @@ import * as _ from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
-import { NewsRepository } from '@app/modules/repositories/news-repository';
+import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
+import { NewsService } from '@app/modules/repositories/news';
 import { KoreaInvestmentNewsToNewsTransformer } from '../transformers/korea-investment-news-to-news.transformer';
 import { NewsCrawlerQueueType } from '../news-crawler.types';
 import { RequestDomesticNewsTitleResponse } from '../news-crawler.interface';
@@ -15,8 +15,8 @@ export class KoreaInvestmentNewsProcessor {
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly settingService: KoreaInvestmentSettingService,
-        private readonly newsRepository: NewsRepository,
+        private readonly newsService: NewsService,
+        private readonly favoriteStockService: FavoriteStockService,
     ) {}
 
     @OnQueueProcessor(NewsCrawlerQueueType.RequestDomesticNewsTitle)
@@ -30,23 +30,30 @@ export class KoreaInvestmentNewsProcessor {
             ({ response }) => response.output,
         );
 
-        const settingStockCodes = await this.settingService.getStockCodes();
-        const stockCodeSet = new Set(settingStockCodes);
+        const favoriteStocks = await this.favoriteStockService.findAll();
+        const stockCodes = favoriteStocks.map(({ stockCode }) => stockCode);
+        const stockCodeSet = new Set(stockCodes);
+
         const transformedNewsItems = childrenResults.map((newsItem) =>
             this.transformer.transform(newsItem),
         );
         const chunks = _.chunk(transformedNewsItems, 10);
         for (const chunk of chunks) {
             await Promise.allSettled([
-                ...chunk.map((news) => this.newsRepository.addNews(news)),
-                ...chunk.flatMap((news) => {
+                ...chunk.map((newsItem) =>
+                    this.newsService.upsert(newsItem.news),
+                ),
+                ...chunk.flatMap((newsItem) => {
                     // 설정된 종목 코드에 해당하는 종목만 종목 뉴스에 추가합니다.
-                    const filteredStockCodes = news.stockCodes.filter(
+                    const filteredStockCodes = newsItem.stockCodes.filter(
                         (stockCode) => stockCodeSet.has(stockCode),
                     );
 
                     return filteredStockCodes.map((stockCode) =>
-                        this.newsRepository.addStockNews(stockCode, news),
+                        this.newsService.upsertStockNews({
+                            ...newsItem.news,
+                            stockCode,
+                        }),
                     );
                 }),
             ]);

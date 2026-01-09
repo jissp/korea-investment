@@ -7,11 +7,11 @@ import {
     NaverApiNewsItem,
     NaverAppName,
 } from '@modules/naver/naver-api';
-import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
 import {
-    NewsItem,
-    NewsRepository,
-} from '@app/modules/repositories/news-repository';
+    KeywordGroupService,
+    KeywordService,
+} from '@app/modules/repositories/keyword';
+import { NewsDto, NewsService } from '@app/modules/repositories/news';
 import {
     CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
@@ -25,8 +25,9 @@ export class NaverNewsProcessor {
 
     constructor(
         private readonly naverApiClientFactory: NaverApiClientFactory,
-        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
-        private readonly newsRepository: NewsRepository,
+        private readonly newsService: NewsService,
+        private readonly keywordService: KeywordService,
+        private readonly keywordGroupService: KeywordGroupService,
     ) {}
 
     @OnQueueProcessor(NewsCrawlerQueueType.CrawlingNaverNews)
@@ -71,52 +72,60 @@ export class NaverNewsProcessor {
     /**
      *
      * @param newsItems
-     * @param keywords
+     * @param keywordNames
      * @private
      */
     private async transformWithSave(
         newsItems: NaverApiNewsItem[],
-        keywords: string[],
+        keywordNames: string[],
     ) {
-        for (const keyword of keywords) {
+        for (const keywordName of keywordNames) {
             const keywordNews = newsItems.filter(
                 ({ title, description }) =>
-                    title.includes(keyword) || description.includes(keyword),
+                    title.includes(keywordName) ||
+                    description.includes(keywordName),
             );
 
             if (keywordNews.length === 0) {
                 continue;
             }
 
-            const stockCodes =
-                await this.keywordSettingService.getStockCodesByKeyword(
-                    keyword,
-                );
-            const keywordGroups =
-                await this.keywordSettingService.getKeywordGroupsListByKeyword(
-                    keyword,
-                );
+            // const stockCodes =
+            //     await this.keywordSettingService.getStockCodesByKeyword(
+            //         keywordName,
+            //     );
+            // TODO 추후 종목 - 키워드 기능을 추가해야할 수 있음.
+            const stockCodes = [];
 
-            const transformedNewsItems = this.transformNews(
-                keywordNews,
-                stockCodes,
-            );
+            const keywordGroups =
+                await this.extractKeywordGroupsByKeywordName(keywordName);
+
+            const transformedNewsItems = this.transformNews(keywordNews);
 
             const chunks = _.chunk(transformedNewsItems, 10);
             for (const chunk of chunks) {
                 await Promise.allSettled([
-                    ...chunk.map((news) => this.newsRepository.addNews(news)),
+                    ...chunk.map((news) => this.newsService.upsert(news)),
                     ...chunk.flatMap((news) =>
                         stockCodes.map((stockCode) =>
-                            this.newsRepository.addStockNews(stockCode, news),
+                            this.newsService.upsertStockNews({
+                                ...news,
+                                stockCode,
+                            }),
                         ),
                     ),
+                    ...chunk.map((news) =>
+                        this.newsService.upsertKeywordNews({
+                            ...news,
+                            keyword: keywordName,
+                        }),
+                    ),
                     ...chunk.flatMap((news) =>
-                        keywordGroups.flatMap((groupName) =>
-                            this.newsRepository.addKeywordGroupNews(
-                                groupName,
-                                news,
-                            ),
+                        keywordGroups.flatMap(({ name }) =>
+                            this.newsService.upsertKeywordGroupNews({
+                                ...news,
+                                keywordGroupName: name,
+                            }),
                         ),
                     ),
                 ]);
@@ -125,24 +134,28 @@ export class NaverNewsProcessor {
     }
 
     /**
-     * Naver News API 응답을 News 모델로 변환합니다.
-     * @param newsItems
-     * @param stockCodes
+     * 키워드명을 가지고 있는 모든 키워드 그룹을 조회한다.
+     * @param keywordName
      * @private
      */
-    private transformNews(
-        newsItems: NaverApiNewsItem[],
-        stockCodes: string[],
-    ): NewsItem[] {
-        const transformedNews = newsItems.map((item) =>
-            this.transformer.transform(item),
-        );
+    private async extractKeywordGroupsByKeywordName(keywordName: string) {
+        const keywords =
+            await this.keywordService.getKeywordsByName(keywordName);
+        const keywordGroupIds = keywords
+            .map(({ keywordGroupId }) => keywordGroupId)
+            .filter(Boolean) as number[];
 
-        return transformedNews.map(
-            (news): NewsItem => ({
-                ...news,
-                stockCodes,
-            }),
+        return await this.keywordGroupService.getKeywordGroupByIds(
+            keywordGroupIds,
         );
+    }
+
+    /**
+     * Naver News API 응답을 News 모델로 변환합니다.
+     * @param newsItems
+     * @private
+     */
+    private transformNews(newsItems: NaverApiNewsItem[]): NewsDto[] {
+        return newsItems.map((item) => this.transformer.transform(item));
     }
 }

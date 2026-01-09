@@ -1,2 +1,2 @@
-export * from './stock-investor.response';
+export * from './stock-investors.response';
 export * from './korea-investment-daily-item-chart-price.response';

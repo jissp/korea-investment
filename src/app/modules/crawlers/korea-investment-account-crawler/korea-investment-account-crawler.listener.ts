@@ -3,10 +3,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { getDefaultJobOptions } from '@modules/queue';
 import {
+    KoreaInvestmentInterestGroupListOutput,
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
-import { AccountStockGroup } from '@app/modules/repositories';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
@@ -27,7 +27,7 @@ export class KoreaInvestmentAccountCrawlerListener {
     @OnEvent(KoreaInvestmentAccountCrawlerEventType.UpdatedStockGroup)
     async handleUpdatedStockGroup(message: {
         userId: string;
-        output: AccountStockGroup;
+        output: KoreaInvestmentInterestGroupListOutput;
     }) {
         try {
             const queueName =

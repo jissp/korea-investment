@@ -4,7 +4,6 @@ import { NewsService } from '@app/modules/services/news-service';
 import {
     AllNewsByKeywordGroupResponse,
     NewsByKeywordGroupResponse,
-    NewsByKeywordResponse,
     NewsByStockResponse,
     NewsResponse,
 } from './dto';
@@ -31,54 +30,29 @@ export class NewsController {
     }
 
     @ApiOperation({
-        summary: '키워드별 뉴스 조회',
-    })
-    @ApiOkResponse({
-        type: NewsByKeywordResponse,
-    })
-    @Get('by-keyword')
-    public async getNewsByKeyword(): Promise<NewsByKeywordResponse> {
-        const newsByKeyword = await this.newsService.getAllKeywordNews();
-
-        return {
-            data: newsByKeyword,
-        };
-    }
-
-    @ApiOperation({
-        summary: '전체 키워드 그룹별 뉴스 조회',
-    })
-    @ApiOkResponse({
-        type: AllNewsByKeywordGroupResponse,
-    })
-    @Get('by-keyword-group')
-    public async getAllNewsByKeywordGroup(): Promise<AllNewsByKeywordGroupResponse> {
-        const result = await this.newsService.getAllKeywordGroupNews();
-
-        return {
-            data: result,
-        };
-    }
-
-    @ApiOperation({
         summary: '키워드 그룹별 뉴스 조회',
     })
     @ApiOkResponse({
         type: NewsByKeywordGroupResponse,
     })
     @ApiParam({
-        name: 'groupName',
+        name: 'keywordGroupName',
         type: String,
         description: '키워드 그룹명',
     })
-    @Get('by-keyword-group/:groupName')
+    @Get('by-keyword-group/:keywordGroupName')
     public async getNewsByKeywordGroup(
-        @Param('groupName') groupName: string,
+        @Param('keywordGroupName') keywordGroupName: string,
     ): Promise<NewsByKeywordGroupResponse> {
-        const result = await this.newsService.getKeywordGroupNews(groupName);
+        const news = await this.newsService.getKeywordGroupNews({
+            keywordGroupName,
+        });
 
         return {
-            data: result,
+            data: {
+                keywordGroupName,
+                news,
+            },
         };
     }
 

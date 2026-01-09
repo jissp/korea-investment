@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { GeminiCliModule } from '@modules/gemini-cli';
 import { NaverApiModule } from '@modules/naver/naver-api';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
-import { AnalysisRepositoryModule } from '@app/modules/repositories';
+import { KeywordModule } from '@app/modules/repositories/keyword';
+import { AiAnalysisReportModule } from '@app/modules/repositories/ai-analysis-report';
 import { StockAnalyzerListener } from './stock-analyzer.listener';
 import { StockAnalyzerService } from './stock-analyzer.service';
 
@@ -12,8 +12,8 @@ import { StockAnalyzerService } from './stock-analyzer.service';
         GeminiCliModule,
         NaverApiModule,
         KoreaInvestmentQuotationClientModule,
-        KoreaInvestmentSettingModule,
-        AnalysisRepositoryModule,
+        KeywordModule,
+        AiAnalysisReportModule,
     ],
     providers: [StockAnalyzerListener, StockAnalyzerService],
     exports: [StockAnalyzerService],

@@ -1,6 +1,7 @@
 import { Pipe } from '@common/types';
 import { getStockName } from '@common/domains';
-import { OverseasDailyGovernmentBondItem } from '@app/modules/repositories';
+import { MarketType } from '@app/common/types';
+import { MarketIndexDto } from '@app/modules/repositories/market-index';
 import { OverseasQuotationInquireDailyChartPriceOutput2 } from '../korea-investment-index-crawler.interface';
 
 type TransformerType = {
@@ -11,20 +12,17 @@ type TransformerType = {
 
 export class OverseasDailyGovernmentBondTransformer implements Pipe<
     TransformerType,
-    OverseasDailyGovernmentBondItem
+    MarketIndexDto
 > {
-    transform({
-        code,
-        date,
-        output2,
-    }: TransformerType): OverseasDailyGovernmentBondItem {
+    transform({ code, date, output2 }: TransformerType): MarketIndexDto {
         return {
+            marketType: MarketType.Overseas,
             date,
             code,
             name: getStockName(code),
-            price: Number(output2.ovrs_nmix_prpr),
-            change: 0,
-            changeRate: 0,
+            value: Number(output2.ovrs_nmix_prpr),
+            changeValue: 0,
+            changeValueRate: 0,
         };
     }
 }

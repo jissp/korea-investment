@@ -1,6 +1,8 @@
 import { Pipe } from '@common/types';
+import { toDateYmdByDate } from '@common/utils';
 import { getStockName } from '@common/domains';
-import { OverseasIndexItem } from '@app/modules/repositories';
+import { MarketType } from '@app/common/types';
+import { MarketIndexDto } from '@app/modules/repositories/market-index';
 import { OverseasQuotationInquireDailyChartPriceOutput } from '../korea-investment-index-crawler.interface';
 
 type TransformerType = {
@@ -10,15 +12,17 @@ type TransformerType = {
 
 export class OverseasIndexTransformer implements Pipe<
     TransformerType,
-    OverseasIndexItem
+    MarketIndexDto
 > {
-    transform({ code, output }: TransformerType): OverseasIndexItem {
+    transform({ code, output }: TransformerType): MarketIndexDto {
         return {
+            marketType: MarketType.Overseas,
+            date: toDateYmdByDate(),
             code,
             name: getStockName(code),
-            price: Number(output.ovrs_nmix_prpr),
-            change: Number(output.ovrs_nmix_prdy_vrss),
-            changeRate: Number(output.prdy_ctrt),
+            value: Number(output.ovrs_nmix_prpr),
+            changeValue: Number(output.ovrs_nmix_prdy_vrss),
+            changeValueRate: Number(output.prdy_ctrt),
         };
     }
 }

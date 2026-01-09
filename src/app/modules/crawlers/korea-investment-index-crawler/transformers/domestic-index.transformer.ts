@@ -1,6 +1,8 @@
 import { Pipe } from '@common/types';
+import { toDateYmdByDate } from '@common/utils';
 import { getStockName } from '@common/domains';
-import { DomesticIndexItem } from '@app/modules/repositories';
+import { MarketType } from '@app/common/types';
+import { MarketIndexDto } from '@app/modules/repositories/market-index';
 import { KoreaInvestmentDomesticInquireIndexDailyPriceOutput } from '../korea-investment-index-crawler.interface';
 
 type TransformerType = {
@@ -10,15 +12,17 @@ type TransformerType = {
 
 export class DomesticIndexTransformer implements Pipe<
     TransformerType,
-    DomesticIndexItem
+    MarketIndexDto
 > {
-    transform({ code, output }: TransformerType): DomesticIndexItem {
+    transform({ code, output }: TransformerType): MarketIndexDto {
         return {
+            marketType: MarketType.Domestic,
+            date: toDateYmdByDate(),
             code,
             name: getStockName(code),
-            price: Number(output.bstp_nmix_prpr),
-            change: Number(output.bstp_nmix_prdy_vrss),
-            changeRate: Number(output.bstp_nmix_prdy_ctrt),
+            value: Number(output.bstp_nmix_prpr),
+            changeValue: Number(output.bstp_nmix_prdy_vrss),
+            changeValueRate: Number(output.bstp_nmix_prdy_ctrt),
         };
     }
 }

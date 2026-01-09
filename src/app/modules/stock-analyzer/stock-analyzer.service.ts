@@ -5,7 +5,10 @@ import { GeminiCliService } from '@modules/gemini-cli';
 import { NaverApiClientFactory, NaverAppName } from '@modules/naver/naver-api';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentKeywordSettingService } from '@app/modules/korea-investment-setting';
+import {
+    KeywordGroupService,
+    KeywordService,
+} from '@app/modules/repositories/keyword';
 import { StockAnalyzerEventType } from './stock-analyzer.types';
 import { AnalyzeStockPromptTransformer } from './transformers/analyze-stock-prompt.transformer';
 import { AnalyzeKeywordGroupPromptTransformer } from './transformers/analyze-keyword-group-prompt.transformer';
@@ -17,8 +20,9 @@ export class StockAnalyzerService {
     constructor(
         private readonly geminiCliService: GeminiCliService,
         private readonly naverApiClientFactory: NaverApiClientFactory,
-        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
+        private readonly keywordService: KeywordService,
+        private readonly keywordGroupService: KeywordGroupService,
     ) {}
 
     /**
@@ -59,13 +63,21 @@ export class StockAnalyzerService {
 
     /**
      * Gemini를 통해 키워드 그룹의 흐름을 분석합니다.
-     * @param groupName
+     * @param groupId
      */
-    public async requestAnalyzeKeywordGroup(groupName: string) {
+    public async requestAnalyzeKeywordGroup(groupId: number) {
         try {
+            const keywordGroup =
+                await this.keywordGroupService.getKeywordGroup(groupId);
+            if (!keywordGroup) {
+                throw new Error(`키워드 그룹이 존재하지 않습니다.`);
+            }
+
             const keywords =
-                await this.keywordSettingService.getKeywordsByGroup(groupName);
-            const naverNewsItems = await this.getNaverNewsItems(keywords);
+                await this.keywordService.getKeywordsByGroupId(groupId);
+            const naverNewsItems = await this.getNaverNewsItems(
+                keywords.map(({ name }) => name),
+            );
 
             const transformer = new AnalyzeKeywordGroupPromptTransformer();
             this.geminiCliService.requestPrompt({
@@ -73,11 +85,11 @@ export class StockAnalyzerService {
                     eventName:
                         StockAnalyzerEventType.AnalysisCompletedForKeywordGroup,
                     eventData: {
-                        groupName,
+                        keywordGroup,
                     },
                 },
                 prompt: transformer.transform({
-                    groupName,
+                    groupName: keywordGroup.name,
                     naverNewsItems,
                 }),
             });
@@ -94,8 +106,8 @@ export class StockAnalyzerService {
      * @private
      */
     private async getKeywords(stockCode: string): Promise<string[]> {
-        const keywords: string[] =
-            await this.keywordSettingService.getKeywordsByStockCode(stockCode);
+        // TODO 추후 종목 - 키워드 기능을 추가해야할 수 있음.
+        const keywords: string[] = [];
 
         const stockName = getStockName(stockCode);
         const allKeywords: string[] = [stockName, ...keywords];

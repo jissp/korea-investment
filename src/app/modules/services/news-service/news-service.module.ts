@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
+import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
+import { KeywordModule } from '@app/modules/repositories/keyword';
+import { NewsModule } from '@app/modules/repositories/news';
 import { NewsService } from './news.service';
 
 @Module({
-    imports: [NewsRepositoryModule],
+    imports: [KeywordModule, FavoriteStockModule, NewsModule],
     providers: [NewsService],
     exports: [NewsService],
 })

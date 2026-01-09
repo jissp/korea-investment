@@ -1,4 +1,11 @@
 export interface IConfiguration {
+    database: {
+        host: string;
+        database: string;
+        userName: string;
+        password: string;
+        port: string;
+    };
     koreaInvestment: {
         user: {
             id: string;
@@ -52,6 +59,13 @@ export interface IConfiguration {
 }
 
 export default (): IConfiguration => ({
+    database: {
+        host: getEnv('DATABASE_HOST'),
+        database: getEnv('DATABASE_DATABASE'),
+        userName: getEnv('DATABASE_USERNAME'),
+        password: getEnv('DATABASE_PASSWORD'),
+        port: getEnv('DATABASE_PORT'),
+    },
     koreaInvestment: {
         user: {
             id: getEnv('KOREA_INVESTMENT_USER_ID'),
