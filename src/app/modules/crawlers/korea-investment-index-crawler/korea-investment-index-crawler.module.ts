@@ -3,7 +3,7 @@ import { QueueModule } from '@modules/queue';
 import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
-import { IndexRepositoryModule } from '@app/modules/repositories';
+import { MarketIndexModule } from '@app/modules/repositories/market-index';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
 import { KoreaInvestmentIndexCrawlerProcessor } from './korea-investment-index-crawler.processor';
 import { KoreaInvestmentIndexCrawlerSchedule } from './korea-investment-index-crawler.schedule';
@@ -23,7 +23,7 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         KoreaInvestmentConfigModule,
         KoreaInvestmentHelperModule,
         KoreaInvestmentRequestApiModule,
-        IndexRepositoryModule,
+        MarketIndexModule,
     ],
     providers: [
         ...flowProviders,

@@ -1,4 +1,2 @@
-export * from './get-ai-analysis-stock.response';
-export * from './get-ai-analysis-stocks.response';
-export * from './get-ai-analysis-keyword-group.response';
-export * from './get-ai-analysis-keyword-groups.response';
+export * from './get-ai-analysis-report.response';
+export * from './get-ai-analysis-reports.response';

@@ -1,4 +1,6 @@
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -8,15 +10,7 @@ import { QueueModule } from '@modules/queue';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
-import { KoreaInvestmentSettingModule } from '@app/modules/korea-investment-setting';
 import { GeminiCliModule } from '@modules/gemini-cli';
-import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
-import { StockRepositoryModule } from '@app/modules/repositories/stock-repository';
-import {
-    AccountRepositoryModule,
-    AnalysisRepositoryModule,
-    IndexRepositoryModule,
-} from '@app/modules/repositories';
 import { CrawlerModule } from '@app/modules/crawlers/crawler';
 import { NewsCrawlerModule } from '@app/modules/crawlers/news-crawler';
 import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-index-crawler';
@@ -24,12 +18,16 @@ import { StockCrawlerModule } from '@app/modules/crawlers/stock-crawler';
 import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
 import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
 import { StockInvestorModule } from '@app/modules/services/stock-investor';
+import { StockRepositoryModule } from '@app/modules/repositories/stock-repository';
+import { AccountModule } from '@app/modules/repositories/account';
+import { NewsModule } from '@app/modules/repositories/news';
+import { KeywordModule } from '@app/modules/repositories/keyword';
+import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
+import { MarketIndexModule } from '@app/modules/repositories/market-index';
+import { AiAnalysisReportModule } from '@app/modules/repositories/ai-analysis-report';
+import { StockDailyInvestorModule } from '@app/modules/repositories/stock-daily-investor';
 import { AppServiceModule } from '@app/modules/services';
-import configuration from './configuration';
-import {
-    KoreaInvestmentKeywordListener,
-    KoreaInvestmentStockCodeListener,
-} from './listeners';
+import configuration, { IConfiguration } from './configuration';
 import {
     AccountController,
     AnalysisController,
@@ -38,9 +36,10 @@ import {
     KeywordController,
     KeywordGroupController,
     LatestStockRankController,
+    MarketIndexController,
     NewsController,
     StockController,
-    StockIndexController,
+    StockDailyInvestorController,
 } from './controllers';
 import { KoreaInvestmentBeGateway } from './gateways';
 
@@ -50,6 +49,35 @@ import { KoreaInvestmentBeGateway } from './gateways';
             load: [configuration],
         }),
         LoggerModule.forRoot(),
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (
+                configService: ConfigService,
+            ): TypeOrmModuleOptions => {
+                const config =
+                    configService.get<IConfiguration['database']>('database');
+                if (!config) {
+                    throw new Error('Database configuration is missing');
+                }
+
+                return {
+                    type: 'mysql',
+                    timezone: 'Z',
+                    host: config.host,
+                    database: config.database,
+                    username: config.userName,
+                    password: config.password,
+                    port: Number(config.port),
+                    synchronize: false,
+                    autoLoadEntities: true,
+                    namingStrategy: new SnakeNamingStrategy(),
+                    extra: {
+                        decimalNumbers: true,
+                    },
+                };
+            },
+        }),
         RedisModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -64,14 +92,8 @@ import { KoreaInvestmentBeGateway } from './gateways';
         ScheduleModule.forRoot(),
         GeminiCliModule,
         KoreaInvestmentCollectorModule.forRoot(),
-        KoreaInvestmentSettingModule.forRoot(),
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
-        StockRepositoryModule,
-        IndexRepositoryModule,
-        AccountRepositoryModule,
-        AnalysisRepositoryModule,
-        NewsRepositoryModule,
         CrawlerModule,
         NewsCrawlerModule,
         KoreaInvestmentAccountCrawlerModule,
@@ -80,6 +102,14 @@ import { KoreaInvestmentBeGateway } from './gateways';
         StockAnalyzerModule,
         StockInvestorModule,
         AppServiceModule,
+        StockRepositoryModule,
+        StockDailyInvestorModule,
+        AccountModule,
+        NewsModule,
+        KeywordModule,
+        FavoriteStockModule,
+        MarketIndexModule,
+        AiAnalysisReportModule,
     ],
     controllers: [
         AssetController,
@@ -88,15 +118,12 @@ import { KoreaInvestmentBeGateway } from './gateways';
         NewsController,
         LatestStockRankController,
         StockController,
-        StockIndexController,
+        StockDailyInvestorController,
+        MarketIndexController,
         FavoriteStockController,
         KeywordController,
         KeywordGroupController,
     ],
-    providers: [
-        KoreaInvestmentKeywordListener,
-        KoreaInvestmentStockCodeListener,
-        KoreaInvestmentBeGateway,
-    ],
+    providers: [KoreaInvestmentBeGateway],
 })
 export class AppModule {}

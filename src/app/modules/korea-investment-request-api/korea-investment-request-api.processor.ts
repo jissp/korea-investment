@@ -52,7 +52,7 @@ export class KoreaInvestmentRequestApiProcessor {
                 response,
             };
         } catch (error) {
-            this.logger.error(error);
+            this.logger.error(error.message);
 
             throw error;
         }

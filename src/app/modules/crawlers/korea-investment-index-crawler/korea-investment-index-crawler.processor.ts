@@ -2,7 +2,7 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import { IndexRepository } from '@app/modules/repositories';
+import { MarketIndexService } from '@app/modules/repositories/market-index';
 import {
     KoreaInvestmentCallApiMultiResult,
     KoreaInvestmentRequestApiHelper,
@@ -32,7 +32,7 @@ export class KoreaInvestmentIndexCrawlerProcessor {
     );
 
     constructor(
-        private readonly indexRepository: IndexRepository,
+        private readonly marketIndexService: MarketIndexService,
         private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
     ) {}
@@ -61,31 +61,30 @@ export class KoreaInvestmentIndexCrawlerProcessor {
             const dailyTransformer = new DomesticDailyIndexTransformer();
 
             for (const { code, output, output2 } of indexContents) {
-                // 국내 지수 - 현재 데이터 저장
-                await this.indexRepository.setDomesticIndex(
+                // 국내 지수 - 오늘 데이터
+                const todayMarketIndex = transformer.transform({
                     code,
-                    transformer.transform({
+                    output,
+                });
+
+                // 국내 지수 - 일자별 데이터
+                const dailyMarketIndices = output2.map((output2Item) => {
+                    const date = this.koreaInvestmentHelperService
+                        .splitDateDt(output2Item.stck_bsop_date)
+                        .join('-');
+
+                    return dailyTransformer.transform({
                         code,
-                        output,
-                    }),
-                );
+                        date,
+                        output2: output2Item,
+                    });
+                });
 
-                // 국내 지수 - 일자별 데이터 저장
                 await Promise.all(
-                    output2.map((output2Item) => {
-                        const date = this.koreaInvestmentHelperService
-                            .splitDateDt(output2Item.stck_bsop_date)
-                            .join('-');
-
-                        return this.indexRepository.setDomesticDailyIndex(
-                            code,
-                            dailyTransformer.transform({
-                                code,
-                                date,
-                                output2: output2Item,
-                            }),
-                        );
-                    }),
+                    [todayMarketIndex, ...dailyMarketIndices].map(
+                        (marketIndex) =>
+                            this.marketIndexService.upsert(marketIndex),
+                    ),
                 );
             }
         } catch (error) {
@@ -117,31 +116,30 @@ export class KoreaInvestmentIndexCrawlerProcessor {
             const dailyTransformer = new OverseasDailyIndexTransformer();
 
             for (const { code, output, output2 } of indexContents) {
-                // 해외 지수 - 현재 데이터 저장
-                await this.indexRepository.setOverseasIndex(
+                // 해외 지수 - 오늘 데이터
+                const todayMarketIndex = transformer.transform({
                     code,
-                    transformer.transform({
+                    output,
+                });
+
+                // 해외 지수 - 일자별 데이터
+                const dailyMarketIndices = output2.map((output2Item) => {
+                    const date = this.koreaInvestmentHelperService
+                        .splitDateDt(output2Item.stck_bsop_date)
+                        .join('-');
+
+                    return dailyTransformer.transform({
                         code,
-                        output,
-                    }),
-                );
+                        date,
+                        output2: output2Item,
+                    });
+                });
 
-                // 해외 지수 - 일자별 데이터 저장
                 await Promise.all(
-                    output2.map((output2Item) => {
-                        const date = this.koreaInvestmentHelperService
-                            .splitDateDt(output2Item.stck_bsop_date)
-                            .join('-');
-
-                        return this.indexRepository.setOverseasDailyIndex(
-                            code,
-                            dailyTransformer.transform({
-                                code,
-                                date,
-                                output2: output2Item,
-                            }),
-                        );
-                    }),
+                    [todayMarketIndex, ...dailyMarketIndices].map(
+                        (marketIndex) =>
+                            this.marketIndexService.upsert(marketIndex),
+                    ),
                 );
             }
         } catch (error) {
@@ -179,31 +177,30 @@ export class KoreaInvestmentIndexCrawlerProcessor {
                 new OverseasDailyGovernmentBondTransformer();
 
             for (const { code, output, output2 } of indexContents) {
-                // 미국 국채 - 현재 데이터 저장
-                await this.indexRepository.setOverseasGovernmentBond(
+                // 미국 국채 - 오늘 데이터
+                const todayMarketIndex = transformer.transform({
                     code,
-                    transformer.transform({
+                    output,
+                });
+
+                // 미국 국채 - 일자별 데이터
+                const dailyMarketIndices = output2.map((output2Item) => {
+                    const date = this.koreaInvestmentHelperService
+                        .splitDateDt(output2Item.stck_bsop_date)
+                        .join('-');
+
+                    return dailyTransformer.transform({
                         code,
-                        output,
-                    }),
-                );
+                        date,
+                        output2: output2Item,
+                    });
+                });
 
-                // 미국 국채 - 일자별 데이터 저장
                 await Promise.all(
-                    output2.map((output2Item) => {
-                        const date = this.koreaInvestmentHelperService
-                            .splitDateDt(output2Item.stck_bsop_date)
-                            .join('-');
-
-                        return this.indexRepository.setOverseasDailyGovernmentBond(
-                            code,
-                            dailyTransformer.transform({
-                                code,
-                                date,
-                                output2: output2Item,
-                            }),
-                        );
-                    }),
+                    [todayMarketIndex, ...dailyMarketIndices].map(
+                        (marketIndex) =>
+                            this.marketIndexService.upsert(marketIndex),
+                    ),
                 );
             }
         } catch (error) {

@@ -7,7 +7,6 @@ import {
     Param,
     Post,
 } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
     ApiBody,
     ApiNoContentResponse,
@@ -16,22 +15,17 @@ import {
     ApiParam,
 } from '@nestjs/swagger';
 import { assertStockCode, getStockName } from '@common/domains';
-import { GetCodesResponse } from '@app/common';
 import {
-    KoreaInvestmentSettingEvent,
-    KoreaInvestmentSettingService,
-    StockCodeType,
-} from '@app/modules/korea-investment-setting';
-import { UpsertFavoriteStockBody } from './dto';
+    FavoriteStockService,
+    FavoriteType,
+} from '@app/modules/repositories/favorite-stock';
+import { GetFavoritesResponse, UpsertFavoriteStockBody } from './dto';
 
 @Controller('v1/favorite-stocks')
 export class FavoriteStockController {
     private logger = new Logger(FavoriteStockController.name);
 
-    constructor(
-        private readonly settingService: KoreaInvestmentSettingService,
-        private readonly eventEmitter: EventEmitter2,
-    ) {}
+    constructor(private readonly favoriteStockService: FavoriteStockService) {}
 
     @ApiOperation({
         summary: '관심있는 종목 추가',
@@ -45,26 +39,13 @@ export class FavoriteStockController {
     public async addFavoriteStockCode(
         @Body() { stockCode }: UpsertFavoriteStockBody,
     ) {
-        try {
-            assertStockCode(stockCode);
+        assertStockCode(stockCode);
 
-            await this.settingService.addStockCodeByType(
-                StockCodeType.Favorite,
-                stockCode,
-            );
-
-            this.eventEmitter.emit(
-                KoreaInvestmentSettingEvent.UpdatedStockCode,
-                {
-                    stockCode,
-                    stockCodeType: StockCodeType.Favorite,
-                },
-            );
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
+        await this.favoriteStockService.upsert({
+            type: FavoriteType.Manual,
+            stockCode,
+            stockName: getStockName(stockCode),
+        });
     }
 
     @ApiOperation({
@@ -84,17 +65,10 @@ export class FavoriteStockController {
         try {
             assertStockCode(stockCode);
 
-            await this.settingService.deleteStockCodeByType(
-                StockCodeType.Favorite,
+            await this.favoriteStockService.deleteByStockCode({
+                type: FavoriteType.Manual,
                 stockCode,
-            );
-
-            this.eventEmitter.emit(
-                KoreaInvestmentSettingEvent.DeletedStockCode,
-                {
-                    stockCode,
-                },
-            );
+            });
         } catch (error) {
             this.logger.error(error);
 
@@ -107,25 +81,16 @@ export class FavoriteStockController {
         description: '관심있는 종목 코드들을 조회합니다.',
     })
     @ApiOkResponse({
-        type: GetCodesResponse,
+        type: GetFavoritesResponse,
     })
     @Get()
-    public async getFavoriteStockCodes(): Promise<GetCodesResponse> {
-        try {
-            const codes = await this.settingService.getStockCodesByType(
-                StockCodeType.Favorite,
-            );
+    public async getFavoriteStockCodes(): Promise<GetFavoritesResponse> {
+        const favoriteStocks = await this.favoriteStockService.findByType(
+            FavoriteType.Manual,
+        );
 
-            return {
-                data: codes.map((code) => ({
-                    code,
-                    name: getStockName(code),
-                })),
-            };
-        } catch (error) {
-            this.logger.error(error);
-
-            throw error;
-        }
+        return {
+            data: favoriteStocks,
+        };
     }
 }

@@ -7,9 +7,8 @@ import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
-import { AccountRepository } from '@app/modules/repositories';
+import { AccountService } from '@app/modules/repositories/account';
 import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
-import { KoreaInvestmentSettingService } from '@app/modules/korea-investment-setting';
 
 @Injectable()
 export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
@@ -18,10 +17,9 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     );
 
     constructor(
-        private readonly koreaInvestmentSettingService: KoreaInvestmentSettingService,
         private readonly koreaInvestmentConfigService: KoreaInvestmentConfigService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly accountRepository: AccountRepository,
+        private readonly accountService: AccountService,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccount)
         private readonly requestKoreaInvestmentAccountFlow: FlowProducer,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccountStocks)
@@ -39,16 +37,15 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/1 * * * *')
     async handleCrawlingKoreaInvestmentAccounts() {
         try {
-            const accounts =
-                await this.koreaInvestmentSettingService.getAccountNumbers();
+            const accounts = await this.accountService.getAccounts();
 
             const queueName = KoreaInvestmentAccountCrawlerType.RequestAccount;
             await this.requestKoreaInvestmentAccountFlow.add(
                 {
                     name: queueName,
                     queueName,
-                    children: accounts.map((account) => {
-                        const { caNo, prdtCd } = this.splitAccount(account);
+                    children: accounts.map(({ accountId }) => {
+                        const { caNo, prdtCd } = this.splitAccount(accountId);
 
                         return this.requestApiHelper.generateDomesticInquireAccountBalance(
                             {
@@ -79,8 +76,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     @Cron('*/30 * * * * *')
     async handleCrawlingKoreaInvestmentAccountStocks() {
         try {
-            const accounts =
-                await this.koreaInvestmentSettingService.getAccountNumbers();
+            const accounts = await this.accountService.getAccounts();
 
             const queueName =
                 KoreaInvestmentAccountCrawlerType.RequestAccountStocks;
@@ -88,8 +84,8 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                 {
                     name: queueName,
                     queueName,
-                    children: accounts.map((account) => {
-                        const { caNo, prdtCd } = this.splitAccount(account);
+                    children: accounts.map(({ accountId }) => {
+                        const { caNo, prdtCd } = this.splitAccount(accountId);
 
                         return this.requestApiHelper.generateDomesticInquireBalance(
                             {

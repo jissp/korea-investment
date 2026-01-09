@@ -29,7 +29,14 @@ export class NewsPromptTransformer implements Pipe<NaverApiNewsItem[], string> {
      * @private
      */
     private transformRowPrompt(newsItem: NaverApiNewsItem) {
-        return `- 뉴스 제목: ${newsItem.title}, 뉴스 내용: ${newsItem.description}, 뉴스 링크: ${newsItem.link}`;
+        const title = this.removeTag(newsItem.title);
+        const description = this.removeTag(newsItem.description);
+
+        return `- ${title}  \n${description}`;
+    }
+
+    private removeTag(text: string) {
+        return text.replace('<b>', '').replace('</b>', '');
     }
 
     /**
@@ -42,8 +49,10 @@ export class NewsPromptTransformer implements Pipe<NaverApiNewsItem[], string> {
             throw new Error('실시간으로 검색된 뉴스 정보가 없습니다.');
         }
 
-        return _.sortBy(newsItems, (newsItem) =>
+        const sortedNewsItems = _.sortBy(newsItems, (newsItem) =>
             new Date(newsItem.pubDate).getTime(),
         ).reverse();
+
+        return _.uniqBy(sortedNewsItems, (newsItem) => newsItem.description);
     }
 }

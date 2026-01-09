@@ -2,18 +2,16 @@ import * as _ from 'lodash';
 import { FlowProducer, Queue } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { uniqueValues } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
-    KeywordType,
-    KoreaInvestmentKeywordSettingService,
-    KoreaInvestmentSettingService,
-} from '@app/modules/korea-investment-setting';
-import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
+import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
+import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import {
     CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
@@ -28,8 +26,8 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly koreaInvestmentHelper: KoreaInvestmentHelperService,
-        private readonly settingService: KoreaInvestmentSettingService,
-        private readonly keywordSettingService: KoreaInvestmentKeywordSettingService,
+        private readonly keywordService: KeywordService,
+        private readonly favoriteStockService: FavoriteStockService,
         @Inject(NewsCrawlerQueueType.RequestDomesticNewsTitle)
         private readonly requestDomesticNewsTitleFlow: FlowProducer,
         @Inject(NewsCrawlerQueueType.CrawlingNaverNews)
@@ -51,10 +49,10 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async handleCrawlingKoreaInvestmentNewsByStockCode() {
         try {
-            const stockCodes = await this.settingService.getStockCodes();
-            if (!stockCodes.length) {
-                return;
-            }
+            const favoriteStocks = await this.favoriteStockService.findAll();
+            const stockCodes = uniqueValues(
+                favoriteStocks.map(({ stockCode }) => stockCode),
+            );
 
             const startDate = this.koreaInvestmentHelper.formatDateParam(
                 new Date(),
@@ -101,9 +99,12 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async requestNaverNewsCrawlingForKeyword() {
         try {
-            const keywords =
-                await this.keywordSettingService.getKeywordsFromAllGroups();
-            const filteredKeywords = keywords.filter(
+            const keywords = await this.keywordService.getKeywords({
+                type: KeywordType.Manual,
+            });
+            const keywordName = uniqueValues(keywords.map(({ name }) => name));
+
+            const filteredKeywords = keywordName.filter(
                 (keyword) => !(keyword.includes('(') && keyword.includes(')')),
             );
 
@@ -128,13 +129,12 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async requestNaverNewsCrawlingForStockCode() {
         try {
-            const keywords = await this.keywordSettingService.getKeywords([
-                KeywordType.StockGroup,
-                KeywordType.Possess,
-                KeywordType.Favorite,
-            ]);
+            const keywords = await this.keywordService.getKeywords({
+                type: [KeywordType.StockGroup, KeywordType.Possess],
+            });
+            const keywordName = uniqueValues(keywords.map(({ name }) => name));
 
-            const filteredKeywords = keywords.filter(
+            const filteredKeywords = keywordName.filter(
                 (keyword) => !(keyword.includes('(') && keyword.includes(')')),
             );
 

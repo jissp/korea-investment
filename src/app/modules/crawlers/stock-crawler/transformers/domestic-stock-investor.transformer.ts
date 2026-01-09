@@ -1,17 +1,24 @@
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
-import { KoreaInvestmentStockInvestor } from '@app/modules/repositories/stock-repository/stock-repository.types';
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { StockDailyInvestorDto } from '@app/modules/repositories/stock-daily-investor';
+import { getStockName } from '@common/domains';
+import { MarketType } from '@app/common/types';
 
+interface TransformParams {
+    stockCode: string;
+    output: DomesticStockQuotationsInquireInvestorOutput;
+}
 export class DomesticStockInvestorTransformer {
-    transform(
-        output: DomesticStockQuotationsInquireInvestorOutput,
-    ): KoreaInvestmentStockInvestor {
+    transform({ stockCode, output }: TransformParams): StockDailyInvestorDto {
         return {
+            marketType: MarketType.Domestic,
             date: toDateByKoreaInvestmentYmd(output.stck_bsop_date),
-            stockPrice: Number(output.stck_clpr),
-            prsnQuantity: Number(output.prsn_ntby_qty),
-            frgnQuantity: Number(output.frgn_ntby_qty),
-            orgnQuantity: Number(output.orgn_ntby_qty),
+            stockCode,
+            stockName: getStockName(stockCode),
+            price: Number(output.stck_clpr),
+            person: Number(output.prsn_ntby_qty),
+            foreigner: Number(output.frgn_ntby_qty),
+            organization: Number(output.orgn_ntby_qty),
         };
     }
 }

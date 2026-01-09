@@ -1,5 +1,5 @@
 import { Axios, AxiosRequestConfig } from 'axios';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getRedisKey, RedisService } from '@modules/redis';
 import {
     CustomerType,
@@ -12,6 +12,8 @@ import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-inve
 export class KoreaInvestmentHelperService {
     private readonly WEBSOCKET_TOKEN_TTL = 86400;
     private readonly WEBSOCKET_TOKEN_TTL_BUFFER = 3600; //
+
+    private readonly logger = new Logger(KoreaInvestmentHelperService.name);
 
     constructor(
         @Inject('Client') private readonly client: Axios,
@@ -37,16 +39,22 @@ export class KoreaInvestmentHelperService {
         AxiosRequestConfig<T>,
         'method' | 'url' | 'params' | 'data' | 'headers'
     >): Promise<R> {
-        const response = await this.client.request<R>({
-            method,
-            url,
-            params,
-            data: payload,
-            headers,
-            timeout: 3000,
-        });
+        try {
+            const response = await this.client.request<R>({
+                method,
+                url,
+                params,
+                data: payload,
+                headers,
+                timeout: 5000,
+            });
 
-        return response.data;
+            return response.data;
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
     }
 
     /**

@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import {
-    KoreaInvestmentStockInvestor,
-    StockRepository,
-} from '@app/modules/repositories/stock-repository';
 import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler/transformers/domestic-stock-investor.transformer';
+import {
+    StockDailyInvestor,
+    StockDailyInvestorService,
+} from '@app/modules/repositories/stock-daily-investor';
 
 @Injectable()
 export class StockInvestorService {
@@ -13,7 +13,7 @@ export class StockInvestorService {
 
     constructor(
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
-        private readonly stockRepository: StockRepository,
+        private readonly stockDailyInvestorService: StockDailyInvestorService,
     ) {}
 
     /**
@@ -24,25 +24,25 @@ export class StockInvestorService {
     public async getDailyInvestors(
         stockCode: string,
         limit: number = 30,
-    ): Promise<KoreaInvestmentStockInvestor[]> {
+    ): Promise<StockDailyInvestor[]> {
         try {
             const stockInvestors =
-                await this.stockRepository.getDailyInvestorList(
+                await this.stockDailyInvestorService.getStockDailyInvestors({
                     stockCode,
                     limit,
-                );
+                });
 
             const hasToday = stockInvestors[0]?.date === this.getTodayDate();
             if (hasToday) {
                 return stockInvestors;
             }
 
-            await this.fetchAndCacheInvestorData(stockCode);
+            await this.fetchAndSaveStockDailyInvestors(stockCode);
 
-            return await this.stockRepository.getDailyInvestorList(
+            return await this.stockDailyInvestorService.getStockDailyInvestors({
                 stockCode,
                 limit,
-            );
+            });
         } catch (error) {
             this.logger.error(error);
             throw error;
@@ -54,7 +54,7 @@ export class StockInvestorService {
      * @param stockCode
      * @private
      */
-    private async fetchAndCacheInvestorData(stockCode: string) {
+    private async fetchAndSaveStockDailyInvestors(stockCode: string) {
         const response =
             await this.koreaInvestmentQuotationClient.inquireInvestor({
                 FID_INPUT_ISCD: stockCode,
@@ -62,13 +62,17 @@ export class StockInvestorService {
             });
 
         const transformer = new DomesticStockInvestorTransformer();
-        const transformedStockInvestors = response.map((item) =>
-            transformer.transform(item),
+        const transformedStockInvestors = response.map((output) =>
+            transformer.transform({
+                stockCode,
+                output,
+            }),
         );
 
-        await this.stockRepository.setDailyInvestor(
-            stockCode,
-            transformedStockInvestors,
+        await Promise.all(
+            transformedStockInvestors.map((transformedStockInvestor) =>
+                this.stockDailyInvestorService.upsert(transformedStockInvestor),
+            ),
         );
     }
 

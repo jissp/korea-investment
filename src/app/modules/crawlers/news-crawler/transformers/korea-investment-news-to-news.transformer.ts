@@ -4,10 +4,7 @@ import {
     toDateByKoreaInvestmentTime,
     toDateByKoreaInvestmentYmd,
 } from '@common/utils';
-import {
-    NewsCategory,
-    NewsItem,
-} from '@app/modules/repositories/news-repository';
+import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
 import { KoreaInvestmentNewsItem } from '../news-crawler.interface';
 
 export class KoreaInvestmentNewsToNewsTransformer {
@@ -23,16 +20,21 @@ export class KoreaInvestmentNewsToNewsTransformer {
         'iscd5',
     ];
 
-    public transform(koreaInvestmentNews: KoreaInvestmentNewsItem): NewsItem {
+    public transform(koreaInvestmentNews: KoreaInvestmentNewsItem): {
+        stockCodes: string[];
+        news: NewsDto;
+    } {
         const createdAt = this.toNormalizeCreatedAt(koreaInvestmentNews);
         const createdAtDate = createdAt ? new Date(createdAt) : new Date();
 
         return {
-            articleId: koreaInvestmentNews.cntt_usiq_srno,
-            category: NewsCategory.KoreaInvestment,
-            title: koreaInvestmentNews.hts_pbnt_titl_cntt,
             stockCodes: this.extractStockCodes(koreaInvestmentNews),
-            createdAt: createdAtDate.toISOString(),
+            news: {
+                articleId: koreaInvestmentNews.cntt_usiq_srno,
+                category: NewsCategory.KoreaInvestment,
+                title: koreaInvestmentNews.hts_pbnt_titl_cntt,
+                publishedAt: createdAtDate,
+            },
         };
     }
 

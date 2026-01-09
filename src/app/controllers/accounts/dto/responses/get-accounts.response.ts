@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-    KoreaInvestmentAccountOutput2,
-    KoreaInvestmentAccountStockOutput,
-} from '@app/modules/korea-investment-request-api';
-
-class GetAccountInfo extends KoreaInvestmentAccountOutput2 {}
-
-class GetAccountStock extends KoreaInvestmentAccountStockOutput {}
+import { Account, AccountStock } from '@app/modules/repositories/account';
 
 class GetAccountData {
     @ApiProperty({
@@ -16,17 +9,17 @@ class GetAccountData {
     accountNumber: string;
 
     @ApiProperty({
-        type: GetAccountInfo,
+        type: Account,
         description: '계좌 정보',
     })
-    accountInfo: GetAccountInfo;
+    accountInfo: Account;
 
     @ApiProperty({
-        type: GetAccountStock,
+        type: AccountStock,
         description: '계좌 잔고 목록',
         isArray: true,
     })
-    accountStocks: GetAccountStock[];
+    accountStocks: AccountStock[];
 }
 
 export class GetAccountsResponse {
