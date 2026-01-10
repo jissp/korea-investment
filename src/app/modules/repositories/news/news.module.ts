@@ -1,10 +1,7 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
-import { News } from './entities/news.entity';
+import { KeywordGroupNews, KeywordNews, News, StockNews } from './entities';
 import { NewsService } from './news.service';
-import { StockNews } from './entities/stock-news.entity';
-import { KeywordGroupNews } from './entities/keyword-group-news.entity';
-import { KeywordNews } from './entities/keyword-news.entity';
 
 const entities = [News, StockNews, KeywordNews, KeywordGroupNews];
 

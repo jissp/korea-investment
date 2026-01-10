@@ -6,7 +6,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MarketType } from '@app/common/types';
+import { ExchangeType, MarketType } from '@app/common/types';
 
 @Entity('stocks')
 export class Stock {
@@ -20,22 +20,22 @@ export class Stock {
     id!: number;
 
     /**
-     * 종목 코드
-     */
-    @Column({ type: 'enum', enum: MarketType })
-    @ApiProperty({
-        description: '국내/해외 종목 유형',
-    })
-    marketType!: MarketType;
-
-    /**
-     * 종목 코드
+     * 긴 종목 코드
      */
     @Column({ type: 'varchar', length: 32 })
     @ApiProperty({
-        description: '종목 코드',
+        description: '긴 종목 코드',
     })
     code!: string;
+
+    /**
+     * 짧은 종목 코드
+     */
+    @Column({ type: 'varchar', length: 32 })
+    @ApiProperty({
+        description: '짧은 종목 코드',
+    })
+    shortCode!: string;
 
     /**
      * 종목명
@@ -45,6 +45,24 @@ export class Stock {
         description: '종목명',
     })
     name!: string;
+
+    /**
+     * 국내/해외 종목 유형
+     */
+    @Column({ type: 'enum', enum: MarketType })
+    @ApiProperty({
+        description: '국내/해외 종목 유형',
+    })
+    marketType!: MarketType;
+
+    /**
+     * 거래소 구분
+     */
+    @Column({ type: 'enum', enum: ExchangeType })
+    @ApiProperty({
+        description: '거래소 구분',
+    })
+    exchangeType!: ExchangeType;
 
     @CreateDateColumn({
         type: 'datetime',

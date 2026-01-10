@@ -5,7 +5,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { ReportType } from '@app/modules/repositories/ai-analysis-report/ai-analysis-report.types';
+import { ReportType } from './ai-analysis-report.types';
 
 @Entity('ai_analysis_reports')
 export class AiAnalysisReport {

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler/transformers/domestic-stock-investor.transformer';
+import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
 import {
     StockDailyInvestor,
     StockDailyInvestorService,

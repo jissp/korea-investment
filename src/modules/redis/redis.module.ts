@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { IConfiguration } from '@app/configuration';
 import { RedisAsyncConfig, RedisConfig, RedisConnection } from './redis.types';
 import { RedisService } from './redis.service';
-import { RedisHelper } from '@modules/redis/redis.helper';
 
 @Module({})
 export class RedisModule {
@@ -45,8 +44,8 @@ export class RedisModule {
             global: true,
             module: RedisModule,
             imports: [ConfigModule, ...(options.imports ?? [])],
-            providers: [...providers, RedisHelper, RedisService],
-            exports: [RedisConnection, RedisHelper],
+            providers: [...providers, RedisService],
+            exports: [RedisConnection],
         };
     }
 

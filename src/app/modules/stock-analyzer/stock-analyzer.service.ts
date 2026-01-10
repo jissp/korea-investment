@@ -10,8 +10,10 @@ import {
     KeywordService,
 } from '@app/modules/repositories/keyword';
 import { StockAnalyzerEventType } from './stock-analyzer.types';
-import { AnalyzeStockPromptTransformer } from './transformers/analyze-stock-prompt.transformer';
-import { AnalyzeKeywordGroupPromptTransformer } from './transformers/analyze-keyword-group-prompt.transformer';
+import {
+    AnalyzeKeywordGroupPromptTransformer,
+    AnalyzeStockPromptTransformer,
+} from './transformers';
 
 @Injectable()
 export class StockAnalyzerService {

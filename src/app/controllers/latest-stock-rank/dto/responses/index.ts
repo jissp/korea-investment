@@ -1,2 +1,2 @@
-export * from './korea-investment-populated-hts-top-view.response';
-export * from './korea-investment-populated-volume-rank.response';
+export * from './get-most-viewed-stocks.response';
+export * from './get-trading-volume-ranks.response';

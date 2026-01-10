@@ -1,11 +1,8 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AiAnalysisReportDto, ReportType } from './ai-analysis-report.types';
 import { AiAnalysisReport } from './ai-analysis-report.entity';
-import {
-    AiAnalysisReportDto,
-    ReportType,
-} from '@app/modules/repositories/ai-analysis-report/ai-analysis-report.types';
 
 @Injectable()
 export class AiAnalysisReportService {

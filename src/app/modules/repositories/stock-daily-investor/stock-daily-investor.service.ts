@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { toDateYmdByDate } from '@common/utils';
 import { StockDailyInvestor } from './stock-daily-investor.entity';
 import { StockDailyInvestorDto } from './stock-daily-investor.types';
-import { toDateYmdByDate } from '@common/utils';
 
 @Injectable()
 export class StockDailyInvestorService {
@@ -24,7 +24,7 @@ export class StockDailyInvestorService {
             .values(stockDailyInvestorDto)
             .orUpdate(
                 ['price', 'person', 'foreigner', 'organization'],
-                ['date', 'stockCode'],
+                ['date', 'stock_code'],
             )
             .updateEntity(false)
             .execute();

@@ -7,31 +7,18 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { QueueModule } from '@modules/queue';
-import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
+import { GeminiCliModule } from '@modules/gemini-cli';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
-import { GeminiCliModule } from '@modules/gemini-cli';
-import { CrawlerModule } from '@app/modules/crawlers/crawler';
-import { NewsCrawlerModule } from '@app/modules/crawlers/news-crawler';
-import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-index-crawler';
-import { StockCrawlerModule } from '@app/modules/crawlers/stock-crawler';
-import { KoreaInvestmentAccountCrawlerModule } from '@app/modules/crawlers/korea-investment-account-crawler';
+import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
-import { StockInvestorModule } from '@app/modules/services/stock-investor';
-import { StockRepositoryModule } from '@app/modules/repositories/stock-repository';
-import { AccountModule } from '@app/modules/repositories/account';
-import { NewsModule } from '@app/modules/repositories/news';
-import { KeywordModule } from '@app/modules/repositories/keyword';
-import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
-import { MarketIndexModule } from '@app/modules/repositories/market-index';
-import { AiAnalysisReportModule } from '@app/modules/repositories/ai-analysis-report';
-import { StockDailyInvestorModule } from '@app/modules/repositories/stock-daily-investor';
+import { CrawlerModule } from '@app/modules/crawlers';
 import { AppServiceModule } from '@app/modules/services';
+import { RepositoryModule } from '@app/modules/repositories';
 import configuration, { IConfiguration } from './configuration';
 import {
     AccountController,
     AnalysisController,
-    AssetController,
     FavoriteStockController,
     KeywordController,
     KeywordGroupController,
@@ -95,24 +82,11 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
         CrawlerModule,
-        NewsCrawlerModule,
-        KoreaInvestmentAccountCrawlerModule,
-        KoreaInvestmentIndexCrawlerModule,
-        StockCrawlerModule,
         StockAnalyzerModule,
-        StockInvestorModule,
         AppServiceModule,
-        StockRepositoryModule,
-        StockDailyInvestorModule,
-        AccountModule,
-        NewsModule,
-        KeywordModule,
-        FavoriteStockModule,
-        MarketIndexModule,
-        AiAnalysisReportModule,
+        RepositoryModule,
     ],
     controllers: [
-        AssetController,
         AccountController,
         AnalysisController,
         NewsController,

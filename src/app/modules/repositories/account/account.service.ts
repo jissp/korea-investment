@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Account } from './entities/account.entity';
 import { AccountInfoDto } from './account.types';
+import { Account } from './entities/account.entity';
 
 @Injectable()
 export class AccountService {

@@ -2,7 +2,7 @@ import { AxiosInstance } from 'axios';
 import {
     NaverApiNewsParams,
     NaverApiNewsResponse,
-} from '@modules/naver/naver-api/naver-api.interface';
+} from './naver-api.interface';
 
 export class NaverApiClient {
     constructor(private readonly client: AxiosInstance) {}

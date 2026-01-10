@@ -1,25 +1,32 @@
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
-import { StockRepository } from '@app/modules/repositories/stock-repository';
+import { MostViewedStockService } from '@app/modules/repositories/most-viewed-stock';
+import { TradingVolumeRankService } from '@app/modules/repositories/trading-volume-rank';
 import {
-    KoreaInvestmentPopulatedHtsTopViewResponse,
-    KoreaInvestmentPopulatedVolumeRankResponse,
+    GetMostViewedStocksResponse,
+    GetTradingVolumeRanksResponse,
 } from './dto';
 
 @Controller('v1/latest-stock-rank')
 export class LatestStockRankController {
-    constructor(private readonly stockRepository: StockRepository) {}
+    constructor(
+        private readonly mostViewedStockService: MostViewedStockService,
+        private readonly tradingVolumeRankService: TradingVolumeRankService,
+    ) {}
 
     @ApiOperation({
         summary: 'HTS 조회 상위 20 종목 랭킹 조회',
     })
     @ApiOkResponse({
-        type: KoreaInvestmentPopulatedHtsTopViewResponse,
+        type: GetMostViewedStocksResponse,
     })
-    @Get('hts-top-view')
-    public async getKoreaInvestmentHtsTopView(): Promise<KoreaInvestmentPopulatedHtsTopViewResponse> {
+    @Get('most-viewed-stocks')
+    public async getMostViewedStocks(): Promise<GetMostViewedStocksResponse> {
+        const mostViewedStocks =
+            await this.mostViewedStockService.getLatestMostViewedStocks(20);
+
         return {
-            data: await this.stockRepository.getPopulatedHtsTopView(),
+            data: mostViewedStocks,
         };
     }
 
@@ -27,12 +34,15 @@ export class LatestStockRankController {
         summary: '거래량 순위 랭킹 조회',
     })
     @ApiOkResponse({
-        type: KoreaInvestmentPopulatedVolumeRankResponse,
+        type: GetTradingVolumeRanksResponse,
     })
     @Get('volume')
-    public async getKoreaInvestmentVolume(): Promise<KoreaInvestmentPopulatedVolumeRankResponse> {
+    public async getKoreaInvestmentVolume(): Promise<GetTradingVolumeRanksResponse> {
+        const tradingVolumeRanks =
+            await this.tradingVolumeRankService.getLatestTradingVolumeRanks(30);
+
         return {
-            data: await this.stockRepository.getPopulatedVolumeRank(),
+            data: tradingVolumeRanks,
         };
     }
 }

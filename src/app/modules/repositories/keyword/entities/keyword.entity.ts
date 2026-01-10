@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Nullable } from '@common/types';
-import { KeywordType } from '@app/modules/repositories/keyword';
+import { KeywordType } from '../keyword.types';
 
 @Entity('keywords')
 export class Keyword {

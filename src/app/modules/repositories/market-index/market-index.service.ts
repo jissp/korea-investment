@@ -1,15 +1,15 @@
+import { In, Repository } from 'typeorm';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { MarketIndex } from '@app/modules/repositories/market-index/market-index.entity';
-import { MarketIndexDto } from '@app/modules/repositories/market-index/market-index.types';
-import { MarketType } from '@app/common/types';
 import { toDateYmdByDate } from '@common/utils';
 import {
     DOMESTIC_INDEX_CODES,
+    MarketType,
     OVERSEAS_GOVERNMENT_BOND_CODES,
     OVERSEAS_INDEX_CODES,
-} from '@app/modules/crawlers/korea-investment-index-crawler/korea-investment-index-crawler.types';
+} from '@app/common/types';
+import { MarketIndexDto } from './market-index.types';
+import { MarketIndex } from './market-index.entity';
 
 @Injectable()
 export class MarketIndexService {
