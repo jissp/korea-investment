@@ -1,10 +1,10 @@
 import { In, IsNull, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Keyword, KeywordGroup } from './entities';
-import { KeywordDto, KeywordType } from './keyword.types';
-import { Nullable } from '@common/types';
 import { isNil } from '@nestjs/common/utils/shared.utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Nullable } from '@common/types';
+import { KeywordDto, KeywordType } from './keyword.types';
+import { Keyword, KeywordGroup } from './entities';
 
 @Injectable()
 export class KeywordService {

@@ -5,15 +5,15 @@ import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
+    DOMESTIC_INDEX_CODES,
+    OVERSEAS_GOVERNMENT_BOND_CODES,
+    OVERSEAS_INDEX_CODES,
+} from '@app/common/types';
+import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api';
-import {
-    DOMESTIC_INDEX_CODES,
-    KoreaInvestmentIndexCrawlerFlowType,
-    OVERSEAS_GOVERNMENT_BOND_CODES,
-    OVERSEAS_INDEX_CODES,
-} from './korea-investment-index-crawler.types';
+import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
 import {
     KoreaInvestmentDomesticInquireIndexDailyPriceParam,
     OverseasQuotationInquireDailyChartPriceParam,

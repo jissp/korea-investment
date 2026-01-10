@@ -59,11 +59,9 @@ export class KoreaInvestmentHelperService {
 
     /**
      * @param tradeId
-     * @param tradeCond
      */
     public async buildHeaders(
         tradeId: string,
-        tradeCond?: string,
     ): Promise<KoreaInvestmentBaseHeader> {
         const credential = this.getCredential();
         const token = await this.getToken();

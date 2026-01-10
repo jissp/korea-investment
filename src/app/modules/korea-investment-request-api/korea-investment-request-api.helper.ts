@@ -21,6 +21,8 @@ import {
     KoreaInvestmentInterestGroupListParam,
     KoreaInvestmentInterestStockListByGroupParam,
 } from './korea-investment-request-api.interface';
+import { DomesticStockQuotationVolumeRankParam } from '@modules/korea-investment/korea-investment-rank-client';
+import { MarketDivCode } from '@modules/korea-investment/common';
 
 @Injectable()
 export class KoreaInvestmentRequestApiHelper {
@@ -211,6 +213,44 @@ export class KoreaInvestmentRequestApiHelper {
                 params,
             },
         );
+    }
+
+    /**
+     * 거래량순위
+     */
+    public generateRequestApiForRankingVolume({
+        marketDivCode,
+    }: {
+        marketDivCode: MarketDivCode;
+    }) {
+        return this.generateRequestApi<DomesticStockQuotationVolumeRankParam>({
+            url: '/uapi/domestic-stock/v1/quotations/volume-rank',
+            tradeId: 'FHPST01710000',
+            params: {
+                FID_COND_MRKT_DIV_CODE: marketDivCode,
+                FID_COND_SCR_DIV_CODE: '20171',
+                FID_INPUT_ISCD: '0000',
+                FID_DIV_CLS_CODE: '1',
+                FID_BLNG_CLS_CODE: '0',
+                FID_TRGT_CLS_CODE: '000000000',
+                FID_TRGT_EXLS_CLS_CODE: '000000000',
+                FID_INPUT_PRICE_1: '',
+                FID_INPUT_PRICE_2: '',
+                FID_VOL_CNT: '',
+                FID_INPUT_DATE_1: '',
+            },
+        });
+    }
+
+    /**
+     * HTS조회상위20종목
+     */
+    public generateRequestApiForRankingHtsTopView() {
+        return this.generateRequestApi<undefined>({
+            url: '/uapi/domestic-stock/v1/ranking/hts-top-view',
+            tradeId: 'HHMCM000100C0',
+            params: undefined,
+        });
     }
 
     /**

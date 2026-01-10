@@ -1,0 +1,30 @@
+import { Module } from '@nestjs/common';
+import { AccountModule } from './account';
+import { AiAnalysisReportModule } from './ai-analysis-report';
+import { FavoriteStockModule } from './favorite-stock';
+import { KeywordModule } from './keyword';
+import { MarketIndexModule } from './market-index';
+import { MostViewedStockModule } from './most-viewed-stock';
+import { NewsModule } from './news';
+import { StockModule } from './stock';
+import { StockDailyInvestorModule } from './stock-daily-investor';
+import { TradingVolumeRankModule } from './trading-volume-rank';
+
+const repositoryModules = [
+    AccountModule,
+    AiAnalysisReportModule,
+    FavoriteStockModule,
+    KeywordModule,
+    MarketIndexModule,
+    MostViewedStockModule,
+    NewsModule,
+    StockModule,
+    StockDailyInvestorModule,
+    TradingVolumeRankModule,
+];
+
+@Module({
+    imports: [...repositoryModules],
+    exports: [...repositoryModules],
+})
+export class RepositoryModule {}

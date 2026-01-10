@@ -1,4 +1,4 @@
-import { AppCredentials } from '@modules/korea-investment/common/base.types';
+import { AppCredentials } from '@modules/korea-investment/common';
 
 export interface RequestBodyOauth2TokenP extends AppCredentials {
     grant_type: string;

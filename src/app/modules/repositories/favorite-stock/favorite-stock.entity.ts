@@ -5,7 +5,7 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { FavoriteType } from '@app/modules/repositories/favorite-stock';
+import { FavoriteType } from './favorite-stock.types';
 
 @Entity('favorite_stocks')
 export class FavoriteStock {

@@ -1,10 +1,8 @@
 import axios from 'axios';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { IConfiguration } from '@app/configuration';
+import { StockPlusConfigs } from './stock-plus.types';
 import { StockPlusClient } from './stock-plus.client';
-
-type StockPlusConfigs = IConfiguration['stockPlus'];
 
 @Module({
     imports: [ConfigModule],

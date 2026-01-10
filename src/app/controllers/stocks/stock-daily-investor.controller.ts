@@ -7,7 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { assertStockCode } from '@common/domains';
 import { StockInvestorService } from '@app/modules/services/stock-investor';
-import { StockInvestorsResponse } from './dto';
+import { GetStockInvestorsResponse } from './dto';
 
 @Controller('v1/stocks')
 export class StockDailyInvestorController {
@@ -31,14 +31,14 @@ export class StockDailyInvestorController {
         example: 7,
     })
     @ApiOkResponse({
-        type: StockInvestorsResponse,
+        type: GetStockInvestorsResponse,
         description: '투자자 동향 데이터 (날짜 내림차순)',
     })
     @Get(':stockCode/investors')
     public async getStockInvestors(
         @Param('stockCode') stockCode: string,
         @Query('limit') limit?: number,
-    ): Promise<StockInvestorsResponse> {
+    ): Promise<GetStockInvestorsResponse> {
         assertStockCode(stockCode);
 
         const stockInvestors =

@@ -1,3 +1,7 @@
+import { IConfiguration } from '@app/configuration';
+
+export type StockPlusConfigs = IConfiguration['stockPlus'];
+
 export type StockPlusResponse<T> = {
     data: T;
     message: string;

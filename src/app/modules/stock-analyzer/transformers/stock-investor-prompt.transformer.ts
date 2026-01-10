@@ -3,9 +3,6 @@ import { Pipe } from '@common/types';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 
-/**
- * 투자자 동향 정보를 프롬프트로 변환하는 역할의 클래스입니다.
- */
 export class StockInvestorPromptTransformer implements Pipe<
     DomesticStockQuotationsInquireInvestorOutput[],
     string
