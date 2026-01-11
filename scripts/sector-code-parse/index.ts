@@ -14,7 +14,7 @@ async function main() {
     const mstFileNames = ['idxcode'];
 
     for (const fileName of mstFileNames) {
-        const filePath = path.join(__dirname, 'asserts', `${fileName}.mst`);
+        const filePath = path.join(__dirname, '../temp', `${fileName}.mst`);
 
         const codes = await parser.parse(filePath);
 

@@ -3610,6 +3610,11 @@
     "name": "유니드"
   },
   {
+    "shortCode": "0148J0",
+    "code": "KR70148J0006",
+    "name": "TIGER 코리아휴머노이드로봇산업"
+  },
+  {
     "shortCode": "014910",
     "code": "KR7014910004",
     "name": "성문전자"
@@ -10420,11 +10425,6 @@
     "name": "KG모빌리티 122WR"
   },
   {
-    "shortCode": "J0113321D",
-    "code": "KRA0113321D0",
-    "name": "유니켐 38WR"
-  },
-  {
     "shortCode": "J0113321F",
     "code": "KRA0113321F5",
     "name": "유니켐 41WR"
@@ -10440,9 +10440,19 @@
     "name": "엘앤에프 7WR"
   },
   {
+    "shortCode": "J0932401F",
+    "code": "KRA0932401F4",
+    "name": "형지엘리트 14R"
+  },
+  {
     "shortCode": "J1099621D",
     "code": "KRA1099621D9",
     "name": "앱토크롬 6WR"
+  },
+  {
+    "shortCode": "J1218501G",
+    "code": "KRA1218501G2",
+    "name": "코이즈 16R"
   },
   {
     "shortCode": "J1432121D",

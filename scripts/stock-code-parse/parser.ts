@@ -1,12 +1,16 @@
-import * as iconv from 'iconv-lite';
 import * as fs from 'node:fs';
+import * as iconv from 'iconv-lite';
 
 export class Parser {
     private readonly SUFFIX_LENGTH = 228;
     private readonly FIELD1_LENGTH = 9;
     private readonly FIELD2_LENGTH = 12;
 
-    public async parse(filePath: string) {
+    /**
+     * 종목코드 파일을 파싱합니다.
+     * @param filePath
+     */
+    public parse(filePath: string) {
         const buffer = fs.readFileSync(filePath);
 
         const content = this.decode(buffer);
@@ -18,6 +22,7 @@ export class Parser {
     }
 
     /**
+     * Buffer를 CP949로 디코딩합니다.
      * @param buffer
      * @private
      */
@@ -38,6 +43,7 @@ export class Parser {
             this.FIELD1_LENGTH + this.FIELD2_LENGTH,
         );
         const field3 = content.slice(this.FIELD1_LENGTH + this.FIELD2_LENGTH);
+
         return [field1, field2, field3].map((v) => v.trim());
     }
 }

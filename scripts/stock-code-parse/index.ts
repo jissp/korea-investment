@@ -11,15 +11,10 @@ interface StockCode {
 async function main() {
     const parser = new Parser();
 
-    const mstFileNames = [
-        'kosdaq_code',
-        'kospi_code',
-        'nxt_kosdaq_code',
-        'nxt_kospi_code',
-    ];
+    const mstFileNames = ['kosdaq_code', 'kospi_code'];
 
     for (const fileName of mstFileNames) {
-        const filePath = path.join(__dirname, 'asserts', `${fileName}.mst`);
+        const filePath = path.join(__dirname, '../temp', `${fileName}.mst`);
         const codes = await parser.parse(filePath);
 
         const codeJson = codes.map(([shortCode, code, name]): StockCode => {
