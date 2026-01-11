@@ -124,11 +124,7 @@ export class StockRankCrawlerProcessor {
             });
         });
 
-        await Promise.all(
-            mostViewedStockDtoList.map((dto) =>
-                this.mostViewedStockService.upsert(dto),
-            ),
-        );
+        await this.mostViewedStockService.upsert(mostViewedStockDtoList);
     }
 
     @OnQueueProcessor(StockRankCrawlerFlowType.RequestVolumeRanks)
@@ -148,10 +144,8 @@ export class StockRankCrawlerProcessor {
                 transformer.transform(output),
             );
 
-            await Promise.all(
-                tradingVolumeRankDtoList.map((dto) =>
-                    this.tradingVolumeRankService.upsert(dto),
-                ),
+            await this.tradingVolumeRankService.upsert(
+                tradingVolumeRankDtoList,
             );
         } catch (error) {
             this.logger.error(error);

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { toDateTimeByDate, toDateYmdByDate } from '@common/utils';
 import {
     BaseMultiResponse,
     BaseResponse,
@@ -114,7 +115,7 @@ export class KoreaInvestmentQuotationClient {
         date: Date,
         isIncludeOldData: boolean = false,
     ) {
-        const hourParam = this.helper.formatTimeParam(date);
+        const hourParam = toDateTimeByDate({ date });
 
         const response = await this.makeQuotationRequest<
             BaseMultiResponse<
@@ -150,8 +151,12 @@ export class KoreaInvestmentQuotationClient {
         date: Date,
         isIncludeOldData: boolean = false,
     ) {
-        const dateParam = this.helper.formatDateParam(date);
-        const hourParam = this.helper.formatTimeParam(date);
+        const dateParam = toDateYmdByDate({
+            date,
+        });
+        const hourParam = toDateTimeByDate({
+            date,
+        });
 
         const response = await this.makeQuotationRequest<
             BaseMultiResponse<

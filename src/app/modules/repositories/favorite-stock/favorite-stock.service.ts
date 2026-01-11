@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FavoriteStockDto, FavoriteType } from './favorite-stock.types';
 import { FavoriteStock } from './favorite-stock.entity';
@@ -78,7 +78,7 @@ export class FavoriteStockService {
      * 즐겨찾기에 종목을 추가합니다.
      * @param favoriteStock
      */
-    public async upsert(favoriteStock: FavoriteStockDto) {
+    public async upsert(favoriteStock: FavoriteStockDto | FavoriteStockDto[]) {
         return this.favoriteStockRepository
             .createQueryBuilder()
             .insert()
@@ -109,7 +109,7 @@ export class FavoriteStockService {
     public async delete(id: number) {
         const exists = await this.exists(id);
         if (!exists) {
-            throw new Error('존재하지 않는 즐겨찾기 종목입니다.');
+            throw new NotFoundException('존재하지 않는 즐겨찾기 종목입니다.');
         }
 
         return this.favoriteStockRepository.delete(id);
@@ -129,7 +129,7 @@ export class FavoriteStockService {
     }) {
         const exists = await this.existsByCode({ type, stockCode });
         if (!exists) {
-            throw new Error('존재하지 않는 즐겨찾기 종목입니다.');
+            throw new NotFoundException('존재하지 않는 즐겨찾기 종목입니다.');
         }
 
         return this.favoriteStockRepository.delete(stockCode);

@@ -1,15 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisConfig, RedisModule } from '@modules/redis';
-import configuration from '@app/configuration';
+import { toDateYmdByDate } from '@common/utils';
 import {
     KoreaInvestmentQuotationClient,
     KoreaInvestmentQuotationClientModule,
 } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
+import configuration from '@app/configuration';
 
 describe('KoreaInvestmentQuotation e2e 테스트', () => {
-    let helperService: KoreaInvestmentHelperService;
     let quotationClient: KoreaInvestmentQuotationClient;
 
     beforeAll(async () => {
@@ -21,9 +20,7 @@ describe('KoreaInvestmentQuotation e2e 테스트', () => {
                 RedisModule.forRootAsync({
                     imports: [ConfigModule],
                     inject: [ConfigService],
-                    useFactory: async (
-                        configService: ConfigService,
-                    ): Promise<RedisConfig> => {
+                    useFactory: (configService: ConfigService): RedisConfig => {
                         return configService.get<RedisConfig>('redis')!;
                     },
                 }),
@@ -31,15 +28,15 @@ describe('KoreaInvestmentQuotation e2e 테스트', () => {
             ],
         }).compile();
 
-        helperService = app.get(KoreaInvestmentHelperService);
         quotationClient = app.get(KoreaInvestmentQuotationClient);
     });
 
     describe('일단 API 호출 테스트', () => {
         it('', async () => {
             const currentDate = new Date();
-            const koreaInvestmentDate =
-                helperService.formatDateParam(currentDate);
+            const koreaInvestmentDate = toDateYmdByDate({
+                date: currentDate,
+            });
 
             const news = await quotationClient.inquireNewsTitle({
                 FID_INPUT_DATE_1: `00${koreaInvestmentDate}`,

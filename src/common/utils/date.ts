@@ -1,12 +1,37 @@
 const dateRegex = /(\d{4})(\d{2})(\d{2})/;
 const timeRegex = /(\d{2})(\d{2})(\d{2})/;
 
-export function toDateYmdByDate(date: Date = new Date()) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+/**
+ * Date 객체를 YYYY-MM-DD 형식으로 변환합니다.
+ * @param options
+ */
+export function toDateYmdByDate(options?: { date?: Date; separator?: string }) {
+    const date = options?.date ?? new Date();
+    const separator = options?.separator ?? '';
 
-    return `${year}-${month}-${day}`;
+    const year = date.getFullYear();
+    const month = formatTwoDigits(date.getMonth() + 1);
+    const day = formatTwoDigits(date.getDate());
+
+    return [year, month, day].join(separator);
+}
+
+/**
+ * Date 객체를 HH:MM:SS 형식으로 변환합니다.
+ * @param options
+ */
+export function toDateTimeByDate(options?: {
+    date?: Date;
+    separator?: string;
+}) {
+    const date = options?.date ?? new Date();
+    const separator = options?.separator ?? '';
+
+    const hour = formatTwoDigits(date.getHours());
+    const minute = formatTwoDigits(date.getMinutes());
+    const seconds = formatTwoDigits(date.getSeconds());
+
+    return [hour, minute, seconds].join(separator);
 }
 
 /**
@@ -37,4 +62,8 @@ export function toDateByKoreaInvestmentTime(time: string): string {
     const [, hour, minute, second] = timeMatch;
 
     return `${hour}:${minute}:${second}`;
+}
+
+function formatTwoDigits(num: number): string {
+    return num.toString().padStart(2, '0');
 }

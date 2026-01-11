@@ -26,7 +26,7 @@ export class NewsService {
      * 뉴스를 업데이트합니다.
      * @param newsDto
      */
-    public async upsert(newsDto: NewsDto) {
+    public async upsert(newsDto: NewsDto | NewsDto[]) {
         return this.newsRepository
             .createQueryBuilder()
             .insert()
@@ -79,7 +79,7 @@ export class NewsService {
      * 종목 뉴스를 업데이트합니다.
      * @param stockNewsDto
      */
-    public async upsertStockNews(stockNewsDto: StockNewsDto) {
+    public async upsertStockNews(stockNewsDto: StockNewsDto | StockNewsDto[]) {
         return this.stockNewsRepository
             .createQueryBuilder()
             .insert()

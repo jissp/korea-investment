@@ -16,7 +16,9 @@ export class StockDailyInvestorService {
      * 일별 투자자 동향 정보 업데이트
      * @param stockDailyInvestorDto
      */
-    public async upsert(stockDailyInvestorDto: StockDailyInvestorDto) {
+    public async upsert(
+        stockDailyInvestorDto: StockDailyInvestorDto | StockDailyInvestorDto[],
+    ) {
         return this.stockDailyInvestorRepository
             .createQueryBuilder()
             .insert()
@@ -37,7 +39,9 @@ export class StockDailyInvestorService {
      */
     public async getTodayDailyInvestor({ stockCode }: { stockCode: string }) {
         return this.stockDailyInvestorRepository.findOneBy({
-            date: toDateYmdByDate(),
+            date: toDateYmdByDate({
+                separator: '-',
+            }),
             stockCode,
         });
     }

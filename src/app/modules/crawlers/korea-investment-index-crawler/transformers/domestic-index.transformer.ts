@@ -17,7 +17,9 @@ export class DomesticIndexTransformer implements Pipe<
     transform({ code, output }: TransformerType): MarketIndexDto {
         return {
             marketType: MarketType.Domestic,
-            date: toDateYmdByDate(),
+            date: toDateYmdByDate({
+                separator: '-',
+            }),
             code,
             name: getStockName(code),
             value: Number(output.bstp_nmix_prpr),

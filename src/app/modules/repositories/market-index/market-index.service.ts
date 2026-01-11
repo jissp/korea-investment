@@ -32,14 +32,6 @@ export class MarketIndexService {
         });
     }
 
-    // /**
-    //  * 마켓의 주가 정보를 조회합니다.
-    //  * @param query
-    //  */
-    // public async findBy(query: FindOptionsWhere<MarketIndex>) {
-    //     return this.marketIndexRepository.findBy(query);
-    // }
-
     /**
      * 국내 증시 - 금일 주가 정보를 조회합니다.
      */
@@ -49,7 +41,9 @@ export class MarketIndexService {
 
             return this.marketIndexRepository.findBy({
                 marketType: MarketType.Domestic,
-                date: toDateYmdByDate(),
+                date: toDateYmdByDate({
+                    separator: '-',
+                }),
                 code: In(codes),
             });
         } catch (error) {
@@ -66,7 +60,9 @@ export class MarketIndexService {
 
         return this.marketIndexRepository.findBy({
             marketType: MarketType.Overseas,
-            date: toDateYmdByDate(),
+            date: toDateYmdByDate({
+                separator: '-',
+            }),
             code: In(codes),
         });
     }
@@ -79,7 +75,9 @@ export class MarketIndexService {
 
         return this.marketIndexRepository.findBy({
             marketType: MarketType.Overseas,
-            date: toDateYmdByDate(),
+            date: toDateYmdByDate({
+                separator: '-',
+            }),
             code: In(codes),
         });
     }
@@ -100,7 +98,7 @@ export class MarketIndexService {
      * 기업의 주가 정보를 업데이트합니다.
      * @param marketIndexDto
      */
-    public async upsert(marketIndexDto: MarketIndexDto) {
+    public async upsert(marketIndexDto: MarketIndexDto | MarketIndexDto[]) {
         return this.marketIndexRepository
             .createQueryBuilder()
             .insert()

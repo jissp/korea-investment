@@ -18,6 +18,7 @@ import {
     KoreaInvestmentDomesticInquireIndexDailyPriceParam,
     OverseasQuotationInquireDailyChartPriceParam,
 } from './korea-investment-index-crawler.interface';
+import { toDateYmdByDate } from '@common/utils';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
@@ -64,10 +65,9 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                                 FID_COND_MRKT_DIV_CODE: 'U',
                                 FID_INPUT_ISCD: code,
                                 FID_PERIOD_DIV_CODE: 'D',
-                                FID_INPUT_DATE_1:
-                                    this.helperService.formatDateParam(
-                                        fromDate,
-                                    ),
+                                FID_INPUT_DATE_1: toDateYmdByDate({
+                                    date: fromDate,
+                                }),
                             },
                         },
                     );
@@ -108,14 +108,12 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                                 params: {
                                     FID_COND_MRKT_DIV_CODE: 'N',
                                     FID_INPUT_ISCD: code,
-                                    FID_INPUT_DATE_1:
-                                        this.helperService.formatDateParam(
-                                            fromDate,
-                                        ),
-                                    FID_INPUT_DATE_2:
-                                        this.helperService.formatDateParam(
-                                            currentDate,
-                                        ),
+                                    FID_INPUT_DATE_1: toDateYmdByDate({
+                                        date: fromDate,
+                                    }),
+                                    FID_INPUT_DATE_2: toDateYmdByDate({
+                                        date: currentDate,
+                                    }),
                                     FID_PERIOD_DIV_CODE: 'D',
                                 },
                             },
@@ -160,14 +158,12 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                                 params: {
                                     FID_COND_MRKT_DIV_CODE: 'I',
                                     FID_INPUT_ISCD: code,
-                                    FID_INPUT_DATE_1:
-                                        this.helperService.formatDateParam(
-                                            fromDate,
-                                        ),
-                                    FID_INPUT_DATE_2:
-                                        this.helperService.formatDateParam(
-                                            currentDate,
-                                        ),
+                                    FID_INPUT_DATE_1: toDateYmdByDate({
+                                        date: fromDate,
+                                    }),
+                                    FID_INPUT_DATE_2: toDateYmdByDate({
+                                        date: currentDate,
+                                    }),
                                     FID_PERIOD_DIV_CODE: 'D',
                                 },
                             },

@@ -40,9 +40,7 @@ export class KoreaInvestmentNewsProcessor {
         const chunks = _.chunk(transformedNewsItems, 10);
         for (const chunk of chunks) {
             await Promise.allSettled([
-                ...chunk.map((newsItem) =>
-                    this.newsService.upsert(newsItem.news),
-                ),
+                this.newsService.upsert(chunk.map(({ news }) => news)),
                 ...chunk.flatMap((newsItem) => {
                     // 설정된 종목 코드에 해당하는 종목만 종목 뉴스에 추가합니다.
                     const filteredStockCodes = newsItem.stockCodes.filter(

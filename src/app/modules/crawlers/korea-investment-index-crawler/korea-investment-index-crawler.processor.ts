@@ -24,6 +24,7 @@ import {
     OverseasGovernmentBondTransformer,
     OverseasIndexTransformer,
 } from './transformers';
+import { toDateByKoreaInvestmentYmd } from '@common/utils';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerProcessor {
@@ -69,9 +70,9 @@ export class KoreaInvestmentIndexCrawlerProcessor {
 
                 // 국내 지수 - 일자별 데이터
                 const dailyMarketIndices = output2.map((output2Item) => {
-                    const date = this.koreaInvestmentHelperService
-                        .splitDateDt(output2Item.stck_bsop_date)
-                        .join('-');
+                    const date = toDateByKoreaInvestmentYmd(
+                        output2Item.stck_bsop_date,
+                    );
 
                     return dailyTransformer.transform({
                         code,
@@ -80,10 +81,9 @@ export class KoreaInvestmentIndexCrawlerProcessor {
                     });
                 });
 
-                await Promise.all(
-                    [todayMarketIndex, ...dailyMarketIndices].map(
-                        (marketIndex) =>
-                            this.marketIndexService.upsert(marketIndex),
+                await this.marketIndexService.upsert(
+                    [todayMarketIndex, ...dailyMarketIndices].flatMap(
+                        (marketIndex) => marketIndex,
                     ),
                 );
             }
@@ -124,9 +124,9 @@ export class KoreaInvestmentIndexCrawlerProcessor {
 
                 // 해외 지수 - 일자별 데이터
                 const dailyMarketIndices = output2.map((output2Item) => {
-                    const date = this.koreaInvestmentHelperService
-                        .splitDateDt(output2Item.stck_bsop_date)
-                        .join('-');
+                    const date = toDateByKoreaInvestmentYmd(
+                        output2Item.stck_bsop_date,
+                    );
 
                     return dailyTransformer.transform({
                         code,
@@ -185,9 +185,9 @@ export class KoreaInvestmentIndexCrawlerProcessor {
 
                 // 미국 국채 - 일자별 데이터
                 const dailyMarketIndices = output2.map((output2Item) => {
-                    const date = this.koreaInvestmentHelperService
-                        .splitDateDt(output2Item.stck_bsop_date)
-                        .join('-');
+                    const date = toDateByKoreaInvestmentYmd(
+                        output2Item.stck_bsop_date,
+                    );
 
                     return dailyTransformer.transform({
                         code,

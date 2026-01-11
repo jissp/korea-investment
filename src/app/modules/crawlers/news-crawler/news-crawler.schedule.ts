@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { FlowProducer, Queue } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { uniqueValues } from '@common/utils';
+import { toDateYmdByDate, uniqueValues } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
@@ -54,9 +54,7 @@ export class NewsCrawlerSchedule implements OnModuleInit {
                 favoriteStocks.map(({ stockCode }) => stockCode),
             );
 
-            const startDate = this.koreaInvestmentHelper.formatDateParam(
-                new Date(),
-            );
+            const startDate = toDateYmdByDate();
 
             const queueName = NewsCrawlerQueueType.RequestDomesticNewsTitle;
 

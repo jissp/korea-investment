@@ -16,7 +16,7 @@ export class TradingVolumeRankService {
      * 거래량 순위 데이터를 업데이트 합니다.
      * @param dto
      */
-    public async upsert(dto: TradingVolumeRankDto) {
+    public async upsert(dto: TradingVolumeRankDto | TradingVolumeRankDto[]) {
         return this.repository
             .createQueryBuilder()
             .insert()

@@ -15,7 +15,7 @@ export class MostViewedStockService {
      * 실시간 인기 조회 종목 데이터를 업데이트합니다.
      * @param dto
      */
-    public async upsert(dto: MostViewedStockDto) {
+    public async upsert(dto: MostViewedStockDto | MostViewedStockDto[]) {
         return this.mostViewedStockRepository
             .createQueryBuilder()
             .insert()

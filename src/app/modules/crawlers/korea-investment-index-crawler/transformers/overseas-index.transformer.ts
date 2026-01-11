@@ -17,7 +17,9 @@ export class OverseasIndexTransformer implements Pipe<
     transform({ code, output }: TransformerType): MarketIndexDto {
         return {
             marketType: MarketType.Overseas,
-            date: toDateYmdByDate(),
+            date: toDateYmdByDate({
+                separator: '-',
+            }),
             code,
             name: getStockName(code),
             value: Number(output.ovrs_nmix_prpr),

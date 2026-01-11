@@ -121,15 +121,13 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                         transformedStock,
                     ),
                 ),
-                ...possessStocks.flatMap(({ stockCode, stockName }) => {
-                    return [
-                        this.favoriteStockService.upsert({
-                            type: FavoriteType.Possess,
-                            stockCode,
-                            stockName,
-                        }),
-                    ];
-                }),
+                this.favoriteStockService.upsert(
+                    possessStocks.map(({ stockCode, stockName }) => ({
+                        type: FavoriteType.Possess,
+                        stockCode,
+                        stockName,
+                    })),
+                ),
                 this.updateStockKeywords(KeywordType.Possess, possessStocks),
             ]);
         }
@@ -196,15 +194,15 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                     stockCode: output.jong_code,
                 }),
             );
-            await Promise.all(
-                stockInfoList.map(({ stockCode, stockName }) =>
-                    this.favoriteStockService.upsert({
-                        type: FavoriteType.StockGroup,
-                        stockCode,
-                        stockName,
-                    }),
-                ),
+
+            await this.favoriteStockService.upsert(
+                stockInfoList.map(({ stockCode, stockName }) => ({
+                    type: FavoriteType.StockGroup,
+                    stockCode,
+                    stockName,
+                })),
             );
+
             await this.updateStockKeywords(
                 KeywordType.StockGroup,
                 stockInfoList,

@@ -49,13 +49,8 @@ export class StockCrawlerProcessor {
                     ),
             );
 
-            await Promise.all(
-                transformedStockDailyInvestors.map(
-                    (transformedStockDailyInvestor) =>
-                        this.stockDailyInvestorService.upsert(
-                            transformedStockDailyInvestor,
-                        ),
-                ),
+            await this.stockDailyInvestorService.upsert(
+                transformedStockDailyInvestors,
             );
         } catch (error) {
             this.logger.error(error);

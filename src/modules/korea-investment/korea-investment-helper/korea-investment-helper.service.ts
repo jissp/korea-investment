@@ -77,7 +77,7 @@ export class KoreaInvestmentHelperService {
     }
 
     /**
-     *
+     * 한국투자증권 API 액세스 토큰을 발급합니다.
      */
     public async getToken() {
         const redisKey = getRedisKey('korea-investment', 'token');
@@ -136,68 +136,10 @@ export class KoreaInvestmentHelperService {
         return Math.round((expirationTime - currentTime) / 1000);
     }
 
+    /**
+     * 한국투자증권 API 인증 정보 설정을 응답합니다.
+     */
     public getCredential() {
         return this.configService.getCredentials();
-    }
-
-    /**
-     * 숫자를 2자리 문자열로 패딩
-     */
-    private formatTwoDigits(num: number): string {
-        return num.toString().padStart(2, '0');
-    }
-
-    /**
-     * Date 객체를 YYYYMMDD 형식으로 변환
-     */
-    public formatDateParam(date: Date): string {
-        const year = date.getFullYear();
-        const month = this.formatTwoDigits(date.getMonth() + 1);
-        const day = this.formatTwoDigits(date.getDate());
-
-        return `${year}${month}${day}`;
-    }
-
-    /**
-     * Date 객체를 HHMMSS 형식으로 변환
-     */
-    public formatTimeParam(date: Date): string {
-        const hour = this.formatTwoDigits(date.getHours());
-        const minute = this.formatTwoDigits(date.getMinutes());
-        const seconds = this.formatTwoDigits(date.getSeconds());
-
-        return `${hour}${minute}${seconds}`;
-    }
-
-    /**
-     * 한국투자증권 dateDt 포맷 형식을 Y, M, D 로 분리한다.
-     * @param dateDt
-     */
-    public splitDateDt(dateDt: string) {
-        const dateMatch = dateDt.match(/(\d{4})(\d{2})(\d{2})/);
-
-        if (!dateMatch) {
-            throw new Error(`Invalid date format: ${dateDt}`);
-        }
-
-        const [, year, month, day] = dateMatch;
-
-        return [year, month, day];
-    }
-
-    /**
-     * 한국투자증권 timeDt 포맷 형식을 H, M, S 로 분리한다.
-     * @param dateTm
-     */
-    public splitTimeDt(dateTm: string) {
-        const timeMatch = dateTm.match(/(\d{2})(\d{2})(\d{2})/);
-
-        if (!timeMatch) {
-            throw new Error(`Invalid date format: ${dateTm}`);
-        }
-
-        const [, hour, minute, second] = timeMatch;
-
-        return [hour, minute, second];
     }
 }

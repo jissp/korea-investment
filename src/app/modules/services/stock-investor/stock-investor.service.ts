@@ -69,11 +69,7 @@ export class StockInvestorService {
             }),
         );
 
-        await Promise.all(
-            transformedStockInvestors.map((transformedStockInvestor) =>
-                this.stockDailyInvestorService.upsert(transformedStockInvestor),
-            ),
-        );
+        await this.stockDailyInvestorService.upsert(transformedStockInvestors);
     }
 
     /**

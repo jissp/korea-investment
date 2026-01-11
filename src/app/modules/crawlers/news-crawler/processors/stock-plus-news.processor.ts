@@ -35,18 +35,16 @@ export class StockPlusNewsProcessor {
      * @param results
      */
     private async transformWithSave(results: StockPlusNewsTransformResult[]) {
-        return Promise.all(
-            results.flatMap(({ stockCodes, news }) => {
-                return [
-                    this.newsService.upsert(news),
-                    ...stockCodes.map((stockCode) =>
-                        this.newsService.upsertStockNews({
-                            ...news,
-                            stockCode,
-                        }),
-                    ),
-                ];
-            }),
-        );
+        return Promise.all([
+            this.newsService.upsert(results.map(({ news }) => news)),
+            this.newsService.upsertStockNews(
+                results.flatMap(({ stockCodes, news }) => {
+                    return stockCodes.map((stockCode) => ({
+                        ...news,
+                        stockCode,
+                    }));
+                }),
+            ),
+        ]);
     }
 }

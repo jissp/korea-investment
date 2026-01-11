@@ -105,7 +105,7 @@ export class NaverNewsProcessor {
             const chunks = _.chunk(transformedNewsItems, 10);
             for (const chunk of chunks) {
                 await Promise.allSettled([
-                    ...chunk.map((news) => this.newsService.upsert(news)),
+                    this.newsService.upsert(chunk),
                     ...chunk.flatMap((news) =>
                         stockCodes.map((stockCode) =>
                             this.newsService.upsertStockNews({
