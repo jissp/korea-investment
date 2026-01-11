@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { KoreaInvestmentConfig } from './korea-investment-config.types';
+import {
+    KoreaInvestmentConfig,
+    KoreaInvestmentConfigProvider,
+} from './korea-investment-config.types';
 import { KoreaInvestmentConfigService } from './korea-investment-config.service';
 
 @Module({
     imports: [ConfigModule],
     providers: [
         {
-            provide: 'APP_CONFIG',
+            provide: KoreaInvestmentConfigProvider.AppConfig,
             inject: [ConfigService],
             useFactory: (
                 configService: ConfigService,

@@ -140,7 +140,7 @@ export class KoreaInvestmentRankClient {
      */
     private buildFluctuationParams(
         params: DomesticStockRankingFluctuationParam,
-    ): Record<string, string> {
+    ) {
         return {
             fid_cond_mrkt_div_code: params.fid_cond_mrkt_div_code,
             fid_cond_scr_div_code: params.fid_cond_scr_div_code || '20171',

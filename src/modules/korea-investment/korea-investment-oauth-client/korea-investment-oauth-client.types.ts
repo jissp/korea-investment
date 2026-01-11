@@ -1,5 +1,9 @@
 import { AppCredentials } from '@modules/korea-investment/common';
 
+export enum KoreaInvestmentOauthClientProvider {
+    Client = 'Client',
+}
+
 export interface RequestBodyOauth2TokenP extends AppCredentials {
     grant_type: string;
 }

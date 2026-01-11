@@ -2,6 +2,7 @@ import { Axios } from 'axios';
 import { Inject, Injectable } from '@nestjs/common';
 import { AppCredentials } from '@modules/korea-investment/common';
 import {
+    KoreaInvestmentOauthClientProvider,
     Oauth2WebSocketTokenRequestBody,
     Oauth2WebsocketTokenResponse,
     RequestBodyOauth2TokenP,
@@ -11,7 +12,10 @@ import {
 
 @Injectable()
 export class KoreaInvestmentOauthClient {
-    constructor(@Inject('Client') private readonly client: Axios) {}
+    constructor(
+        @Inject(KoreaInvestmentOauthClientProvider.Client)
+        private readonly client: Axios,
+    ) {}
 
     /**
      * 접근토큰발급

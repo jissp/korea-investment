@@ -7,16 +7,18 @@ import {
 } from '@modules/korea-investment/common';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
+import { KoreaInvestmentHelperProvider } from './korea-investment-helper.types';
 
 @Injectable()
 export class KoreaInvestmentHelperService {
     private readonly WEBSOCKET_TOKEN_TTL = 86400;
-    private readonly WEBSOCKET_TOKEN_TTL_BUFFER = 3600; //
+    private readonly WEBSOCKET_TOKEN_TTL_BUFFER = 3600;
 
     private readonly logger = new Logger(KoreaInvestmentHelperService.name);
 
     constructor(
-        @Inject('Client') private readonly client: Axios,
+        @Inject(KoreaInvestmentHelperProvider.Client)
+        private readonly client: Axios,
         private readonly redisService: RedisService,
         private readonly configService: KoreaInvestmentConfigService,
         private readonly oAuthClient: KoreaInvestmentOauthClient,

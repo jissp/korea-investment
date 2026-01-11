@@ -1,11 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AppCredentials } from '@modules/korea-investment/common';
-import { KoreaInvestmentConfig } from './korea-investment-config.types';
+import {
+    KoreaInvestmentConfig,
+    KoreaInvestmentConfigProvider,
+} from './korea-investment-config.types';
 
 @Injectable()
 export class KoreaInvestmentConfigService {
     constructor(
-        @Inject('APP_CONFIG') private readonly config: KoreaInvestmentConfig,
+        @Inject(KoreaInvestmentConfigProvider.AppConfig)
+        private readonly config: KoreaInvestmentConfig,
     ) {}
 
     /**

@@ -42,11 +42,11 @@ export class KoreaInvestmentQuotationClient {
     /**
      * 주식현재가 시세
      * @param marketDivCode
-     * @param iscd 종목코드의 shortCode. 예) 삼성전자: 005930
+     * @param stockCode 종목코드의 shortCode. 예) 삼성전자: 005930
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-price-2
      */
-    public async inquirePrice(marketDivCode: MarketDivCode, iscd: string) {
+    public async inquirePrice(marketDivCode: MarketDivCode, stockCode: string) {
         const response = await this.makeQuotationRequest<
             BaseResponse<DomesticStockQuotationInquirePrice2Output>
         >({
@@ -54,7 +54,7 @@ export class KoreaInvestmentQuotationClient {
             url: '/uapi/domestic-stock/v1/quotations/inquire-price-2',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDivCode,
-                FID_INPUT_ISCD: iscd,
+                FID_INPUT_ISCD: stockCode,
             },
         });
 
@@ -111,7 +111,7 @@ export class KoreaInvestmentQuotationClient {
      */
     public async inquireTimeItemChartPrice(
         marketDiveCode: MarketDivCode,
-        iscd: string,
+        stockCode: string,
         date: Date,
         isIncludeOldData: boolean = false,
     ) {
@@ -127,7 +127,7 @@ export class KoreaInvestmentQuotationClient {
             url: '/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice',
             params: {
                 FID_COND_MRKT_DIV_CODE: marketDiveCode,
-                FID_INPUT_ISCD: iscd,
+                FID_INPUT_ISCD: stockCode,
                 FID_INPUT_HOUR_1: hourParam,
                 FID_PW_DATA_INCU_YN: isIncludeOldData ? 'Y' : 'N',
                 FID_ETC_CLS_CODE: '',

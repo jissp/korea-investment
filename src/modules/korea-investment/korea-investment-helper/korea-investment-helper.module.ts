@@ -1,12 +1,13 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-import { Module } from '@nestjs/common';
+import { HttpStatus, Module } from '@nestjs/common';
 import { RedisModule } from '@modules/redis';
 import {
     KoreaInvestmentConfigModule,
     KoreaInvestmentConfigService,
 } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentOauthClientModule } from '@modules/korea-investment/korea-investment-oauth-client';
+import { KoreaInvestmentHelperProvider } from './korea-investment-helper.types';
 import { KoreaInvestmentHelperService } from './korea-investment-helper.service';
 
 @Module({
@@ -17,7 +18,7 @@ import { KoreaInvestmentHelperService } from './korea-investment-helper.service'
     ],
     providers: [
         {
-            provide: 'Client',
+            provide: KoreaInvestmentHelperProvider.Client,
             inject: [KoreaInvestmentConfigService],
             useFactory: (configService: KoreaInvestmentConfigService) => {
                 const host = configService.getHost();
@@ -29,7 +30,16 @@ import { KoreaInvestmentHelperService } from './korea-investment-helper.service'
                 axiosRetry(client, {
                     retries: 3,
                     retryCondition: (err) => {
-                        return err.isAxiosError;
+                        // 재시도할 가치가 있는 에러만 필터링
+                        if (!err.response) {
+                            return true; // 네트워크 에러
+                        }
+
+                        return [
+                            HttpStatus.REQUEST_TIMEOUT,
+                            HttpStatus.TOO_MANY_REQUESTS,
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                        ].includes(err.response.status);
                     },
                     retryDelay: () => 250,
                 });

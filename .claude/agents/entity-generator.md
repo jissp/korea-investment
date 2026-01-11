@@ -14,8 +14,7 @@ color: cyan
 
 1. Repository 모듈은 src/app/modules/repositories 디렉토리에서 관리합니다.
     - 신규로 생성되는 Module은 해당 디렉토리에 생성해주세요.
-2. Repository의 기본 베이스는 .template/repository 디렉토리를 참고하세요.
-3. SQL 파일은 SQL 디렉토리에서 관리합니다.
+2. SQL 파일은 SQL 디렉토리에서 관리합니다.
     - SQL 파일 생성 시 "{table}.sql" 파일명 패턴으로 생성합니다.
         - 예) most_viewed_stocks.sql
 
