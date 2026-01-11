@@ -1,12 +1,15 @@
-import * as iconv from 'iconv-lite';
 import * as fs from 'node:fs';
+import * as iconv from 'iconv-lite';
 
 export class Parser {
-    private readonly SUFFIX_LENGTH = 228;
     private readonly FIELD1_LENGTH = 5;
     private readonly FIELD2_LENGTH = 43;
 
-    public async parse(filePath: string) {
+    /**
+     * 섹터코드 파일을 파싱합니다.
+     * @param filePath
+     */
+    public parse(filePath: string) {
         const buffer = fs.readFileSync(filePath);
 
         const content = this.decode(buffer);
@@ -18,6 +21,7 @@ export class Parser {
     }
 
     /**
+     * Buffer를 CP949로 디코딩합니다.
      * @param buffer
      * @private
      */
@@ -30,10 +34,9 @@ export class Parser {
      * @private
      */
     private parseLine(line: string) {
-        // const content = line.slice(0, line.length - this.SUFFIX_LENGTH);
-        //
         const field1 = line.slice(1, this.FIELD1_LENGTH);
         const field2 = line.slice(this.FIELD1_LENGTH, this.FIELD2_LENGTH);
+
         return [field1, field2].map((v) => v.trim());
     }
 }

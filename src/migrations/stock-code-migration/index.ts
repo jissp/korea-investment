@@ -2,22 +2,20 @@ import * as dotenv from 'dotenv';
 import * as _ from 'lodash';
 import { Repository } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { INestApplicationContext, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { INestApplicationContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
     getRepositoryToken,
     TypeOrmModule,
     TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
+import { ExchangeType, MarketType } from '@app/common/types';
 import { Stock, StockDto, StockModule } from '@app/modules/repositories/stock';
 import configuration, { IConfiguration } from '@app/configuration';
-import { IMigrator } from '../common/migrator.interface';
-import * as KrxKosdaqCodeJson from '@assets/kosdaq_code.json';
 import * as KrxKospiCodeJson from '@assets/kospi_code.json';
-import * as NxtKosdaqCodeJson from '@assets/nxt_kosdaq_code.json';
-import * as NxtKospiCodeJson from '@assets/nxt_kospi_code.json';
-import { ExchangeType, MarketType } from '@app/common/types';
+import * as KrxKosdaqCodeJson from '@assets/kosdaq_code.json';
+import { IMigrator } from '../common/migrator.interface';
 
 type StockCode = {
     shortCode: string;
@@ -25,10 +23,8 @@ type StockCode = {
     name: string;
 };
 
-const KrxKosdaqCodes: StockCode[] = KrxKosdaqCodeJson as unknown as StockCode[];
 const KrxKospiCodes: StockCode[] = KrxKospiCodeJson as unknown as StockCode[];
-const NxtKosdaqCodes: StockCode[] = NxtKosdaqCodeJson as unknown as StockCode[];
-const NxtKospiCodes: StockCode[] = NxtKospiCodeJson as unknown as StockCode[];
+const KrxKosdaqCodes: StockCode[] = KrxKosdaqCodeJson as unknown as StockCode[];
 
 @Module({
     imports: [
@@ -87,6 +83,7 @@ export class Migrator implements IMigrator {
     }
 
     async up(): Promise<void> {
+        await this.truncate();
         await this.migrationKospi();
         await this.migrationKosdaq();
 
@@ -140,7 +137,16 @@ export class Migrator implements IMigrator {
     }
 
     async close(): Promise<void> {
-        return Promise.resolve(undefined);
+        if (this.app) {
+            await this.app.close();
+        }
+    }
+
+    /**
+     * @private
+     */
+    private async truncate() {
+        return this.stockRepository.clear();
     }
 
     /**

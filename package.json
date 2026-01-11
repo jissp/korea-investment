@@ -13,8 +13,11 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "test:e2e": "jest --config ./jest-e2e.json",
+        "refresh-stock-codes": "npm run download-stock-files && npm run convert-korea-investment-code && npm run stock-code-migration",
+        "download-stock-files": "ts-node ./scripts/download-stock-files/index.ts",
         "convert-korea-investment-code": "ts-node ./scripts/sector-code-parse/index.ts && ts-node ./scripts/stock-code-parse/index.ts",
-        "convert-korea-investment-overseas-code": "ts-node ./scripts/overseas-index-code-parse/index.ts"
+        "convert-korea-investment-overseas-code": "ts-node ./scripts/overseas-index-code-parse/index.ts",
+        "stock-code-migration": "npx ts-node -r tsconfig-paths/register src/migrations/stock-code-migration/index.ts up"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
@@ -55,11 +58,13 @@
         "@nestjs/testing": "^11.0.1",
         "@swc/cli": "^0.6.0",
         "@swc/core": "^1.10.7",
+        "@types/adm-zip": "^0.5.7",
         "@types/express": "^5.0.0",
         "@types/jest": "^29.5.14",
         "@types/node": "^22.19.1",
         "@types/supertest": "^6.0.2",
         "@types/ws": "^8.18.1",
+        "adm-zip": "^0.5.16",
         "eslint": "^9.39.1",
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-prettier": "^5.2.2",
