@@ -21,6 +21,12 @@ import {
     AccountStockService,
 } from '@app/modules/repositories/account';
 import {
+    AccountStockGroupService,
+    AccountStockGroupStockDto,
+    AccountStockGroupStockService,
+} from '@app/modules/repositories/account-stock-group';
+import {
+    FavoriteStockDto,
     FavoriteStockService,
     FavoriteType,
 } from '@app/modules/repositories/favorite-stock';
@@ -28,20 +34,23 @@ import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
-} from './korea-investment-account-crawler.types';
+} from '../korea-investment-account-crawler.types';
 import {
-    KoreaInvestmentAccountStockTransformer,
-    KoreaInvestmentAccountTransformer,
-} from './transformers';
+    AccountStockGroupTransformer,
+    AccountStockTransformer,
+    AccountTransformer,
+} from '../transformers';
 
 type StockInfo = { stockName: string; stockCode: string };
 
 @Injectable()
-export class KoreaInvestmentAccountCrawlerProcessor {
+export class AccountProcessor {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly accountService: AccountService,
         private readonly accountStockService: AccountStockService,
+        private readonly accountStockGroupService: AccountStockGroupService,
+        private readonly accountStockGroupStockService: AccountStockGroupStockService,
         private readonly favoriteStockService: FavoriteStockService,
         private readonly keywordService: KeywordService,
         private readonly eventEmitter: EventEmitter2,
@@ -60,7 +69,7 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 KoreaInvestmentAccountOutput2
             >(job);
 
-        const transformer = new KoreaInvestmentAccountTransformer();
+        const transformer = new AccountTransformer();
 
         const transformedAccountInfos = childrenResponses.map(
             ({ request: { params }, response }) => {
@@ -94,41 +103,37 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 unknown
             >(job);
 
-        const transformer = new KoreaInvestmentAccountStockTransformer();
+        const transformer = new AccountStockTransformer();
 
         for (const {
             request,
             response: { output1 },
         } of childrenResponses) {
             const { CANO, ACNT_PRDT_CD } = request.params;
+            const accountId = this.buildAccountNumber(CANO, ACNT_PRDT_CD);
 
             const transformedStocks = output1.map((output) =>
                 transformer.transform({
-                    accountId: this.buildAccountNumber(CANO, ACNT_PRDT_CD),
+                    accountId,
                     output,
                 }),
             );
-            const possessStocks = transformedStocks
+            const favoriteStockDtoList = transformedStocks
                 .map(({ stockCode, stockName }) => ({
                     stockCode,
                     stockName,
                 }))
-                .filter(({ stockName }) => !isDelistedStockByName(stockName));
+                .filter(
+                    ({ stockName }) => !isDelistedStockByName(stockName),
+                ) as FavoriteStockDto[];
 
             await Promise.all([
-                ...transformedStocks.map((transformedStock) =>
-                    this.accountStockService.upsertAccountStock(
-                        transformedStock,
-                    ),
+                this.accountStockService.upsert(transformedStocks),
+                this.favoriteStockService.upsert(favoriteStockDtoList),
+                this.updateStockKeywords(
+                    KeywordType.Possess,
+                    favoriteStockDtoList,
                 ),
-                this.favoriteStockService.upsert(
-                    possessStocks.map(({ stockCode, stockName }) => ({
-                        type: FavoriteType.Possess,
-                        stockCode,
-                        stockName,
-                    })),
-                ),
-                this.updateStockKeywords(KeywordType.Possess, possessStocks),
             ]);
         }
     }
@@ -148,6 +153,14 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 unknown,
                 KoreaInvestmentInterestGroupListOutput[]
             >(job);
+
+        const transformer = new AccountStockGroupTransformer();
+        const accountStockGroupDto = childrenResponses.flatMap(({ response }) =>
+            response.output2.map((output) => transformer.transform(output)),
+        );
+
+        await this.accountStockGroupService.truncate();
+        await this.accountStockGroupService.upsert(accountStockGroupDto);
 
         for (const {
             response: { output2 },
@@ -178,11 +191,6 @@ export class KoreaInvestmentAccountCrawlerProcessor {
 
         for (const { response } of childrenResponses) {
             const { output1, output2 } = response;
-            const groupName = output1.inter_grp_name;
-
-            if (!groupName.includes('키워드')) {
-                continue;
-            }
 
             const accountStockItems = output2.filter(
                 (output) => !isDelistedStockByName(output.hts_kor_isnm),
@@ -195,17 +203,40 @@ export class KoreaInvestmentAccountCrawlerProcessor {
                 }),
             );
 
-            await this.favoriteStockService.upsert(
-                stockInfoList.map(({ stockCode, stockName }) => ({
-                    type: FavoriteType.StockGroup,
-                    stockCode,
-                    stockName,
-                })),
-            );
+            const groupName = output1.inter_grp_name;
+            if (groupName.includes('키워드')) {
+                await this.favoriteStockService.upsert(
+                    stockInfoList.map(({ stockCode, stockName }) => ({
+                        type: FavoriteType.StockGroup,
+                        stockCode,
+                        stockName,
+                    })),
+                );
 
-            await this.updateStockKeywords(
-                KeywordType.StockGroup,
-                stockInfoList,
+                await this.updateStockKeywords(
+                    KeywordType.StockGroup,
+                    stockInfoList,
+                );
+
+                continue;
+            }
+
+            const accountStockGroup =
+                await this.accountStockGroupService.findOneByName(groupName);
+            if (!accountStockGroup) {
+                continue;
+            }
+
+            await this.accountStockGroupStockService.create(
+                stockInfoList.map(
+                    ({ stockCode, stockName }): AccountStockGroupStockDto => {
+                        return {
+                            groupCode: accountStockGroup.code,
+                            stockCode,
+                            stockName,
+                        };
+                    },
+                ),
             );
         }
     }

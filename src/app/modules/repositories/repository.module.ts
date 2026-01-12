@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AccountModule } from './account';
+import { AccountStockGroupModule } from './account-stock-group';
 import { AiAnalysisReportModule } from './ai-analysis-report';
 import { FavoriteStockModule } from './favorite-stock';
 import { KeywordModule } from './keyword';
@@ -12,6 +13,7 @@ import { TradingVolumeRankModule } from './trading-volume-rank';
 
 const repositoryModules = [
     AccountModule,
+    AccountStockGroupModule,
     AiAnalysisReportModule,
     FavoriteStockModule,
     KeywordModule,

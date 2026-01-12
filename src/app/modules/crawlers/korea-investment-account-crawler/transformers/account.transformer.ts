@@ -2,7 +2,7 @@ import { Pipe } from '@common/types';
 import { KoreaInvestmentAccountOutput2 } from '@app/modules/korea-investment-request-api';
 import { AccountInfoDto } from '@app/modules/repositories/account';
 
-export class KoreaInvestmentAccountTransformer implements Pipe<
+export class AccountTransformer implements Pipe<
     KoreaInvestmentAccountOutput2,
     AccountInfoDto
 > {

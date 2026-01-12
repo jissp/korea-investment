@@ -1,4 +1,4 @@
-import { Like, Repository } from 'typeorm';
+import { In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { ExchangeType, MarketType } from '@app/common/types';
@@ -34,6 +34,34 @@ export class StockService {
             },
             order: {
                 name: 'ASC',
+            },
+        });
+    }
+
+    /**
+     * 종목 목록을 조회합니다.
+     * @param marketType
+     * @param exchangeType
+     * @param name
+     */
+    public async getStocksByStockCode({
+        marketType,
+        exchangeType,
+        stockCodes,
+    }: {
+        marketType: MarketType;
+        exchangeType?: ExchangeType;
+        stockCodes: string[];
+    }) {
+        if (stockCodes.length === 0) {
+            return [];
+        }
+
+        return this.stockRepository.find({
+            where: {
+                marketType,
+                exchangeType,
+                shortCode: In(stockCodes),
             },
         });
     }

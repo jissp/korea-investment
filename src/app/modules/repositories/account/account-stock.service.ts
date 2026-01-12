@@ -26,7 +26,7 @@ export class AccountStockService {
     /**
      * 계좌의 자산 정보를 업데이트합니다.
      */
-    public async upsertAccountStock(accountStockDto: AccountStockDto) {
+    public async upsert(accountStockDto: AccountStockDto | AccountStockDto[]) {
         return this.accountStockRepository
             .createQueryBuilder()
             .insert()
@@ -41,7 +41,7 @@ export class AccountStockService {
                     'pchs_avg_pric',
                     'evlu_amt',
                 ],
-                ['accountId', 'stock_code'],
+                ['type', 'stock_code'],
             )
             .updateEntity(false)
             .execute();

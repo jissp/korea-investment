@@ -4,11 +4,13 @@ import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-inv
 import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { AccountModule } from '@app/modules/repositories/account';
+import { AccountStockGroupModule } from '@app/modules/repositories/account-stock-group';
+import { StockModule } from '@app/modules/repositories/stock';
 import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { KeywordModule } from '@app/modules/repositories/keyword';
 import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
+import { AccountProcessor, AccountStockPriceProcessor } from './processors';
 import { KoreaInvestmentAccountCrawlerListener } from './korea-investment-account-crawler.listener';
-import { KoreaInvestmentAccountCrawlerProcessor } from './korea-investment-account-crawler.processor';
 import { KoreaInvestmentAccountCrawlerSchedule } from './korea-investment-account-crawler.schedule';
 
 const flowTypes = [
@@ -16,6 +18,7 @@ const flowTypes = [
     KoreaInvestmentAccountCrawlerType.RequestAccountStocks,
     KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups,
     KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup,
+    KoreaInvestmentAccountCrawlerType.UpdateAccountStockGroupStockPrices,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
 
@@ -28,13 +31,16 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         KoreaInvestmentHelperModule,
         KoreaInvestmentRequestApiModule,
         AccountModule,
+        AccountStockGroupModule,
         KeywordModule,
         FavoriteStockModule,
+        StockModule,
     ],
     providers: [
         ...flowProviders,
         KoreaInvestmentAccountCrawlerListener,
-        KoreaInvestmentAccountCrawlerProcessor,
+        AccountProcessor,
+        AccountStockPriceProcessor,
         KoreaInvestmentAccountCrawlerSchedule,
     ],
     exports: [],

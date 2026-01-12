@@ -18,6 +18,7 @@ import { RepositoryModule } from '@app/modules/repositories';
 import configuration, { IConfiguration } from './configuration';
 import {
     AccountController,
+    AccountStockController,
     AnalysisController,
     FavoriteStockController,
     KeywordController,
@@ -88,6 +89,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
     ],
     controllers: [
         AccountController,
+        AccountStockController,
         AnalysisController,
         NewsController,
         LatestStockRankController,
