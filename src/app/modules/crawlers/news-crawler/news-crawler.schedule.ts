@@ -5,7 +5,6 @@ import { Cron } from '@nestjs/schedule';
 import { toDateYmdByDate, uniqueValues } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
@@ -25,7 +24,6 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentHelper: KoreaInvestmentHelperService,
         private readonly keywordService: KeywordService,
         private readonly favoriteStockService: FavoriteStockService,
         @Inject(NewsCrawlerQueueType.RequestDomesticNewsTitle)

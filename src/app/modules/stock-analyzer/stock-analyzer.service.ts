@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { Injectable, Logger } from '@nestjs/common';
 import { getStockName } from '@common/domains';
 import { uniqueValues } from '@common/utils';
@@ -14,6 +15,8 @@ import {
     AnalyzeKeywordGroupPromptTransformer,
     AnalyzeStockPromptTransformer,
 } from './transformers';
+
+const DEFAULT_CHUNK_SIZE = 5;
 
 @Injectable()
 export class StockAnalyzerService {
@@ -126,20 +129,23 @@ export class StockAnalyzerService {
         const maxPage = keywords.length < 2 ? 1 : 2;
         const arr = Array.from({ length: maxPage }, (_, i) => i + 1);
 
-        // 네이버 키워드 검색 - or 조건 적용
-        const mergedKeyword = keywords.join(' | ');
         const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
-        const newsResponses = await Promise.all(
-            arr.map((page) =>
-                client.getNews({
-                    query: mergedKeyword,
-                    start: page,
-                    display: 100,
-                    sort: 'date',
-                }),
+
+        const keywordChunk = _.chunk(keywords, DEFAULT_CHUNK_SIZE);
+
+        const responses = await Promise.all(
+            keywordChunk.flatMap((keywords) =>
+                arr.map((page) =>
+                    client.getNews({
+                        query: keywords.join(' | '),
+                        start: page,
+                        display: 100,
+                        sort: 'date',
+                    }),
+                ),
             ),
         );
 
-        return newsResponses.flatMap((response) => response.items);
+        return responses.flatMap((response) => response.items);
     }
 }
