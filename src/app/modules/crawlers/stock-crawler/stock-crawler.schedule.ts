@@ -36,7 +36,6 @@ export class StockCrawlerSchedule implements OnModuleInit {
     @Cron('0 16 * * *') // 매일 16시에 실행 (장 마감 후)
     @PreventConcurrentExecution()
     async handleCrawlingStockInvestor() {
-        // 임시로 처리 안함.
         return;
 
         try {
@@ -56,7 +55,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
                                 url: '/uapi/domestic-stock/v1/quotations/inquire-investor',
                                 tradeId: 'FHKST01010900',
                                 params: {
-                                    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
+                                    FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
                                     FID_INPUT_ISCD: stockCode,
                                 },
                             },

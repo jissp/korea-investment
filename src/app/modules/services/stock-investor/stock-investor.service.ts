@@ -33,7 +33,11 @@ export class StockInvestorService {
                 });
 
             const hasToday = stockInvestors[0]?.date === this.getTodayDate();
-            if (hasToday) {
+            const sumInvestorCount =
+                stockInvestors[0].person +
+                stockInvestors[0].foreigner +
+                stockInvestors[0].organization;
+            if (hasToday && sumInvestorCount > 0) {
                 return stockInvestors;
             }
 
@@ -58,7 +62,7 @@ export class StockInvestorService {
         const response =
             await this.koreaInvestmentQuotationClient.inquireInvestor({
                 FID_INPUT_ISCD: stockCode,
-                FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX, // Fixed to KRX
+                FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
             });
 
         const transformer = new DomesticStockInvestorTransformer();

@@ -88,6 +88,9 @@ export class AccountStockGroupStockService {
                 price,
                 changePrice,
                 changePriceRate,
+                lowPrice,
+                highPrice,
+                tradingVolume,
             } of dtoList) {
                 await entityManager.update(
                     AccountStockGroupStock,
@@ -98,6 +101,9 @@ export class AccountStockGroupStockService {
                         price,
                         changePrice,
                         changePriceRate,
+                        lowPrice,
+                        highPrice,
+                        tradingVolume,
                     },
                 );
             }

@@ -8,9 +8,9 @@ export type AccountStockGroupStockDto = Pick<
     AccountStockGroupStock,
     'groupCode' | 'stockCode' | 'stockName'
 >;
-export type UpdateAccountStockGroupStockDto = Pick<
+export type UpdateAccountStockGroupStockDto = Omit<
     AccountStockGroupStock,
-    'stockCode' | 'price' | 'changePrice' | 'changePriceRate'
+    'id' | 'groupCode' | 'stockName' | 'createdAt' | 'updatedAt'
 >;
 export type DeleteAccountStockGroupStockDto = Pick<
     AccountStockGroupStock,

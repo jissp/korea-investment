@@ -11,12 +11,18 @@ export class AccountStockGroupStockTransformer implements Pipe<
         inter2_prpr,
         inter2_prdy_vrss,
         prdy_ctrt,
+        inter2_hgpr,
+        inter2_lwpr,
+        acml_vol,
     }: DomesticStockQuotationsIntstockMultPriceOutput): UpdateAccountStockGroupStockDto {
         return {
             stockCode: inter_shrn_iscd,
             price: Number(inter2_prpr),
             changePrice: Number(inter2_prdy_vrss),
             changePriceRate: Number(prdy_ctrt),
+            lowPrice: Number(inter2_lwpr),
+            highPrice: Number(inter2_hgpr),
+            tradingVolume: Number(acml_vol),
         };
     }
 }

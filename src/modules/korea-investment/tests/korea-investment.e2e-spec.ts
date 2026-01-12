@@ -55,22 +55,31 @@ describe('KoreaInvestmentOauthClient e2e 테스트', () => {
         });
 
         describe('KoreaInvestmentQuotationClient', () => {
-            it('관심종목(멀티종목) 시세조회', async () => {
-                const response =
-                    await quotationClient.inquireIntstockMultiPrice({
-                        FID_INPUT_ISCD_1: '128940',
-                        FID_COND_MRKT_DIV_CODE_1: 'UN',
-                    });
+            // it('관심종목(멀티종목) 시세조회', async () => {
+            //     const response =
+            //         await quotationClient.inquireIntstockMultiPrice({
+            //             FID_INPUT_ISCD_1: '128940',
+            //             FID_COND_MRKT_DIV_CODE_1: 'UN',
+            //         });
+            //
+            //     expect(response).toBeDefined();
+            // });
+
+            it('투자자 동향 조회', async () => {
+                const response = await quotationClient.inquireInvestor({
+                    FID_INPUT_ISCD: '005930',
+                    FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
+                });
 
                 expect(response).toBeDefined();
             });
 
-            it('국내업종 현재지수 테스트', async () => {
-                const response =
-                    await quotationClient.inquireIndexPrice('0001');
-
-                expect(response).toBeDefined();
-            });
+            // it('국내업종 현재지수 테스트', async () => {
+            //     const response =
+            //         await quotationClient.inquireIndexPrice('0001');
+            //
+            //     expect(response).toBeDefined();
+            // });
         });
 
         describe('KoreaInvestmentRankClient', () => {

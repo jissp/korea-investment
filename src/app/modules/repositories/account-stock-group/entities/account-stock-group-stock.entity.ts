@@ -72,6 +72,33 @@ export class AccountStockGroupStock {
     })
     changePriceRate!: number;
 
+    /**
+     * 고가
+     */
+    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @ApiProperty({
+        description: '고가',
+    })
+    highPrice!: number;
+
+    /**
+     * 저가
+     */
+    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @ApiProperty({
+        description: '저가',
+    })
+    lowPrice!: number;
+
+    /**
+     * 누적 거래량
+     */
+    @Column({ type: 'bigint', unsigned: true })
+    @ApiProperty({
+        description: '누적 거래량',
+    })
+    tradingVolume!: number;
+
     @CreateDateColumn({
         type: 'datetime',
         default: 'CURRENT_TIMESTAMP()',
