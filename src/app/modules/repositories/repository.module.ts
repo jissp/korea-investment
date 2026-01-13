@@ -10,6 +10,7 @@ import { NewsModule } from './news';
 import { StockModule } from './stock';
 import { StockDailyInvestorModule } from './stock-daily-investor';
 import { TradingVolumeRankModule } from './trading-volume-rank';
+import { ThemeModule } from './theme';
 
 const repositoryModules = [
     AccountModule,
@@ -23,6 +24,7 @@ const repositoryModules = [
     StockModule,
     StockDailyInvestorModule,
     TradingVolumeRankModule,
+    ThemeModule,
 ];
 
 @Module({

@@ -17,6 +17,10 @@ const DOWNLOAD_FILES = [
         url: 'https://new.real.download.dws.co.kr/common/master/kosdaq_code.mst.zip',
     },
     {
+        fileName: 'theme_code.mst.zip',
+        url: 'https://new.real.download.dws.co.kr/common/master/theme_code.mst.zip',
+    },
+    {
         fileName: 'nasmst.cod.zip',
         url: 'https://new.real.download.dws.co.kr/common/master/nasmst.cod.zip',
     },

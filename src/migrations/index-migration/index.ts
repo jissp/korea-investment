@@ -10,21 +10,21 @@ import {
     TypeOrmModule,
     TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { ExchangeType, MarketType } from '@app/common/types';
-import { Stock, StockDto, StockModule } from '@app/modules/repositories/stock';
 import configuration, { IConfiguration } from '@app/configuration';
-import * as KospiCodeJson from '@assets/kospi_code.json';
-import * as KosdaqCodeJson from '@assets/kosdaq_code.json';
+import * as IdxCodeJson from '@assets/idxcode.json';
 import { IMigrator } from '../common/migrator.interface';
+import {
+    DomesticIndex,
+    DomesticIndexDto,
+    DomesticIndexModule,
+} from '@app/modules/repositories/domestic-index';
 
-type StockCode = {
+type Idx = {
     shortCode: string;
     code: string;
-    name: string;
 };
 
-const kospiCodes: StockCode[] = KospiCodeJson as unknown as StockCode[];
-const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
+const idxList: Idx[] = IdxCodeJson as unknown as Idx[];
 
 @Module({
     imports: [
@@ -60,14 +60,14 @@ const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
                 };
             },
         }),
-        StockModule,
+        DomesticIndexModule,
     ],
 })
 class StockCodeMigrationModule {}
 
 export class Migrator implements IMigrator {
     private app?: INestApplicationContext;
-    private stockRepository: Repository<Stock>;
+    private repository: Repository<DomesticIndex>;
 
     public async init() {
         dotenv.config({
@@ -77,49 +77,24 @@ export class Migrator implements IMigrator {
         this.app = await NestFactory.createApplicationContext(
             StockCodeMigrationModule,
         );
-        this.stockRepository = this.app.get<Repository<Stock>>(
-            getRepositoryToken(Stock),
+        this.repository = this.app.get<Repository<DomesticIndex>>(
+            getRepositoryToken(DomesticIndex),
         );
     }
 
     async up(): Promise<void> {
         await this.truncate();
-        await this.migrationKospi();
-        await this.migrationKosdaq();
+        await this.migration();
     }
 
-    private async migrationKospi() {
-        const chunks = _.chunk(kospiCodes, 20);
+    private async migration() {
+        const chunks = _.chunk(idxList, 20);
         for (const chunk of chunks) {
             await Promise.all(
-                chunk.map((stock) => {
-                    console.log(stock.code, stock.name);
-
+                chunk.map((idx) => {
                     return this.upsertStock({
-                        marketType: MarketType.Domestic,
-                        exchangeType: ExchangeType.KOSPI,
-                        code: stock.code,
-                        shortCode: stock.shortCode,
-                        name: stock.name,
-                    });
-                }),
-            );
-        }
-    }
-
-    private async migrationKosdaq() {
-        const chunks = _.chunk(kosdaqCodes, 20);
-        for (const chunk of chunks) {
-            await Promise.all(
-                chunk.map((stock) => {
-                    console.log(stock.code, stock.name);
-
-                    return this.upsertStock({
-                        marketType: MarketType.Domestic,
-                        exchangeType: ExchangeType.KOSDAQ,
-                        code: stock.code,
-                        shortCode: stock.shortCode,
-                        name: stock.name,
+                        code: idx.shortCode,
+                        name: idx.code,
                     });
                 }),
             );
@@ -144,26 +119,26 @@ export class Migrator implements IMigrator {
      * @private
      */
     private async truncate() {
-        return this.stockRepository.clear();
+        return this.repository.clear();
     }
 
     /**
-     * @param stockDto
+     * @param dto
      * @private
      */
-    private async upsertStock(stockDto: StockDto) {
-        return this.stockRepository
+    private async upsertStock(dto: DomesticIndexDto) {
+        return this.repository
             .createQueryBuilder()
             .insert()
-            .into(Stock)
-            .values(stockDto)
-            .orUpdate(['name'], ['short_code'])
+            .into(DomesticIndex)
+            .values(dto)
+            .orUpdate(['name'], ['code'])
             .updateEntity(false)
             .execute();
     }
 }
 
-// npx ts-node -r tsconfig-paths/register src/migrations/stock-code-migration/index.ts test
+// npx ts-node -r tsconfig-paths/register src/migrations/index-migration/index.ts test
 
 const [, , command] = process.argv;
 const migrator = new Migrator();

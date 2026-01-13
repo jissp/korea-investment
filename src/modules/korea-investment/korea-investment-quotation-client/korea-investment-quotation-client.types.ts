@@ -2123,3 +2123,447 @@ export interface DomesticStockQuotationsInquireInvestorOutput {
      */
     orgn_seln_tr_pbmn: string;
 }
+
+/**
+ * 국내업종 구분별전체시세 API Param
+ */
+export interface DomesticStockInquireIndexCategoryPriceParam {
+    /**
+     * FID 조건 시장 분류 코드
+     * 시장구분코드 (업종 U)
+     */
+    FID_COND_MRKT_DIV_CODE: string;
+
+    /**
+     * FID 입력 종목코드
+     * 코스피(0001), 코스닥(1001), 코스피200(2001) 등
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * FID 조건 화면 분류 코드
+     * Unique key (20214)
+     */
+    FID_COND_SCR_DIV_CODE: string;
+
+    /**
+     * FID 시장 구분 코드
+     * K:거래소, Q:코스닥, K2:코스피200
+     */
+    FID_MRKT_CLS_CODE: string;
+
+    /**
+     * FID 소속 구분 코드
+     * 시장구분코드에 따라 0:전업종, 1:기타, 2:자본금/벤처, 3:상업/일반 등 입력
+     */
+    FID_BLNG_CLS_CODE: string;
+}
+
+/**
+ * 국내업종 구분별전체시세 API Output1
+ */
+export class DomesticStockInquireIndexCategoryPriceOutput1 {
+    /** 업종 지수 현재가 */
+    bstp_nmix_prpr: string;
+
+    /** 업종 지수 전일 대비 */
+    bstp_nmix_prdy_vrss: string;
+
+    /** 전일 대비 부호 */
+    prdy_vrss_sign: string;
+
+    /** 업종 지수 전일 대비율 */
+    bstp_nmix_prdy_ctrt: string;
+
+    /** 누적 거래량 */
+    acml_vol: string;
+
+    /** 누적 거래 대금 */
+    acml_tr_pbmn: string;
+
+    /** 업종 지수 시가2 */
+    bstp_nmix_oprc: string;
+
+    /** 업종 지수 최고가 */
+    bstp_nmix_hgpr: string;
+
+    /** 업종 지수 최저가 */
+    bstp_nmix_lwpr: string;
+
+    /** 전일 거래량 */
+    prdy_vol: string;
+
+    /** 상승 종목 수 */
+    ascn_issu_cnt: string;
+
+    /** 하락 종목 수 */
+    down_issu_cnt: string;
+
+    /** 보합 종목 수 */
+    stnr_issu_cnt: string;
+
+    /** 상한 종목 수 */
+    uplm_issu_cnt: string;
+
+    /** 하한 종목 수 */
+    lslm_issu_cnt: string;
+
+    /** 전일 거래 대금 */
+    prdy_tr_pbmn: string;
+
+    /** 연중업종지수최고가일자 */
+    dryy_bstp_nmix_hgpr_date: string;
+
+    /** 연중업종지수최고가 */
+    dryy_bstp_nmix_hgpr: string;
+
+    /** 연중업종지수최저가 */
+    dryy_bstp_nmix_lwpr: string;
+
+    /** 연중업종지수최저가일자 */
+    dryy_bstp_nmix_lwpr_date: string;
+}
+
+/**
+ * 국내업종 구분별전체시세 API Output2
+ */
+export class DomesticStockInquireIndexCategoryPriceOutput2 {
+    /** 업종 구분 코드 */
+    bstp_cls_code: string;
+
+    /** HTS 한글 종목명 */
+    hts_kor_isnm: string;
+
+    /** 업종 지수 현재가 */
+    bstp_nmix_prpr: string;
+
+    /** 업종 지수 전일 대비 */
+    bstp_nmix_prdy_vrss: string;
+
+    /** 전일 대비 부호 */
+    prdy_vrss_sign: string;
+
+    /** 업종 지수 전일 대비율 */
+    bstp_nmix_prdy_ctrt: string;
+
+    /** 누적 거래량 */
+    acml_vol: string;
+
+    /** 누적 거래 대금 */
+    acml_tr_pbmn: string;
+
+    /** 누적 거래량 비중 */
+    acml_vol_rlim: string;
+
+    /** 누적 거래 대금 비중 */
+    acml_tr_pbmn_rlim: string;
+}
+
+/**
+ * 주식기본조회 API Param [1]
+ */
+export interface DomesticStockSearchStockInfoParam {
+    /**
+     * 상품유형코드
+     * 300: 주식, ETF, ETN, ELW / 301: 선물옵션 / 302: 채권 / 306: ELS
+     */
+    PRDT_TYPE_CD: '300' | '301' | '302' | '306';
+
+    /**
+     * 상품번호
+     * 종목번호 (6자리) / ETN의 경우, Q로 시작 (EX. Q500001)
+     */
+    PDNO: string;
+}
+
+export class DomesticStockSearchStockInfoOutput {
+    /** 상품번호 */
+    pdno: string;
+
+    /** 상품유형코드 */
+    prdt_type_cd: string;
+
+    /** 시장ID코드 */
+    mket_id_cd: string;
+
+    /** 증권그룹ID코드 */
+    scty_grp_id_cd: string;
+
+    /** 거래소구분코드 */
+    excg_dvsn_cd: string;
+
+    /** 결산월일 */
+    setl_mmdd: string;
+
+    /** 상장주수 */
+    lstg_stqt: string;
+
+    /** 상장자본금액 */
+    lstg_cptl_amt: string;
+
+    /** 자본금 */
+    cpta: string;
+
+    /** 액면가 */
+    papr: string;
+
+    /** 발행가격 */
+    issu_pric: string;
+
+    /** 코스피200종목여부 */
+    kospi200_item_yn: string;
+
+    /** 유가증권시장상장일자 */
+    scts_mket_lstg_dt: string;
+
+    /** 유가증권시장상장폐지일자 */
+    scts_mket_lstg_abol_dt: string;
+
+    /** 코스닥시장상장일자 */
+    kosdaq_mket_lstg_dt: string;
+
+    /** 코스닥시장상장폐지일자 */
+    kosdaq_mket_lstg_abol_dt: string;
+
+    /** 프리보드시장상장일자 */
+    frbd_mket_lstg_dt: string;
+
+    /** 프리보드시장상장폐지일자 */
+    frbd_mket_lstg_abol_dt: string;
+
+    /** 리츠종류코드 */
+    reits_kind_cd: string;
+
+    /** ETF구분코드 */
+    etf_dvsn_cd: string;
+
+    /** 유전펀드여부 */
+    oilf_fund_yn: string;
+
+    /** 지수업종대분류코드 */
+    idx_bztp_lcls_cd: string;
+
+    /** 지수업종중분류코드 */
+    idx_bztp_mcls_cd: string;
+
+    /** 지수업종소분류코드 */
+    idx_bztp_scls_cd: string;
+
+    /** 주식종류코드 */
+    stck_kind_cd: string;
+
+    /** 뮤추얼펀드개시일자 */
+    mfnd_opng_dt: string;
+
+    /** 뮤추얼펀드종료일자 */
+    mfnd_end_dt: string;
+
+    /** 예탁등록취소일자 */
+    dpsi_erlm_cncl_dt: string;
+
+    /** ETFCU수량 */
+    etf_cu_qty: string;
+
+    /** 상품명 */
+    prdt_name: string;
+
+    /** 상품명120 */
+    prdt_name120: string;
+
+    /** 상품약어명 */
+    prdt_abrv_name: string;
+
+    /** 표준상품번호 */
+    std_pdno: string;
+
+    /** 상품영문명 */
+    prdt_eng_name: string;
+
+    /** 상품영문명120 */
+    prdt_eng_name120: string;
+
+    /** 상품영문약어명 */
+    prdt_eng_abrv_name: string;
+
+    /** 예탁지정등록여부 */
+    dpsi_aptm_erlm_yn: string;
+
+    /** ETF과세유형코드 */
+    etf_txtn_type_cd: string;
+
+    /** ETF유형코드 */
+    etf_type_cd: string;
+
+    /** 상장폐지일자 */
+    lstg_abol_dt: string;
+
+    /** 신주구주구분코드 */
+    nwst_odst_dvsn_cd: string;
+
+    /** 대용가격 */
+    sbst_pric: string;
+
+    /** 당사대용가격 */
+    thco_sbst_pric: string;
+
+    /** 당사대용가격변경일자 */
+    thco_sbst_pric_chng_dt: string;
+
+    /** 거래정지여부 */
+    tr_stop_yn: string;
+
+    /** 관리종목여부 */
+    admn_item_yn: string;
+
+    /** 당일종가 */
+    thdt_clpr: string;
+
+    /** 전일종가 */
+    bfdy_clpr: string;
+
+    /** 종가변경일자 */
+    clpr_chng_dt: string;
+
+    /** 표준산업분류코드 */
+    std_idst_clsf_cd: string;
+
+    /** 표준산업분류코드명 */
+    std_idst_clsf_cd_name: string;
+
+    /** 지수업종대분류코드명 */
+    idx_bztp_lcls_cd_name: string;
+
+    /** 지수업종중분류코드명 */
+    idx_bztp_mcls_cd_name: string;
+
+    /** 지수업종소분류코드명 */
+    idx_bztp_scls_cd_name: string;
+
+    /** OCR번호 */
+    ocr_no: string;
+
+    /** 크라우드펀딩종목여부 */
+    crfd_item_yn: string;
+
+    /** 전자증권여부 */
+    elec_scty_yn: string;
+
+    /** 발행기관코드 */
+    issu_istt_cd: string;
+
+    /** ETF추적수익율배수 */
+    etf_chas_erng_rt_dbnb: string;
+
+    /** ETFETN투자유의종목여부 */
+    etf_etn_ivst_heed_item_yn: string;
+
+    /** 대주이자율구분코드 */
+    stln_int_rt_dvsn_cd: string;
+
+    /** 외국인개인한도비율 */
+    frnr_psnl_lmt_rt: string;
+
+    /** 상장신청인발행기관코드 */
+    lstg_rqsr_issu_istt_cd: string;
+
+    /** 상장신청인종목코드 */
+    lstg_rqsr_item_cd: string;
+
+    /** 신탁기관발행기관코드 */
+    trst_istt_issu_istt_cd: string;
+
+    /** NXT 거래종목여부 */
+    cptt_trad_tr_psbl_yn: string;
+
+    /** NXT 거래정지여부 */
+    nxt_tr_stop_yn: string;
+}
+
+export interface DomesticStockSearchInfoParam {
+    /**
+     * 상품번호
+     * 주식(하이닉스) : 000660 (코드 : 300)
+     * 선물(101S12) : KR4101SC0009 (코드 : 301)
+     * 미국(AAPL) : AAPL (코드 : 512)
+     */
+    PDNO: string;
+
+    /**
+     * 상품유형코드
+     * 300: 주식, 301: 선물옵션, 302: 채권
+     * 512: 미국 나스닥, 513: 미국 뉴욕, 529: 미국 아멕스
+     * 515: 일본, 501: 홍콩, 507: 베트남 하노이 등
+     */
+    PRDT_TYPE_CD:
+        | '300'
+        | '301'
+        | '302'
+        | '512'
+        | '513'
+        | '529'
+        | '515'
+        | '501'
+        | '507';
+}
+
+export class DomesticStockSearchInfoOutput {
+    /** 상품번호 */
+    pdno: string;
+
+    /** 상품유형코드 */
+    prdt_type_cd: string;
+
+    /** 상품명 */
+    prdt_name: string;
+
+    /** 상품명120 */
+    prdt_name120: string;
+
+    /** 상품약어명 */
+    prdt_abrv_name: string;
+
+    /** 상품영문명 */
+    prdt_eng_name: string;
+
+    /** 상품영문명120 */
+    prdt_eng_name120: string;
+
+    /** 상품영문약어명 */
+    prdt_eng_abrv_name: string;
+
+    /** 표준상품번호 */
+    std_pdno: string;
+
+    /** 단축상품번호 */
+    shtn_pdno: string;
+
+    /** 상품판매상태코드 */
+    prdt_sale_stat_cd: string;
+
+    /** 상품위험등급코드 */
+    prdt_risk_grad_cd: string;
+
+    /** 상품분류코드 */
+    prdt_clsf_cd: string;
+
+    /** 상품분류명 */
+    prdt_clsf_name: string;
+
+    /** 판매시작일자 */
+    sale_strt_dt: string;
+
+    /** 판매종료일자 */
+    sale_end_dt: string;
+
+    /** 랩어카운트자산유형코드 */
+    wrap_asst_type_cd: string;
+
+    /** 투자상품유형코드 */
+    ivst_prdt_type_cd: string;
+
+    /** 투자상품유형코드명 */
+    ivst_prdt_type_cd_name: string;
+
+    /** 최초등록일자 */
+    frst_erlm_dt: string;
+}

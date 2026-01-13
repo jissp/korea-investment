@@ -28,6 +28,7 @@ import {
     NewsController,
     StockController,
     StockDailyInvestorController,
+    ThemeController,
 } from './controllers';
 import { KoreaInvestmentBeGateway } from './gateways';
 
@@ -99,6 +100,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         FavoriteStockController,
         KeywordController,
         KeywordGroupController,
+        ThemeController,
     ],
     providers: [KoreaInvestmentBeGateway],
 })

@@ -7,6 +7,9 @@ import {
 } from '@modules/korea-investment/common';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
+    DomesticStockInquireIndexCategoryPriceOutput1,
+    DomesticStockInquireIndexCategoryPriceOutput2,
+    DomesticStockInquireIndexCategoryPriceParam,
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
@@ -27,6 +30,10 @@ import {
     DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleOutput,
     DomesticStockQuotationsNewsTitleParam,
+    DomesticStockSearchInfoOutput,
+    DomesticStockSearchInfoParam,
+    DomesticStockSearchStockInfoOutput,
+    DomesticStockSearchStockInfoParam,
 } from './korea-investment-quotation-client.types';
 
 interface QuotationRequestConfig {
@@ -334,6 +341,37 @@ export class KoreaInvestmentQuotationClient {
 
     /**
      *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-index-category-price
+     */
+    public async inquireIndexPriceByCategory(
+        params: Omit<
+            DomesticStockInquireIndexCategoryPriceParam,
+            'FID_COND_MRKT_DIV_CODE' | 'FID_COND_SCR_DIV_CODE'
+        >,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockInquireIndexCategoryPriceOutput1,
+                DomesticStockInquireIndexCategoryPriceOutput2
+            >
+        >({
+            tradeId: 'FHPUP02140000',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-index-category-price',
+            params: {
+                ...params,
+                FID_COND_MRKT_DIV_CODE: 'U',
+                FID_COND_SCR_DIV_CODE: '20214',
+            },
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
+    }
+
+    /**
+     *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend
      */
     public async inquireRgnmemPchsTrend(params: {
@@ -362,6 +400,44 @@ export class KoreaInvestmentQuotationClient {
                 FID_INPUT_ISCD_2: params.FID_INPUT_ISCD_2 ?? '99999',
                 FID_COND_MRKT_DIV_CODE: params.FID_COND_MRKT_DIV_CODE ?? 'J',
             },
+        });
+
+        return {
+            output: response.output,
+        };
+    }
+
+    /**
+     * 주식기본조회
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/search-stock-info
+     */
+    public async inquireSearchStockInfo(
+        params: DomesticStockSearchStockInfoParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockSearchStockInfoOutput[]>
+        >({
+            tradeId: 'CTPF1002R',
+            url: '/uapi/domestic-stock/v1/quotations/search-stock-info',
+            params,
+        });
+
+        return {
+            output: response.output,
+        };
+    }
+
+    /**
+     * 상품기본조회
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/search-info
+     */
+    public async inquireSearchInfo(params: DomesticStockSearchInfoParam) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockSearchInfoOutput[]>
+        >({
+            tradeId: 'CTPF1604R',
+            url: '/uapi/domestic-stock/v1/quotations/search-info',
+            params,
         });
 
         return {

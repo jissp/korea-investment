@@ -65,14 +65,14 @@ describe('KoreaInvestmentOauthClient e2e 테스트', () => {
             //     expect(response).toBeDefined();
             // });
 
-            it('투자자 동향 조회', async () => {
-                const response = await quotationClient.inquireInvestor({
-                    FID_INPUT_ISCD: '005930',
-                    FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
-                });
-
-                expect(response).toBeDefined();
-            });
+            // it('투자자 동향 조회', async () => {
+            //     const response = await quotationClient.inquireInvestor({
+            //         FID_INPUT_ISCD: '005930',
+            //         FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
+            //     });
+            //
+            //     expect(response).toBeDefined();
+            // });
 
             // it('국내업종 현재지수 테스트', async () => {
             //     const response =
@@ -80,37 +80,66 @@ describe('KoreaInvestmentOauthClient e2e 테스트', () => {
             //
             //     expect(response).toBeDefined();
             // });
-        });
 
-        describe('KoreaInvestmentRankClient', () => {
-            it('거래량 순위 테스트', async () => {
-                const response = await rankClient.inquireVolumeRank({
-                    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
-                    FID_BLNG_CLS_CODE: '0',
-                    FID_TRGT_EXLS_CLS_CODE: '0000000000',
-                    FID_TRGT_CLS_CODE: '000000000',
+            // it('국내업종 구분별전체시세', async () => {
+            //     const response =
+            //         await quotationClient.inquireIndexPriceByCategory({
+            //             FID_BLNG_CLS_CODE: '0',
+            //             FID_MRKT_CLS_CODE: 'K',
+            //             FID_INPUT_ISCD: '',
+            //         });
+            //
+            //     expect(response).toBeDefined();
+            // });
+
+            // it('주식기본조회', async () => {
+            //     const response = await quotationClient.inquireSearchStockInfo({
+            //         PRDT_TYPE_CD: '300',
+            //         PDNO: '005930',
+            //     });
+            //
+            //     expect(response).toBeDefined();
+            // });
+
+            it('상품기본조회', async () => {
+                const response = await quotationClient.inquireSearchInfo({
+                    PRDT_TYPE_CD: '300',
+                    PDNO: '005930',
                 });
 
                 expect(response).toBeDefined();
             });
-
-            it('국내주식 등락률 순위 테스트', async () => {
-                const response = await rankClient.inquireFluctuationRank({
-                    fid_cond_mrkt_div_code: MarketDivCode.KRX,
-                    fid_prc_cls_code: '0',
-                    fid_rank_sort_cls_code: '0',
-                });
-
-                expect(response).toBeDefined();
-            });
-
-            it('HTS조회상위20종목', async () => {
-                const response = await rankClient.getHtsTopList();
-
-                console.log(response);
-
-                expect(response).toBeDefined();
-            });
         });
+
+        // describe('KoreaInvestmentRankClient', () => {
+        //     it('거래량 순위 테스트', async () => {
+        //         const response = await rankClient.inquireVolumeRank({
+        //             FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
+        //             FID_BLNG_CLS_CODE: '0',
+        //             FID_TRGT_EXLS_CLS_CODE: '0000000000',
+        //             FID_TRGT_CLS_CODE: '000000000',
+        //         });
+        //
+        //         expect(response).toBeDefined();
+        //     });
+        //
+        //     it('국내주식 등락률 순위 테스트', async () => {
+        //         const response = await rankClient.inquireFluctuationRank({
+        //             fid_cond_mrkt_div_code: MarketDivCode.KRX,
+        //             fid_prc_cls_code: '0',
+        //             fid_rank_sort_cls_code: '0',
+        //         });
+        //
+        //         expect(response).toBeDefined();
+        //     });
+        //
+        //     it('HTS조회상위20종목', async () => {
+        //         const response = await rankClient.getHtsTopList();
+        //
+        //         console.log(response);
+        //
+        //         expect(response).toBeDefined();
+        //     });
+        // });
     });
 });

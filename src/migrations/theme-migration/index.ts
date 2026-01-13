@@ -10,21 +10,36 @@ import {
     TypeOrmModule,
     TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { ExchangeType, MarketType } from '@app/common/types';
-import { Stock, StockDto, StockModule } from '@app/modules/repositories/stock';
+import {
+    Theme,
+    ThemeDto,
+    ThemeModule,
+    ThemeStock,
+    ThemeStockDto,
+} from '@app/modules/repositories/theme';
 import configuration, { IConfiguration } from '@app/configuration';
+import * as ThemeCodeJson from '@assets/theme_code.json';
 import * as KospiCodeJson from '@assets/kospi_code.json';
 import * as KosdaqCodeJson from '@assets/kosdaq_code.json';
 import { IMigrator } from '../common/migrator.interface';
 
+type ITheme = {
+    themeCode: string;
+    themeName: string;
+    stockCode: string;
+};
 type StockCode = {
     shortCode: string;
     code: string;
     name: string;
 };
 
+const themeList: ITheme[] = ThemeCodeJson as unknown as ITheme[];
 const kospiCodes: StockCode[] = KospiCodeJson as unknown as StockCode[];
 const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
+
+const stockCodes: StockCode[] = [...kospiCodes, ...kosdaqCodes];
+const stockMap = _.keyBy(stockCodes, 'shortCode');
 
 @Module({
     imports: [
@@ -60,14 +75,15 @@ const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
                 };
             },
         }),
-        StockModule,
+        ThemeModule,
     ],
 })
 class StockCodeMigrationModule {}
 
 export class Migrator implements IMigrator {
     private app?: INestApplicationContext;
-    private stockRepository: Repository<Stock>;
+    private repository: Repository<Theme>;
+    private themeStockRepository: Repository<ThemeStock>;
 
     public async init() {
         dotenv.config({
@@ -77,51 +93,57 @@ export class Migrator implements IMigrator {
         this.app = await NestFactory.createApplicationContext(
             StockCodeMigrationModule,
         );
-        this.stockRepository = this.app.get<Repository<Stock>>(
-            getRepositoryToken(Stock),
+        this.repository = this.app.get<Repository<Theme>>(
+            getRepositoryToken(Theme),
+        );
+        this.themeStockRepository = this.app.get<Repository<ThemeStock>>(
+            getRepositoryToken(ThemeStock),
         );
     }
 
     async up(): Promise<void> {
-        await this.truncate();
-        await this.migrationKospi();
-        await this.migrationKosdaq();
+        await this.migration();
+        await this.migrationThemeStock();
     }
 
-    private async migrationKospi() {
-        const chunks = _.chunk(kospiCodes, 20);
+    private async migration() {
+        await this.truncate();
+        const uniqThemeList = _.uniqBy(themeList, (theme) => theme.themeCode);
+        const chunks = _.chunk(uniqThemeList, 20);
         for (const chunk of chunks) {
             await Promise.all(
-                chunk.map((stock) => {
-                    console.log(stock.code, stock.name);
-
-                    return this.upsertStock({
-                        marketType: MarketType.Domestic,
-                        exchangeType: ExchangeType.KOSPI,
-                        code: stock.code,
-                        shortCode: stock.shortCode,
-                        name: stock.name,
+                chunk.map((theme) => {
+                    return this.upsertTheme({
+                        code: theme.themeCode,
+                        name: theme.themeName,
                     });
                 }),
             );
         }
     }
 
-    private async migrationKosdaq() {
-        const chunks = _.chunk(kosdaqCodes, 20);
+    private async migrationThemeStock() {
+        await this.truncateThemeStock();
+
+        const filteredTheme = themeList.filter(
+            (theme) => !!this.getStock(theme.stockCode),
+        );
+        const themeStockDtoList = filteredTheme.map(
+            ({ themeCode, stockCode }): ThemeStockDto => {
+                return {
+                    themeCode,
+                    stockCode,
+                    stockName: this.getStock(stockCode).name,
+                };
+            },
+        );
+
+        const chunks = _.chunk(themeStockDtoList, 20);
         for (const chunk of chunks) {
             await Promise.all(
-                chunk.map((stock) => {
-                    console.log(stock.code, stock.name);
-
-                    return this.upsertStock({
-                        marketType: MarketType.Domestic,
-                        exchangeType: ExchangeType.KOSDAQ,
-                        code: stock.code,
-                        shortCode: stock.shortCode,
-                        name: stock.name,
-                    });
-                }),
+                chunk.map((dto) => {
+                    return this.upsertThemeStock(dto);
+                }, this),
             );
         }
     }
@@ -144,26 +166,46 @@ export class Migrator implements IMigrator {
      * @private
      */
     private async truncate() {
-        return this.stockRepository.clear();
+        return this.repository.clear();
     }
 
     /**
-     * @param stockDto
      * @private
      */
-    private async upsertStock(stockDto: StockDto) {
-        return this.stockRepository
-            .createQueryBuilder()
-            .insert()
-            .into(Stock)
-            .values(stockDto)
-            .orUpdate(['name'], ['short_code'])
-            .updateEntity(false)
-            .execute();
+    private async truncateThemeStock() {
+        return this.themeStockRepository.clear();
+    }
+
+    /**
+     * @param dto
+     * @private
+     */
+    private async upsertTheme(dto: ThemeDto) {
+        const entity = this.repository.create(dto);
+
+        return this.repository.insert(entity);
+    }
+
+    /**
+     * @param dto
+     * @private
+     */
+    private async upsertThemeStock(dto: ThemeStockDto) {
+        const entity = this.themeStockRepository.create(dto);
+
+        return this.themeStockRepository.insert(entity);
+    }
+
+    /**
+     * @param stockCode
+     * @private
+     */
+    private getStock(stockCode: string) {
+        return stockMap[stockCode];
     }
 }
 
-// npx ts-node -r tsconfig-paths/register src/migrations/stock-code-migration/index.ts test
+// npx ts-node -r tsconfig-paths/register src/migrations/theme-migration/index.ts test
 
 const [, , command] = process.argv;
 const migrator = new Migrator();

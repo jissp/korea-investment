@@ -3635,6 +3635,16 @@
     "name": "이스타코"
   },
   {
+    "shortCode": "0150K0",
+    "code": "KR70150K0008",
+    "name": "KoAct 수소전력ESS인프라액티브"
+  },
+  {
+    "shortCode": "0151S0",
+    "code": "KR70151S0009",
+    "name": "KODEX 미국AI반도체TOP3플러스"
+  },
+  {
     "shortCode": "015230",
     "code": "KR7015230006",
     "name": "대창단조"
@@ -3643,6 +3653,11 @@
     "shortCode": "015260",
     "code": "KR7015260003",
     "name": "에이엔피"
+  },
+  {
+    "shortCode": "0152E0",
+    "code": "KR70152E0004",
+    "name": "SOL 배당성향탑픽액티브"
   },
   {
     "shortCode": "015360",

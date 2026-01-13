@@ -13,11 +13,13 @@
         "test": "jest",
         "test:watch": "jest --watch",
         "test:e2e": "jest --config ./jest-e2e.json",
-        "refresh-stock-codes": "npm run download-stock-files && npm run convert-korea-investment-code && npm run stock-code-migration",
+        "refresh-stock-codes": "npm run download-stock-files && npm run convert-korea-investment-code && npm run stock-code-migration && npm run theme-migration",
         "download-stock-files": "ts-node ./scripts/download-stock-files/index.ts",
-        "convert-korea-investment-code": "ts-node ./scripts/sector-code-parse/index.ts && ts-node ./scripts/stock-code-parse/index.ts",
+        "convert-korea-investment-code": "ts-node ./scripts/sector-code-parse/index.ts && ts-node ./scripts/stock-code-parse/index.ts && ts-node ./scripts/theme-parse/index.ts",
         "convert-korea-investment-overseas-code": "ts-node ./scripts/overseas-index-code-parse/index.ts",
-        "stock-code-migration": "npx ts-node -r tsconfig-paths/register src/migrations/stock-code-migration/index.ts up"
+        "stock-code-migration": "npx ts-node -r tsconfig-paths/register src/migrations/stock-code-migration/index.ts up",
+        "domestic-idx-migration": "npx ts-node -r tsconfig-paths/register src/migrations/index-migration/index.ts up",
+        "theme-migration": "npx ts-node -r tsconfig-paths/register src/migrations/theme-migration/index.ts up"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
