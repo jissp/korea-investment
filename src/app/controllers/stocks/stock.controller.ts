@@ -1,15 +1,15 @@
-import { Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import {
     ApiNoContentResponse,
+    ApiOkResponse,
     ApiOperation,
     ApiParam,
-    ApiResponse,
 } from '@nestjs/swagger';
 import { assertStockCode } from '@common/domains';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
-import { GetStocksResponse } from '@app/controllers';
-import { StockService } from '@app/modules/repositories/stock';
 import { MarketType } from '@app/common/types';
+import { StockService } from '@app/modules/repositories/stock';
+import { GetStockResponse, GetStocksResponse } from './dto';
 
 @Controller('v1/stocks')
 export class StockController {
@@ -21,12 +21,11 @@ export class StockController {
     @ApiOperation({
         summary: '국내 시장 종목 전체 조회',
     })
-    @ApiResponse({
-        status: HttpStatus.OK,
+    @ApiOkResponse({
         type: GetStocksResponse,
     })
     @Get('domestics')
-    public async getStocksByDomestic(): Promise<GetStocksResponse> {
+    public async getStocks(): Promise<GetStocksResponse> {
         const stocks = await this.stockService.getStocks({
             marketType: MarketType.Domestic,
         });
@@ -44,12 +43,11 @@ export class StockController {
         type: String,
         description: '종목명',
     })
-    @ApiResponse({
-        status: HttpStatus.OK,
+    @ApiOkResponse({
         type: GetStocksResponse,
     })
-    @Get('domestics/:stockName')
-    public async searchStocksByDomestic(
+    @Get('search/:stockName')
+    public async searchStocks(
         @Param('stockName') stockName: string,
     ): Promise<GetStocksResponse> {
         const stocks = await this.stockService.getStocks({
@@ -59,6 +57,28 @@ export class StockController {
 
         return {
             data: stocks,
+        };
+    }
+
+    @ApiOperation({
+        summary: '종목 조회',
+    })
+    @ApiParam({
+        name: 'stockCode',
+        type: String,
+        description: '종목코드',
+    })
+    @ApiOkResponse({
+        type: GetStockResponse,
+    })
+    @Get(':stockCode')
+    public async getStock(
+        @Param('stockCode') stockCode: string,
+    ): Promise<GetStockResponse> {
+        const stock = await this.stockService.getStock(stockCode);
+
+        return {
+            data: stock,
         };
     }
 

@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Nullable } from '@common/types';
 import { Stock } from '@app/modules/repositories/stock';
 
-export class GetStocksResponse {
+export class GetStockResponse {
     @ApiProperty({
         type: Stock,
         description: '종목 정보',
-        isArray: true,
+        nullable: true,
     })
-    data: Stock[];
+    data: Nullable<Stock>;
 }

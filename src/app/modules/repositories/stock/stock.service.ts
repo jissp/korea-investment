@@ -13,6 +13,16 @@ export class StockService {
 
     /**
      * 종목 목록을 조회합니다.
+     * @param stockCode
+     */
+    public async getStock(stockCode: string) {
+        return this.stockRepository.findOneBy({
+            shortCode: stockCode,
+        });
+    }
+
+    /**
+     * 종목 목록을 조회합니다.
      * @param marketType
      * @param exchangeType
      * @param name

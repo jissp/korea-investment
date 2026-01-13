@@ -33,11 +33,12 @@ export class StockInvestorService {
                 });
 
             const hasToday = stockInvestors[0]?.date === this.getTodayDate();
-            const sumInvestorCount =
-                stockInvestors[0].person +
-                stockInvestors[0].foreigner +
-                stockInvestors[0].organization;
-            if (hasToday && sumInvestorCount > 0) {
+            const sumInvestorCount = stockInvestors[0]
+                ? stockInvestors[0].person +
+                  stockInvestors[0].foreigner +
+                  stockInvestors[0].organization
+                : 0;
+            if (hasToday && !sumInvestorCount) {
                 return stockInvestors;
             }
 
