@@ -16,12 +16,12 @@ import {
     CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
 } from '../news-crawler.types';
-import { NaverNewsToNewsTransformer } from '../transformers/naver-news-to-news.transformer';
+import { NaverNewsTransformer } from '../transformers/naver-news.transformer';
 
 @Injectable()
 export class NaverNewsProcessor {
     private readonly logger = new Logger(NaverNewsProcessor.name);
-    private readonly transformer = new NaverNewsToNewsTransformer();
+    private readonly transformer = new NaverNewsTransformer();
 
     constructor(
         private readonly naverApiClientFactory: NaverApiClientFactory,

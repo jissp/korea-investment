@@ -7,10 +7,8 @@ import {
 import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
 import { KoreaInvestmentNewsItem } from '../news-crawler.interface';
 
-export class KoreaInvestmentNewsToNewsTransformer {
-    private readonly logger = new Logger(
-        KoreaInvestmentNewsToNewsTransformer.name,
-    );
+export class KoreaInvestmentNewsTransformer {
+    private readonly logger = new Logger(KoreaInvestmentNewsTransformer.name);
 
     private readonly stockCodeFields: (keyof KoreaInvestmentNewsItem)[] = [
         'iscd1',
@@ -43,7 +41,7 @@ export class KoreaInvestmentNewsToNewsTransformer {
      * @param koreaInvestmentNews
      * @private
      */
-    private extractStockCodes(koreaInvestmentNews: KoreaInvestmentNewsItem) {
+    public extractStockCodes(koreaInvestmentNews: KoreaInvestmentNewsItem) {
         const stockCodes: string[] = [];
 
         this.stockCodeFields.forEach((field) => {

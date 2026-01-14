@@ -6,7 +6,7 @@ export interface StockPlusNewsTransformResult {
     news: NewsDto;
 }
 
-export class StockPlusNewsToNewsTransformer {
+export class StockPlusNewsTransformer {
     private readonly koreaStockPatternRegExp = /^A[0-9]{6}$/;
 
     private readonly stockCodeNormalizersByMarket: Record<

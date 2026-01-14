@@ -5,10 +5,7 @@ import { Cron } from '@nestjs/schedule';
 import { toDateYmdByDate, uniqueValues } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
-import {
-    KoreaInvestmentRequestApiHelper,
-    KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api/common';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
 import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import {
@@ -43,50 +40,32 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         this.handleCrawlingStockPlusNews();
     }
 
-    @Cron('*/1 * * * *')
+    @Cron('*/8 * * * * *')
     @PreventConcurrentExecution()
     async handleCrawlingKoreaInvestmentNewsByStockCode() {
         try {
-            const favoriteStocks = await this.favoriteStockService.findAll();
-            const stockCodes = uniqueValues(
-                favoriteStocks.map(({ stockCode }) => stockCode),
-            );
-
             const startDate = toDateYmdByDate();
 
             const queueName = NewsCrawlerQueueType.RequestDomesticNewsTitle;
 
-            for (const chunk of _.chunk(stockCodes, DEFAULT_CHUNK_SIZE)) {
-                await Promise.allSettled(
-                    chunk.map((stockCode) =>
-                        this.requestDomesticNewsTitleFlow.add(
-                            {
-                                name: queueName,
-                                queueName,
-                                children: [
-                                    this.buildRequestApiChildren(
-                                        startDate,
-                                        stockCode,
-                                    ),
-                                ],
-                            },
-                            {
-                                queuesOptions: {
-                                    [queueName]: {
-                                        defaultJobOptions:
-                                            getDefaultJobOptions(),
-                                    },
-                                    [KoreaInvestmentRequestApiType.Additional]:
-                                        {
-                                            defaultJobOptions:
-                                                getDefaultJobOptions(),
-                                        },
-                                },
-                            },
-                        ),
+            await this.requestDomesticNewsTitleFlow.add({
+                name: queueName,
+                queueName,
+                children: [
+                    this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle(
+                        {
+                            FID_INPUT_DATE_1: `00${startDate}`,
+                            FID_NEWS_OFER_ENTP_CODE: '',
+                            FID_COND_MRKT_CLS_CODE: '',
+                            FID_INPUT_ISCD: '',
+                            FID_TITL_CNTT: '',
+                            FID_INPUT_HOUR_1: '',
+                            FID_RANK_SORT_CLS_CODE: '',
+                            FID_INPUT_SRNO: '',
+                        },
                     ),
-                );
-            }
+                ],
+            });
         } catch (error) {
             this.logger.error(error);
         }
@@ -171,18 +150,5 @@ export class NewsCrawlerSchedule implements OnModuleInit {
         } catch (error) {
             this.logger.error(error);
         }
-    }
-
-    private buildRequestApiChildren(startDate: string, stockCode: string) {
-        return this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle({
-            FID_INPUT_DATE_1: `00${startDate}`,
-            FID_NEWS_OFER_ENTP_CODE: '',
-            FID_COND_MRKT_CLS_CODE: '',
-            FID_INPUT_ISCD: stockCode,
-            FID_TITL_CNTT: '',
-            FID_INPUT_HOUR_1: '',
-            FID_RANK_SORT_CLS_CODE: '',
-            FID_INPUT_SRNO: '',
-        });
     }
 }

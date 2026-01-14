@@ -1,7 +1,7 @@
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
 import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
 
-export class NaverNewsToNewsTransformer {
+export class NaverNewsTransformer {
     public transform(naverNewsItem: NaverApiNewsItem): NewsDto {
         return {
             articleId: naverNewsItem.link,

@@ -3,7 +3,7 @@ import { OnQueueProcessor } from '@modules/queue';
 import { NewsService } from '@app/modules/repositories/news';
 import { NewsCrawlerQueueType } from '../news-crawler.types';
 import {
-    StockPlusNewsToNewsTransformer,
+    StockPlusNewsTransformer,
     StockPlusNewsTransformResult,
 } from '@app/modules/crawlers/news-crawler';
 import { StockPlusClient } from '@modules/stock-plus';
@@ -11,7 +11,7 @@ import { StockPlusClient } from '@modules/stock-plus';
 @Injectable()
 export class StockPlusNewsProcessor {
     private readonly logger = new Logger(StockPlusNewsProcessor.name);
-    private readonly transformer = new StockPlusNewsToNewsTransformer();
+    private readonly transformer = new StockPlusNewsTransformer();
 
     constructor(
         private readonly stockPlusClient: StockPlusClient,

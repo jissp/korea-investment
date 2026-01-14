@@ -80,11 +80,18 @@ export class NewsService {
      * @param stockNewsDto
      */
     public async upsertStockNews(stockNewsDto: StockNewsDto | StockNewsDto[]) {
+        const dtoList = Array.isArray(stockNewsDto)
+            ? stockNewsDto
+            : [stockNewsDto];
+        if (dtoList.length === 0) {
+            return;
+        }
+
         return this.stockNewsRepository
             .createQueryBuilder()
             .insert()
             .into(StockNews)
-            .values(stockNewsDto)
+            .values(dtoList)
             .orUpdate(
                 ['title', 'description', 'published_at'],
                 ['stock_code', 'article_id'],

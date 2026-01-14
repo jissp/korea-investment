@@ -18,11 +18,13 @@ import {
 } from './processors';
 import { NewsCrawlerSchedule } from './news-crawler.schedule';
 
+const flowTypes = [NewsCrawlerQueueType.RequestDomesticNewsTitle];
+const flowProviders = QueueModule.getFlowProviders(flowTypes);
+
 const queueTypes = [
     NewsCrawlerQueueType.CrawlingNaverNews,
     NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
     NewsCrawlerQueueType.CrawlingStockPlusNews,
-    NewsCrawlerQueueType.RequestDomesticNewsTitle,
 ];
 const queueProviders = QueueModule.getQueueProviders(queueTypes);
 const processors = [
@@ -35,6 +37,7 @@ const processors = [
     imports: [
         QueueModule.forFeature({
             queueTypes,
+            flowTypes,
             jobOptions: {
                 removeOnComplete: {
                     count: 3,
@@ -52,6 +55,11 @@ const processors = [
         FavoriteStockModule,
         KeywordModule,
     ],
-    providers: [...queueProviders, ...processors, NewsCrawlerSchedule],
+    providers: [
+        ...queueProviders,
+        ...flowProviders,
+        ...processors,
+        NewsCrawlerSchedule,
+    ],
 })
 export class NewsCrawlerModule {}
