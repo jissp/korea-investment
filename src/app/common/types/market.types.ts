@@ -10,6 +10,11 @@ export enum ExchangeType {
     NASDAQ = 'nasdaq',
 }
 
+export enum YN {
+    Y = 'Y',
+    N = 'N',
+}
+
 export const DOMESTIC_INDEX_CODES = [
     {
         code: '0001',

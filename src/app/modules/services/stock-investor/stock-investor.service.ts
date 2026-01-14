@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
+import { YN } from '@app/common';
 import {
     StockDailyInvestor,
     StockDailyInvestorService,
 } from '@app/modules/repositories/stock-daily-investor';
+import { StockService } from '@app/modules/repositories/stock';
+import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
 
 @Injectable()
 export class StockInvestorService {
@@ -13,6 +15,7 @@ export class StockInvestorService {
 
     constructor(
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
+        private readonly stockService: StockService,
         private readonly stockDailyInvestorService: StockDailyInvestorService,
     ) {}
 
@@ -33,12 +36,17 @@ export class StockInvestorService {
                 });
 
             const hasToday = stockInvestors[0]?.date === this.getTodayDate();
-            const sumInvestorCount = stockInvestors[0]
-                ? stockInvestors[0].person +
-                  stockInvestors[0].foreigner +
-                  stockInvestors[0].organization
-                : 0;
-            if (hasToday && !sumInvestorCount) {
+            const isExistsZeroCount = stockInvestors.some((stockInvestor) => {
+                const sumInvestorCount = stockInvestors
+                    ? stockInvestor.person +
+                      stockInvestor.foreigner +
+                      stockInvestor.organization
+                    : 0;
+
+                return sumInvestorCount === 0;
+            });
+
+            if (hasToday && !isExistsZeroCount) {
                 return stockInvestors;
             }
 
@@ -60,10 +68,17 @@ export class StockInvestorService {
      * @private
      */
     private async fetchAndSaveStockDailyInvestors(stockCode: string) {
+        const stock = await this.stockService.getStock(stockCode);
+        if (!stock) {
+            return [];
+        }
+
+        const divCode =
+            stock.isNextTrade === YN.Y ? MarketDivCode.통합 : MarketDivCode.KRX;
         const response =
             await this.koreaInvestmentQuotationClient.inquireInvestor({
                 FID_INPUT_ISCD: stockCode,
-                FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
+                FID_COND_MRKT_DIV_CODE: divCode,
             });
 
         const transformer = new DomesticStockInvestorTransformer();

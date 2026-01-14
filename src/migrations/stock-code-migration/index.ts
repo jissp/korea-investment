@@ -10,11 +10,13 @@ import {
     TypeOrmModule,
     TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
-import { ExchangeType, MarketType } from '@app/common/types';
+import { ExchangeType, MarketType, YN } from '@app/common/types';
 import { Stock, StockDto, StockModule } from '@app/modules/repositories/stock';
 import configuration, { IConfiguration } from '@app/configuration';
 import * as KospiCodeJson from '@assets/kospi_code.json';
 import * as KosdaqCodeJson from '@assets/kosdaq_code.json';
+import * as NxtKospiCodeJson from '@assets/nxt_kospi_code.json';
+import * as NxtKosdaqCodeJson from '@assets/nxt_kosdaq_code.json';
 import { IMigrator } from '../common/migrator.interface';
 
 type StockCode = {
@@ -25,6 +27,8 @@ type StockCode = {
 
 const kospiCodes: StockCode[] = KospiCodeJson as unknown as StockCode[];
 const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
+const nxtKospiCodes: StockCode[] = NxtKospiCodeJson as unknown as StockCode[];
+const nxtKosdaqCodes: StockCode[] = NxtKosdaqCodeJson as unknown as StockCode[];
 
 @Module({
     imports: [
@@ -86,6 +90,7 @@ export class Migrator implements IMigrator {
         await this.truncate();
         await this.migrationKospi();
         await this.migrationKosdaq();
+        await this.migrationNextTrade();
     }
 
     private async migrationKospi() {
@@ -101,6 +106,7 @@ export class Migrator implements IMigrator {
                         code: stock.code,
                         shortCode: stock.shortCode,
                         name: stock.name,
+                        isNextTrade: YN.N,
                     });
                 }),
             );
@@ -120,7 +126,21 @@ export class Migrator implements IMigrator {
                         code: stock.code,
                         shortCode: stock.shortCode,
                         name: stock.name,
+                        isNextTrade: YN.N,
                     });
+                }),
+            );
+        }
+    }
+
+    private async migrationNextTrade() {
+        const nextCodes = [...nxtKospiCodes, ...nxtKosdaqCodes];
+
+        const chunks = _.chunk(nextCodes, 20);
+        for (const chunk of chunks) {
+            await Promise.all(
+                chunk.map((stock) => {
+                    return this.updateNextTradeYN(stock.shortCode, YN.Y);
                 }),
             );
         }
@@ -160,6 +180,23 @@ export class Migrator implements IMigrator {
             .orUpdate(['name'], ['short_code'])
             .updateEntity(false)
             .execute();
+    }
+
+    /**
+     * 종목의 Next거래소 거래 여부를 저장합니다.
+     * @private
+     * @param stockCode
+     * @param isNextTrade
+     */
+    private async updateNextTradeYN(stockCode: string, isNextTrade: YN) {
+        return this.stockRepository.update(
+            {
+                shortCode: stockCode,
+            },
+            {
+                isNextTrade,
+            },
+        );
     }
 }
 

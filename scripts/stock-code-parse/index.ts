@@ -8,14 +8,19 @@ interface StockCode {
     name: string;
 }
 
-async function main() {
+function main() {
     const parser = new Parser();
 
-    const mstFileNames = ['kosdaq_code', 'kospi_code'];
+    const mstFileNames = [
+        'kospi_code',
+        'kosdaq_code',
+        'nxt_kospi_code',
+        'nxt_kosdaq_code',
+    ];
 
     for (const fileName of mstFileNames) {
         const filePath = path.join(__dirname, '../temp', `${fileName}.mst`);
-        const codes = await parser.parse(filePath);
+        const codes = parser.parse(filePath);
 
         const codeJson = codes.map(([shortCode, code, name]): StockCode => {
             return {
@@ -38,4 +43,4 @@ async function main() {
     }
 }
 
-main().catch(console.error);
+main();

@@ -39,6 +39,7 @@ export class ThemeService {
                         })
                         .getQuery()}`,
             )
+            .orderBy('code', 'DESC')
             .getMany();
     }
 

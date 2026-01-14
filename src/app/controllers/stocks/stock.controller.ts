@@ -1,20 +1,31 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import * as _ from 'lodash';
+import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
     ApiNoContentResponse,
     ApiOkResponse,
     ApiOperation,
     ApiParam,
+    ApiQuery,
 } from '@nestjs/swagger';
 import { assertStockCode } from '@common/domains';
+import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
 import { MarketType } from '@app/common/types';
+import { StockPriceTransformer } from '@app/common/transformers';
 import { StockService } from '@app/modules/repositories/stock';
-import { GetStockResponse, GetStocksResponse } from './dto';
+import {
+    GetStockPricesResponse,
+    GetStockResponse,
+    GetStocksResponse,
+} from './dto';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
 
 @Controller('v1/stocks')
 export class StockController {
     constructor(
         private readonly koreaInvestmentCollectorSocket: KoreaInvestmentCollectorSocket,
+        private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
+        private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
         private readonly stockService: StockService,
     ) {}
 
@@ -57,6 +68,47 @@ export class StockController {
 
         return {
             data: stocks,
+        };
+    }
+
+    @ApiOperation({
+        summary: '종목 조회',
+    })
+    @ApiQuery({
+        name: 'stockCodes',
+        type: String,
+        description: '종목코드 목록. 각 종목 코드는 ,로 구분합니다.',
+    })
+    @ApiOkResponse({
+        type: GetStockPricesResponse,
+    })
+    @Get('prices')
+    public async getStockPrices(
+        @Query('stockCodes') stockCodes: string,
+    ): Promise<GetStockPricesResponse> {
+        const splitStockCodes = stockCodes.split(',');
+        const stockCodeChunks = _.chunk(splitStockCodes, 30);
+
+        const responses = await Promise.all(
+            stockCodeChunks.map((stockCodes) => {
+                const params =
+                    this.koreaInvestmentRequestApiHelper.buildIntstockMultiPriceParam(
+                        stockCodes,
+                    );
+
+                return this.koreaInvestmentQuotationClient.inquireIntstockMultiPrice(
+                    params,
+                );
+            }),
+        );
+
+        const transformer = new StockPriceTransformer();
+        const stockPriceDtoList = responses
+            .flat()
+            .map((output) => transformer.transform(output));
+
+        return {
+            data: stockPriceDtoList,
         };
     }
 

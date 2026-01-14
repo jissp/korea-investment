@@ -6,6 +6,7 @@ import { GeminiCliService } from '@modules/gemini-cli';
 import { NaverApiClientFactory, NaverAppName } from '@modules/naver/naver-api';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
+import { StockService } from '@app/modules/repositories/stock';
 import {
     KeywordGroupService,
     KeywordService,
@@ -15,6 +16,7 @@ import {
     AnalyzeKeywordGroupPromptTransformer,
     AnalyzeStockPromptTransformer,
 } from './transformers';
+import { YN } from '@app/common';
 
 const DEFAULT_CHUNK_SIZE = 5;
 
@@ -26,6 +28,7 @@ export class StockAnalyzerService {
         private readonly geminiCliService: GeminiCliService,
         private readonly naverApiClientFactory: NaverApiClientFactory,
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
+        private readonly stockService: StockService,
         private readonly keywordService: KeywordService,
         private readonly keywordGroupService: KeywordGroupService,
     ) {}
@@ -36,13 +39,23 @@ export class StockAnalyzerService {
      */
     public async requestAnalyzeStock(stockCode: string) {
         try {
-            const keywords = await this.getKeywords(stockCode);
-            const naverNewsItems = await this.getNaverNewsItems(keywords);
+            const stock = await this.stockService.getStock(stockCode);
+            if (!stock) {
+                return;
+            }
+
+            const marketDivCode =
+                stock.isNextTrade === YN.Y
+                    ? MarketDivCode.통합
+                    : MarketDivCode.KRX;
             const stockInvestors =
                 await this.koreaInvestmentQuotationClient.inquireInvestor({
                     FID_INPUT_ISCD: stockCode,
-                    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX,
+                    FID_COND_MRKT_DIV_CODE: marketDivCode,
                 });
+
+            const keywords = await this.getKeywords(stockCode);
+            const naverNewsItems = await this.getNaverNewsItems(keywords);
 
             const transformer = new AnalyzeStockPromptTransformer();
 

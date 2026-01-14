@@ -302,7 +302,7 @@ export class KoreaInvestmentQuotationClient {
      */
     public async inquireIntstockMultiPrice(
         params: DomesticStockQuotationsIntstockMultPriceParam,
-    ) {
+    ): Promise<DomesticStockQuotationsIntstockMultPriceOutput[]> {
         const response = await this.makeQuotationRequest<
             BaseResponse<DomesticStockQuotationsIntstockMultPriceOutput[]>
         >({

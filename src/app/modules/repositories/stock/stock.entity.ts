@@ -6,7 +6,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ExchangeType, MarketType } from '@app/common/types';
+import { ExchangeType, MarketType, YN } from '@app/common/types';
 
 @Entity('stocks')
 export class Stock {
@@ -63,6 +63,15 @@ export class Stock {
         description: '거래소 구분',
     })
     exchangeType!: ExchangeType;
+
+    /**
+     * nxt 시장 거래 여부
+     */
+    @Column({ type: 'enum', enum: YN })
+    @ApiProperty({
+        description: 'nxt 시장 거래 여부',
+    })
+    isNextTrade!: YN;
 
     @CreateDateColumn({
         type: 'datetime',
