@@ -1,10 +1,10 @@
-import { AppCredentials } from '@modules/korea-investment/common';
+import { AppCredential } from '@modules/korea-investment/common';
 
 export enum KoreaInvestmentOauthClientProvider {
     Client = 'Client',
 }
 
-export interface RequestBodyOauth2TokenP extends AppCredentials {
+export interface RequestBodyOauth2TokenP extends AppCredential {
     grant_type: string;
 }
 
@@ -32,7 +32,7 @@ export interface ResponseOauth2TokenP {
     access_token_token_expired: string;
 }
 
-export interface RequestBodyOauth2RevokeTokenP extends AppCredentials {
+export interface RequestBodyOauth2RevokeTokenP extends AppCredential {
     token: string;
 }
 
@@ -47,7 +47,7 @@ export interface ResponseOauth2RevokeTokenP {
     message?: string;
 }
 
-export type Oauth2WebSocketTokenRequestBody = Pick<AppCredentials, 'appkey'> & {
+export type Oauth2WebSocketTokenRequestBody = Pick<AppCredential, 'appkey'> & {
     /**
      * 권한부여타입
      */

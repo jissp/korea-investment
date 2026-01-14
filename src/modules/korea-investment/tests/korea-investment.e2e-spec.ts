@@ -2,13 +2,13 @@ import { Test } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import configuration from '@app/configuration';
-import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-investment-config';
 import {
     KoreaInvestmentQuotationClient,
     KoreaInvestmentQuotationClientModule,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
+    CredentialType,
     KoreaInvestmentHelperModule,
     KoreaInvestmentHelperService,
 } from '@modules/korea-investment/korea-investment-helper';
@@ -36,7 +36,7 @@ describe('KoreaInvestmentOauthClient e2e 테스트', () => {
                     },
                 }),
                 KoreaInvestmentConfigModule,
-                KoreaInvestmentHelperModule,
+                KoreaInvestmentHelperModule.forFeature(CredentialType.Main),
                 KoreaInvestmentQuotationClientModule,
                 KoreaInvestmentRankClientModule,
             ],

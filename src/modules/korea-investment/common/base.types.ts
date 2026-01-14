@@ -16,7 +16,7 @@ export enum CustomerType {
     Personal = 'P',
 }
 
-export interface AppCredentials {
+export interface AppCredential {
     /**
      * 앱키
      * 한국투자증권 홈페이지에서 발급받은 appkey (절대 노출되지 않도록 주의해주세요.)
@@ -30,7 +30,7 @@ export interface AppCredentials {
     appsecret: string;
 }
 
-export interface KoreaInvestmentBaseHeader extends AppCredentials {
+export interface KoreaInvestmentBaseHeader extends AppCredential {
     [key: string]: string | undefined;
 
     /**

@@ -7,7 +7,7 @@ import { MarketDivCode } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { StockRankCrawlerFlowType } from './stock-rank-crawler.types';
 
 @Injectable()
@@ -44,7 +44,7 @@ export class StockRankCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -78,7 +78,7 @@ export class StockRankCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

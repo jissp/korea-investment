@@ -15,6 +15,11 @@ export interface IConfiguration {
             key: string;
             secret: string;
         };
+        additionalApi: {
+            host: string;
+            key: string;
+            secret: string;
+        };
         webSocket: {
             host: string;
         };
@@ -74,6 +79,11 @@ export default (): IConfiguration => ({
             host: getEnv('KOREA_INVESTMENT_HOST'),
             key: getEnv('KOREA_INVESTMENT_APP_KEY'),
             secret: getEnv('KOREA_INVESTMENT_APP_SECRET'),
+        },
+        additionalApi: {
+            host: getEnv('KOREA_INVESTMENT_HOST'),
+            key: getEnv('KOREA_INVESTMENT_ADDITIONAL_APP_KEY'),
+            secret: getEnv('KOREA_INVESTMENT_ADDITIONAL_APP_SECRET'),
         },
         webSocket: {
             host: getEnv('KOREA_INVESTMENT_WEBSOCKET_HOST'),

@@ -12,7 +12,7 @@ import {
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
 import {
     KoreaInvestmentDomesticInquireIndexDailyPriceParam,
@@ -58,6 +58,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                 queueName,
                 children: DOMESTIC_INDEX_CODES.map(({ code }) => {
                     return this.requestApiHelper.generateRequestApi<KoreaInvestmentDomesticInquireIndexDailyPriceParam>(
+                        KoreaInvestmentRequestApiType.Additional,
                         {
                             url: '/uapi/domestic-stock/v1/quotations/inquire-index-daily-price',
                             tradeId: 'FHPUP02120000',
@@ -78,7 +79,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                     [queueName]: {
                         defaultJobOptions: getDefaultJobOptions(),
                     },
-                    [KoreaInvestmentRequestApiType]: {
+                    [KoreaInvestmentRequestApiType.Additional]: {
                         defaultJobOptions: getDefaultJobOptions(),
                     },
                 },
@@ -102,6 +103,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                     queueName: queueName,
                     children: OVERSEAS_INDEX_CODES.map(({ code }) => {
                         return this.requestApiHelper.generateRequestApi<OverseasQuotationInquireDailyChartPriceParam>(
+                            KoreaInvestmentRequestApiType.Additional,
                             {
                                 url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
                                 tradeId: 'FHKST03030100',
@@ -125,7 +127,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -152,6 +154,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                     queueName: queueName,
                     children: OVERSEAS_GOVERNMENT_BOND_CODES.map(({ code }) => {
                         return this.requestApiHelper.generateRequestApi<OverseasQuotationInquireDailyChartPriceParam>(
+                            KoreaInvestmentRequestApiType.Additional,
                             {
                                 url: '/uapi/overseas-price/v1/quotations/inquire-daily-chartprice',
                                 tradeId: 'FHKST03030100',
@@ -175,7 +178,7 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

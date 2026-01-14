@@ -12,6 +12,16 @@ export class StockService {
     ) {}
 
     /**
+     * 종목이 존재하는지 확인합니다.
+     * @param stockCode
+     */
+    public async existsStock(stockCode: string) {
+        return this.stockRepository.existsBy({
+            shortCode: stockCode,
+        });
+    }
+
+    /**
      * 종목 목록을 조회합니다.
      * @param stockCode
      */

@@ -11,7 +11,7 @@ import { ExchangeType } from '@app/common/types';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { MostViewedStockService } from '@app/modules/repositories/most-viewed-stock';
 import { TradingVolumeRankService } from '@app/modules/repositories/trading-volume-rank';
 import {
@@ -83,7 +83,7 @@ export class StockRankCrawlerProcessor {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

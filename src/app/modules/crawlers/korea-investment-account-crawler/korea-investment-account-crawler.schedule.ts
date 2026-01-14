@@ -11,7 +11,7 @@ import { MarketType } from '@app/common';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { AccountService } from '@app/modules/repositories/account';
 import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
 import { StockService } from '@app/modules/repositories/stock';
@@ -79,7 +79,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Main]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -127,7 +127,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Main]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -164,7 +164,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Main]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -201,7 +201,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Main]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },
@@ -253,7 +253,7 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                                 [queueName]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
-                                [KoreaInvestmentRequestApiType]: {
+                                [KoreaInvestmentRequestApiType.Additional]: {
                                     defaultJobOptions: getDefaultJobOptions(),
                                 },
                             },

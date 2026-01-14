@@ -1,5 +1,5 @@
 import { Pipe } from '@common/types';
-import { KoreaInvestmentInterestGroupListOutput } from '@app/modules/korea-investment-request-api';
+import { KoreaInvestmentInterestGroupListOutput } from '@app/modules/korea-investment-request-api/common';
 import { AccountStockGroupDto } from '@app/modules/repositories/account-stock-group';
 
 export class AccountStockGroupTransformer implements Pipe<

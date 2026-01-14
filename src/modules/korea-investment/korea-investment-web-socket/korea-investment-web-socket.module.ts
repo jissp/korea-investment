@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-investment-config';
-import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
+import {
+    CredentialType,
+    KoreaInvestmentHelperModule,
+} from '@modules/korea-investment/korea-investment-helper';
 import {
     koreaInvestmentWebSocketPipeMap,
     koreaInvestmentWebSocketPipeMapProvider,
@@ -10,7 +13,10 @@ import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-so
 import { KoreaInvestmentWebSocketPipe } from './korea-investment-web-socket.pipe';
 
 @Module({
-    imports: [KoreaInvestmentConfigModule, KoreaInvestmentHelperModule],
+    imports: [
+        KoreaInvestmentConfigModule,
+        KoreaInvestmentHelperModule.forFeature(CredentialType.Main),
+    ],
     providers: [
         {
             provide: koreaInvestmentWebSocketPipeMapProvider,

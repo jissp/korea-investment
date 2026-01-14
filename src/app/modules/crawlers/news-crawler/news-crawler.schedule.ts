@@ -8,7 +8,7 @@ import { getDefaultJobOptions } from '@modules/queue';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
 import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import {
@@ -76,10 +76,11 @@ export class NewsCrawlerSchedule implements OnModuleInit {
                                         defaultJobOptions:
                                             getDefaultJobOptions(),
                                     },
-                                    [KoreaInvestmentRequestApiType]: {
-                                        defaultJobOptions:
-                                            getDefaultJobOptions(),
-                                    },
+                                    [KoreaInvestmentRequestApiType.Additional]:
+                                        {
+                                            defaultJobOptions:
+                                                getDefaultJobOptions(),
+                                        },
                                 },
                             },
                         ),

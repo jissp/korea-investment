@@ -32,18 +32,20 @@ export class KoreaInvestmentRequestApiHelper {
     /**
      * 한국투자증권 API 호출용 Job Payload 생성
      *
+     * @param type
      * @param url
      * @param tradeId
      * @param params
      * @param opts
      */
     public generateRequestApi<Params>(
+        type: KoreaInvestmentRequestApiType,
         { url, tradeId, params }: KoreaInvestmentCallApiParam<Params>,
         opts?: FlowChildJob['opts'],
     ): FlowChildJob {
         return {
-            name: KoreaInvestmentRequestApiType,
-            queueName: KoreaInvestmentRequestApiType,
+            name: type,
+            queueName: type,
             data: {
                 url,
                 tradeId,
@@ -69,11 +71,14 @@ export class KoreaInvestmentRequestApiHelper {
         params: DomesticSearchStockInfoParam,
     ) {
         // ETN의 경우, Q로 시작 (EX. Q500001)
-        return this.generateRequestApi<any>({
-            url: '/uapi/domestic-stock/v1/quotations/search-stock-info',
-            tradeId: 'CTPF1002R',
-            params,
-        });
+        return this.generateRequestApi<any>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/search-stock-info',
+                tradeId: 'CTPF1002R',
+                params,
+            },
+        );
     }
 
     /**
@@ -86,6 +91,7 @@ export class KoreaInvestmentRequestApiHelper {
         params: KoreaInvestmentAccountParam,
     ) {
         return this.generateRequestApi<KoreaInvestmentAccountParam>(
+            KoreaInvestmentRequestApiType.Main,
             {
                 url: '/uapi/domestic-stock/v1/trading/inquire-account-balance',
                 tradeId: 'CTRP6548R',
@@ -106,6 +112,7 @@ export class KoreaInvestmentRequestApiHelper {
         params: KoreaInvestmentAccountStockParam,
     ) {
         return this.generateRequestApi<KoreaInvestmentAccountStockParam>(
+            KoreaInvestmentRequestApiType.Main,
             {
                 url: '/uapi/domestic-stock/v1/trading/inquire-balance',
                 tradeId: 'TTTC8434R',
@@ -127,6 +134,7 @@ export class KoreaInvestmentRequestApiHelper {
         params: DomesticStockQuotationsNewsTitleParam,
     ) {
         return this.generateRequestApi<DomesticStockQuotationsNewsTitleParam>(
+            KoreaInvestmentRequestApiType.Additional,
             {
                 url: '/uapi/domestic-stock/v1/quotations/news-title',
                 tradeId: 'FHKST01011800',
@@ -146,11 +154,14 @@ export class KoreaInvestmentRequestApiHelper {
     public generateDomesticInvestorProgramTradeToday(
         params: DomesticProgramTradeTodayParam,
     ) {
-        return this.generateRequestApi<DomesticProgramTradeTodayParam>({
-            url: '/uapi/domestic-stock/v1/quotations/investor-program-trade-today',
-            tradeId: 'HHPPG046600C1',
-            params,
-        });
+        return this.generateRequestApi<DomesticProgramTradeTodayParam>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/investor-program-trade-today',
+                tradeId: 'HHPPG046600C1',
+                params,
+            },
+        );
     }
 
     /**
@@ -161,11 +172,14 @@ export class KoreaInvestmentRequestApiHelper {
     public generateDomesticInvestorTradeByStockDaily(
         params: DomesticInvestorTradeByStockDailyParam,
     ) {
-        return this.generateRequestApi<DomesticInvestorTradeByStockDailyParam>({
-            url: '/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily',
-            tradeId: 'FHPTJ04160001',
-            params,
-        });
+        return this.generateRequestApi<DomesticInvestorTradeByStockDailyParam>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily',
+                tradeId: 'FHPTJ04160001',
+                params,
+            },
+        );
     }
 
     /**
@@ -176,11 +190,14 @@ export class KoreaInvestmentRequestApiHelper {
     public generateDomesticInvestorTrendEstimate(
         params: DomesticInvestorTrendEstimateParam,
     ) {
-        return this.generateRequestApi<DomesticInvestorTrendEstimateParam>({
-            url: '/uapi/domestic-stock/v1/quotations/investor-trend-estimate',
-            tradeId: 'HHPTJ04160200',
-            params,
-        });
+        return this.generateRequestApi<DomesticInvestorTrendEstimateParam>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/investor-trend-estimate',
+                tradeId: 'HHPTJ04160200',
+                params,
+            },
+        );
     }
 
     /**
@@ -191,11 +208,14 @@ export class KoreaInvestmentRequestApiHelper {
     public generateInterestGroupList(
         params: KoreaInvestmentInterestGroupListParam,
     ) {
-        return this.generateRequestApi<KoreaInvestmentInterestGroupListParam>({
-            url: '/uapi/domestic-stock/v1/quotations/intstock-grouplist',
-            tradeId: 'HHKCM113004C7',
-            params,
-        });
+        return this.generateRequestApi<KoreaInvestmentInterestGroupListParam>(
+            KoreaInvestmentRequestApiType.Main,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/intstock-grouplist',
+                tradeId: 'HHKCM113004C7',
+                params,
+            },
+        );
     }
 
     /**
@@ -207,6 +227,7 @@ export class KoreaInvestmentRequestApiHelper {
         params: KoreaInvestmentInterestStockListByGroupParam,
     ) {
         return this.generateRequestApi<KoreaInvestmentInterestStockListByGroupParam>(
+            KoreaInvestmentRequestApiType.Main,
             {
                 url: '/uapi/domestic-stock/v1/quotations/intstock-stocklist-by-group',
                 tradeId: 'HHKCM113004C6',
@@ -223,34 +244,40 @@ export class KoreaInvestmentRequestApiHelper {
     }: {
         marketDivCode: MarketDivCode;
     }) {
-        return this.generateRequestApi<DomesticStockQuotationVolumeRankParam>({
-            url: '/uapi/domestic-stock/v1/quotations/volume-rank',
-            tradeId: 'FHPST01710000',
-            params: {
-                FID_COND_MRKT_DIV_CODE: marketDivCode,
-                FID_COND_SCR_DIV_CODE: '20171',
-                FID_INPUT_ISCD: '0000',
-                FID_DIV_CLS_CODE: '1',
-                FID_BLNG_CLS_CODE: '0',
-                FID_TRGT_CLS_CODE: '000000000',
-                FID_TRGT_EXLS_CLS_CODE: '000000000',
-                FID_INPUT_PRICE_1: '',
-                FID_INPUT_PRICE_2: '',
-                FID_VOL_CNT: '',
-                FID_INPUT_DATE_1: '',
+        return this.generateRequestApi<DomesticStockQuotationVolumeRankParam>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/volume-rank',
+                tradeId: 'FHPST01710000',
+                params: {
+                    FID_COND_MRKT_DIV_CODE: marketDivCode,
+                    FID_COND_SCR_DIV_CODE: '20171',
+                    FID_INPUT_ISCD: '0000',
+                    FID_DIV_CLS_CODE: '1',
+                    FID_BLNG_CLS_CODE: '0',
+                    FID_TRGT_CLS_CODE: '000000000',
+                    FID_TRGT_EXLS_CLS_CODE: '000000000',
+                    FID_INPUT_PRICE_1: '',
+                    FID_INPUT_PRICE_2: '',
+                    FID_VOL_CNT: '',
+                    FID_INPUT_DATE_1: '',
+                },
             },
-        });
+        );
     }
 
     /**
      * HTS조회상위20종목
      */
     public generateRequestApiForRankingHtsTopView() {
-        return this.generateRequestApi<undefined>({
-            url: '/uapi/domestic-stock/v1/ranking/hts-top-view',
-            tradeId: 'HHMCM000100C0',
-            params: undefined,
-        });
+        return this.generateRequestApi<undefined>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/ranking/hts-top-view',
+                tradeId: 'HHMCM000100C0',
+                params: undefined,
+            },
+        );
     }
 
     /**
@@ -265,6 +292,7 @@ export class KoreaInvestmentRequestApiHelper {
         }
 
         return this.generateRequestApi<DomesticStockQuotationsIntstockMultPriceParam>(
+            KoreaInvestmentRequestApiType.Additional,
             {
                 url: '/uapi/domestic-stock/v1/quotations/intstock-multprice',
                 tradeId: 'FHKST11300006',

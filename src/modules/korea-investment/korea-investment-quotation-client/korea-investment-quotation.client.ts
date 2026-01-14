@@ -10,6 +10,8 @@ import {
     DomesticStockInquireIndexCategoryPriceOutput1,
     DomesticStockInquireIndexCategoryPriceOutput2,
     DomesticStockInquireIndexCategoryPriceParam,
+    DomesticStockInvestorTrendEstimateOutput2,
+    DomesticStockInvestorTrendEstimateParam,
     DomesticStockQuotationInquireCcnlOutput,
     DomesticStockQuotationInquireIndexPriceOutput,
     DomesticStockQuotationInquirePrice2Output,
@@ -230,6 +232,28 @@ export class KoreaInvestmentQuotationClient {
         });
 
         return response.output;
+    }
+
+    /**
+     * 종목별 외국계 순매수추이
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/investor-trend-estimate
+     */
+    public async inquireInvestorByEstimate(
+        params: DomesticStockInvestorTrendEstimateParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                unknown,
+                DomesticStockInvestorTrendEstimateOutput2[]
+            >
+        >({
+            tradeId: 'HHPTJ04160200',
+            url: '/uapi/domestic-stock/v1/quotations/investor-trend-estimate',
+            params,
+        });
+
+        return response.output2;
     }
 
     /**

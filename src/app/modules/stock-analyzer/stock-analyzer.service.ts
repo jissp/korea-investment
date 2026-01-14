@@ -6,6 +6,7 @@ import { GeminiCliService } from '@modules/gemini-cli';
 import { NaverApiClientFactory, NaverAppName } from '@modules/naver/naver-api';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
+import { YN } from '@app/common';
 import { StockService } from '@app/modules/repositories/stock';
 import {
     KeywordGroupService,
@@ -16,7 +17,6 @@ import {
     AnalyzeKeywordGroupPromptTransformer,
     AnalyzeStockPromptTransformer,
 } from './transformers';
-import { YN } from '@app/common';
 
 const DEFAULT_CHUNK_SIZE = 5;
 

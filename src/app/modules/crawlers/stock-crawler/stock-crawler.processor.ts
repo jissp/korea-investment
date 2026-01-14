@@ -7,7 +7,7 @@ import {
     DomesticStockQuotationsInquireInvestorOutput,
     DomesticStockQuotationsInquireInvestorParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { StockDailyInvestorService } from '@app/modules/repositories/stock-daily-investor';
 import { StockCrawlerFlowType } from './stock-crawler.types';
 import { DomesticStockInvestorTransformer } from './transformers';

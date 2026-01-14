@@ -6,7 +6,7 @@ import { MarketIndexService } from '@app/modules/repositories/market-index';
 import {
     KoreaInvestmentCallApiMultiResult,
     KoreaInvestmentRequestApiHelper,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
 import {
     KoreaInvestmentDomesticInquireIndexDailyPriceOutput,

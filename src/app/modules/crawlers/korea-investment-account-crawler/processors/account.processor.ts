@@ -15,7 +15,7 @@ import {
     KoreaInvestmentInterestStockListByGroupOutput2,
     KoreaInvestmentInterestStockListByGroupParam,
     KoreaInvestmentRequestApiHelper,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import {
     AccountService,
     AccountStockService,

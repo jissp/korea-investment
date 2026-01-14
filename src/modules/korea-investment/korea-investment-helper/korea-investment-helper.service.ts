@@ -1,13 +1,13 @@
 import { Axios, AxiosRequestConfig } from 'axios';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getRedisKey, RedisService } from '@modules/redis';
-import {
-    CustomerType,
-    KoreaInvestmentBaseHeader,
-} from '@modules/korea-investment/common';
+import { KoreaInvestmentBaseHeader } from '@modules/korea-investment/common';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
-import { KoreaInvestmentHelperProvider } from './korea-investment-helper.types';
+import {
+    KoreaInvestmentHelperConfig,
+    KoreaInvestmentHelperProvider,
+} from './korea-investment-helper.types';
 
 @Injectable()
 export class KoreaInvestmentHelperService {
@@ -17,11 +17,13 @@ export class KoreaInvestmentHelperService {
     private readonly logger = new Logger(KoreaInvestmentHelperService.name);
 
     constructor(
-        @Inject(KoreaInvestmentHelperProvider.Client)
-        private readonly client: Axios,
         private readonly redisService: RedisService,
         private readonly configService: KoreaInvestmentConfigService,
         private readonly oAuthClient: KoreaInvestmentOauthClient,
+        @Inject(KoreaInvestmentHelperProvider.Config)
+        private readonly config: KoreaInvestmentHelperConfig,
+        @Inject(KoreaInvestmentHelperProvider.Client)
+        private readonly client: Axios,
     ) {}
 
     /**
@@ -64,16 +66,11 @@ export class KoreaInvestmentHelperService {
      */
     public async buildHeaders(
         tradeId: string,
-    ): Promise<KoreaInvestmentBaseHeader> {
-        const credential = this.getCredential();
+    ): Promise<Pick<KoreaInvestmentBaseHeader, 'authorization' | 'tr_id'>> {
         const token = await this.getToken();
 
         return {
-            'content-type': 'application/json; charset=utf-8',
-            appkey: credential.appkey,
-            appsecret: credential.appsecret,
             authorization: `Bearer ${token}`,
-            custtype: CustomerType.Personal,
             tr_id: tradeId,
         };
     }
@@ -82,7 +79,12 @@ export class KoreaInvestmentHelperService {
      * 한국투자증권 API 액세스 토큰을 발급합니다.
      */
     public async getToken() {
-        const redisKey = getRedisKey('korea-investment', 'token');
+        const credentialType = this.getCredentialType();
+        const redisKey = getRedisKey(
+            'korea-investment',
+            'token',
+            credentialType,
+        );
 
         const token = await this.redisService.get(redisKey);
         if (token) {
@@ -90,9 +92,7 @@ export class KoreaInvestmentHelperService {
         }
 
         const { access_token, access_token_token_expired } =
-            await this.oAuthClient.getToken(
-                this.configService.getCredentials(),
-            );
+            await this.oAuthClient.getToken(this.configService.getCredential());
 
         const expireSeconds = this.calculateTokenExpireSeconds(
             access_token_token_expired,
@@ -117,7 +117,7 @@ export class KoreaInvestmentHelperService {
         }
 
         const { approval_key } = await this.oAuthClient.getWebSocketToken(
-            this.configService.getCredentials(),
+            this.configService.getCredential(),
         );
 
         await this.redisService.set(redisKey, approval_key, {
@@ -139,9 +139,16 @@ export class KoreaInvestmentHelperService {
     }
 
     /**
+     * 인증정보 타입을 반환합니다.
+     */
+    public getCredentialType() {
+        return this.config.credentialType;
+    }
+
+    /**
      * 한국투자증권 API 인증 정보 설정을 응답합니다.
      */
     public getCredential() {
-        return this.configService.getCredentials();
+        return this.config.credential;
     }
 }

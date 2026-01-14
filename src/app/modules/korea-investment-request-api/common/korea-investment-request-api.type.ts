@@ -3,7 +3,10 @@ import {
     BaseResponse,
 } from '@modules/korea-investment/common';
 
-export const KoreaInvestmentRequestApiType = 'KoreaInvestmentRequestApi';
+export enum KoreaInvestmentRequestApiType {
+    Main = 'KoreaInvestmentRequestApiTypeMain',
+    Additional = 'KoreaInvestmentRequestApiTypeAdditional',
+}
 
 export interface KoreaInvestmentCallApiParam<T = any> {
     url: string;

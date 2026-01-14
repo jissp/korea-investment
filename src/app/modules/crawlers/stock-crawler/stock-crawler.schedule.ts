@@ -10,7 +10,7 @@ import { DomesticStockQuotationsInquireInvestorParam } from '@modules/korea-inve
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api';
+} from '@app/modules/korea-investment-request-api/common';
 import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import { StockCrawlerFlowType } from './stock-crawler.types';
 
@@ -51,6 +51,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
                     queueName: queueName,
                     children: stockCodes.map((stockCode) => {
                         return this.requestApiHelper.generateRequestApi<DomesticStockQuotationsInquireInvestorParam>(
+                            KoreaInvestmentRequestApiType.Additional,
                             {
                                 url: '/uapi/domestic-stock/v1/quotations/inquire-investor',
                                 tradeId: 'FHKST01010900',
@@ -67,7 +68,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [KoreaInvestmentRequestApiType]: {
+                        [KoreaInvestmentRequestApiType.Additional]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

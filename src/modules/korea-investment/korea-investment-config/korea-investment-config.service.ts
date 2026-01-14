@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AppCredentials } from '@modules/korea-investment/common';
+import { AppCredential } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentConfig,
     KoreaInvestmentConfigProvider,
@@ -22,10 +22,20 @@ export class KoreaInvestmentConfigService {
     /**
      * 한국투자증권 앱 인증 정보를 가져옵니다.
      */
-    public getCredentials(): AppCredentials {
+    public getCredential(): AppCredential {
         return {
             appkey: this.config.api.key,
             appsecret: this.config.api.secret,
+        };
+    }
+
+    /**
+     * 한국투자증권 앱 인증 정보를 가져옵니다.
+     */
+    public getAdditionalCredential(): AppCredential {
+        return {
+            appkey: this.config.additionalApi.key,
+            appsecret: this.config.additionalApi.secret,
         };
     }
 

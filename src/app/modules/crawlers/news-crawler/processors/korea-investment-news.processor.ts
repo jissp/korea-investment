@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import { NewsService } from '@app/modules/repositories/news';
 import { KoreaInvestmentNewsToNewsTransformer } from '../transformers/korea-investment-news-to-news.transformer';

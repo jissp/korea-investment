@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
 import { KoreaInvestmentAccountCrawlerType } from '../korea-investment-account-crawler.types';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';

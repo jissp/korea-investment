@@ -1,6 +1,6 @@
 import { Axios } from 'axios';
 import { Inject, Injectable } from '@nestjs/common';
-import { AppCredentials } from '@modules/korea-investment/common';
+import { AppCredential } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentOauthClientProvider,
     Oauth2WebSocketTokenRequestBody,
@@ -22,7 +22,7 @@ export class KoreaInvestmentOauthClient {
      * @param credential
      */
     public async getToken<R = ResponseOauth2TokenP>(
-        credential: AppCredentials,
+        credential: AppCredential,
     ): Promise<R> {
         const response = await this.client.request<R>({
             method: 'POST',
@@ -45,7 +45,7 @@ export class KoreaInvestmentOauthClient {
         credential,
         token,
     }: {
-        credential: AppCredentials;
+        credential: AppCredential;
         token: string;
     }): Promise<R> {
         const response = await this.client.request<R>({
@@ -65,7 +65,7 @@ export class KoreaInvestmentOauthClient {
      * @param credential
      */
     public async getWebSocketToken(
-        credential: AppCredentials,
+        credential: AppCredential,
     ): Promise<Oauth2WebsocketTokenResponse> {
         const response =
             await this.client.request<Oauth2WebsocketTokenResponse>({

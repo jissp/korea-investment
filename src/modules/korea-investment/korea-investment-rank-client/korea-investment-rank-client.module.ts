@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
-import { KoreaInvestmentHelperModule } from '@modules/korea-investment/korea-investment-helper';
+import {
+    CredentialType,
+    KoreaInvestmentHelperModule,
+} from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentRankClient } from './korea-investment-rank.client';
 
 @Module({
-    imports: [KoreaInvestmentHelperModule],
+    imports: [KoreaInvestmentHelperModule.forFeature(CredentialType.Main)],
     providers: [KoreaInvestmentRankClient],
     exports: [KoreaInvestmentRankClient],
 })

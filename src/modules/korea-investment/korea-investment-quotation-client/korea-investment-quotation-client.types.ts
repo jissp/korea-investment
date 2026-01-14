@@ -2124,6 +2124,110 @@ export interface DomesticStockQuotationsInquireInvestorOutput {
     orgn_seln_tr_pbmn: string;
 }
 
+export interface DomesticStockInvestorTrendEstimateParam {
+    /**
+     * 종목코드
+     * 6자리 종목번호 (예: 000660)
+     */
+    MKSC_SHRN_ISCD: string;
+}
+
+export class DomesticStockInvestorTrendEstimateOutput2 {
+    /**
+     * 입력구분
+     * 1: 09시 30분, 2: 10시 00분, 3: 11시 20분, 4: 13시 20분, 5: 14시 30분
+     */
+    bsop_hour_gb: string;
+
+    /**
+     * 외국인수량(가집계)
+     */
+    frgn_fake_ntby_qty: string;
+
+    /**
+     * 기관수량(가집계)
+     */
+    orgn_fake_ntby_qty: string;
+
+    /**
+     * 합산수량(가집계)
+     */
+    sum_fake_ntby_qty: string;
+}
+
+export interface DomesticStockInvestorTrendForeignParam {
+    /**
+     * 입력 종목코드
+     * 종목번호 (6자리, 예: 005930)
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 조건 화면 분류 코드
+     * 외국계 전체(99999) 입력
+     */
+    FID_INPUT_ISCD_2: string;
+
+    /**
+     * 조건 시장 분류 코드
+     * J (KRX만 지원)
+     */
+    FID_COND_MRKT_DIV_CODE: MarketDivCode.KRX;
+}
+
+export class DomesticStockInvestorTrendForeignOutput {
+    /**
+     * 영업시간
+     */
+    bsop_hour: string;
+
+    /**
+     * 주식 현재가
+     */
+    stck_prpr: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     * 1: 상한, 2: 상승, 3: 보합, 4: 하한, 5: 하락
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 외국인 매도 거래량
+     */
+    frgn_seln_vol: string;
+
+    /**
+     * 외국인 매수2 거래량
+     */
+    frgn_shnu_vol: string;
+
+    /**
+     * 외국계 순매수 수량
+     */
+    glob_ntby_qty: string;
+
+    /**
+     * 외국인 순매수 수량 증감
+     */
+    frgn_ntby_qty_icdc: string;
+}
+
 /**
  * 국내업종 구분별전체시세 API Param
  */

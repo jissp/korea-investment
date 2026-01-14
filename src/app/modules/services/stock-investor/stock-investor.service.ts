@@ -1,13 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { toDateYmdByDate } from '@common/utils';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { YN } from '@app/common';
+import { StockInvestorByForeignTransformer, YN } from '@app/common';
 import {
     StockDailyInvestor,
     StockDailyInvestorService,
 } from '@app/modules/repositories/stock-daily-investor';
 import { StockService } from '@app/modules/repositories/stock';
 import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
+import { StockInvestorByEstimateDto } from '@app/controllers/stocks/dto/responses/get-stock-investor-by-estimate.response';
 
 @Injectable()
 export class StockInvestorService {
@@ -35,7 +37,11 @@ export class StockInvestorService {
                     limit,
                 });
 
-            const hasToday = stockInvestors[0]?.date === this.getTodayDate();
+            const hasToday =
+                stockInvestors[0]?.date ===
+                toDateYmdByDate({
+                    separator: '-',
+                });
             const isExistsZeroCount = stockInvestors.some((stockInvestor) => {
                 const sumInvestorCount = stockInvestors
                     ? stockInvestor.person +
@@ -56,6 +62,41 @@ export class StockInvestorService {
                 stockCode,
                 limit,
             });
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * 종목의 투자자 동향 정보를 조회합니다.
+     * @param stockCode
+     */
+    public async getDailyInvestorByEstimate(
+        stockCode: string,
+    ): Promise<StockInvestorByEstimateDto[]> {
+        try {
+            const stock = await this.stockService.getStock(stockCode);
+            if (!stock) {
+                throw new NotFoundException(
+                    `Stock with code ${stockCode} not found`,
+                );
+            }
+
+            const transformer = new StockInvestorByForeignTransformer();
+            const outputs =
+                await this.koreaInvestmentQuotationClient.inquireInvestorByEstimate(
+                    {
+                        MKSC_SHRN_ISCD: stock.shortCode,
+                    },
+                );
+
+            return outputs.map((output) =>
+                transformer.transform({
+                    stock,
+                    output,
+                }),
+            );
         } catch (error) {
             this.logger.error(error);
             throw error;
@@ -90,16 +131,5 @@ export class StockInvestorService {
         );
 
         await this.stockDailyInvestorService.upsert(transformedStockInvestors);
-    }
-
-    /**
-     * 현재 날짜를 년-월-일 형식으로 반환한다.
-     */
-    private getTodayDate(date: Date = new Date()): string {
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(date.getUTCDate()).padStart(2, '0');
-
-        return `${year}-${month}-${day}`;
     }
 }

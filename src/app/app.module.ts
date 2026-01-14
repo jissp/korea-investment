@@ -8,9 +8,9 @@ import { LoggerModule } from '@modules/logger';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { QueueModule } from '@modules/queue';
 import { GeminiCliModule } from '@modules/gemini-cli';
-import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
+import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
 import { CrawlerModule } from '@app/modules/crawlers';
@@ -82,13 +82,13 @@ import { KoreaInvestmentBeGateway } from './gateways';
         ScheduleModule.forRoot(),
         GeminiCliModule,
         KoreaInvestmentCollectorModule.forRoot(),
-        KoreaInvestmentRequestApiModule,
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
         CrawlerModule,
         StockAnalyzerModule,
         AppServiceModule,
         RepositoryModule,
+        KoreaInvestmentRequestApiModule,
     ],
     controllers: [
         AccountController,

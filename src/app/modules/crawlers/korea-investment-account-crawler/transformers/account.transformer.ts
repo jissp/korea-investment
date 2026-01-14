@@ -1,5 +1,5 @@
 import { Pipe } from '@common/types';
-import { KoreaInvestmentAccountOutput2 } from '@app/modules/korea-investment-request-api';
+import { KoreaInvestmentAccountOutput2 } from '@app/modules/korea-investment-request-api/common';
 import { AccountInfoDto } from '@app/modules/repositories/account';
 
 export class AccountTransformer implements Pipe<

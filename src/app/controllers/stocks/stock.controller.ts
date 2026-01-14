@@ -11,14 +11,14 @@ import { assertStockCode } from '@common/domains';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
 import { MarketType } from '@app/common/types';
-import { StockPriceTransformer } from '@app/common/transformers';
+import { StockPriceTransformer } from '@app/common/transformers/stock-price.transformer';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { StockService } from '@app/modules/repositories/stock';
 import {
     GetStockPricesResponse,
     GetStockResponse,
     GetStocksResponse,
 } from './dto';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api';
 
 @Controller('v1/stocks')
 export class StockController {
