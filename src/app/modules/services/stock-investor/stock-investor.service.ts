@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { toDateYmdByDate } from '@common/utils';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockInvestorByForeignTransformer, YN } from '@app/common';
+import { StockInvestorByEstimateTransformer, YN } from '@app/common';
 import {
     StockDailyInvestor,
     StockDailyInvestorService,
@@ -83,7 +83,7 @@ export class StockInvestorService {
                 );
             }
 
-            const transformer = new StockInvestorByForeignTransformer();
+            const transformer = new StockInvestorByEstimateTransformer();
             const outputs =
                 await this.koreaInvestmentQuotationClient.inquireInvestorByEstimate(
                     {
