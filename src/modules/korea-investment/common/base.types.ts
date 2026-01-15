@@ -16,6 +16,13 @@ export enum CustomerType {
     Personal = 'P',
 }
 
+export enum PeriodType {
+    일봉 = 'D',
+    주봉 = 'W',
+    월봉 = 'M',
+    년봉 = 'Y',
+}
+
 export interface AppCredential {
     /**
      * 앱키

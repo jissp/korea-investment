@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
     ApiNoContentResponse,
     ApiOkResponse,
@@ -8,17 +8,21 @@ import {
     ApiQuery,
 } from '@nestjs/swagger';
 import { assertStockCode } from '@common/domains';
+import { MarketDivCode, PeriodType } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
+import { ExistingStockGuard } from '@app/common/guards';
 import { MarketType } from '@app/common/types';
 import { StockPriceTransformer } from '@app/common/transformers/stock-price.transformer';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { StockService } from '@app/modules/repositories/stock';
 import {
+    GetStockDailyPricesResponse,
     GetStockPricesResponse,
     GetStockResponse,
     GetStocksResponse,
 } from './dto';
+import { StockDailyPriceTransformer } from '@app/common';
 
 @Controller('v1/stocks')
 export class StockController {
@@ -72,7 +76,51 @@ export class StockController {
     }
 
     @ApiOperation({
-        summary: '종목 조회',
+        summary: '여러 종목 가격 조회',
+    })
+    @ApiParam({
+        name: 'stockCode',
+        type: String,
+        description: '종목코드',
+    })
+    @ApiQuery({
+        name: 'periodType',
+        enum: PeriodType,
+        description: '기간 타입(D:일별, W:주별, M:월별)',
+    })
+    @ApiOkResponse({
+        type: GetStockDailyPricesResponse,
+    })
+    @UseGuards(ExistingStockGuard)
+    @Get(':stockCode/daily-prices')
+    public async getDailyPriceByStock(
+        @Param('stockCode') stockCode: string,
+        @Query('periodType') periodType: PeriodType,
+    ): Promise<GetStockDailyPricesResponse> {
+        const stock = (await this.stockService.getStock(stockCode))!;
+
+        const response =
+            await this.koreaInvestmentQuotationClient.inquireDailyPrice({
+                FID_COND_MRKT_DIV_CODE: stock.isNextTrade
+                    ? MarketDivCode.통합
+                    : MarketDivCode.KRX,
+                FID_INPUT_ISCD: stock.shortCode,
+                FID_ORG_ADJ_PRC: '1',
+                FID_PERIOD_DIV_CODE: periodType,
+            });
+
+        const transformer = new StockDailyPriceTransformer();
+        const stockDailyPriceDtoList = response.output.map((output) =>
+            transformer.transform(output),
+        );
+
+        return {
+            data: stockDailyPriceDtoList,
+        };
+    }
+
+    @ApiOperation({
+        summary: '여러 종목 가격 조회',
     })
     @ApiQuery({
         name: 'stockCodes',

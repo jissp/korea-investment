@@ -7,6 +7,11 @@ import {
 } from '@modules/korea-investment/common';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
+    DomesticStockInquireDailyIndexChartPriceOutput1,
+    DomesticStockInquireDailyIndexChartPriceOutput2,
+    DomesticStockInquireDailyIndexChartPriceParam,
+    DomesticStockInquireDailyPriceOutput,
+    DomesticStockInquireDailyPriceParam,
     DomesticStockInquireIndexCategoryPriceOutput1,
     DomesticStockInquireIndexCategoryPriceOutput2,
     DomesticStockInquireIndexCategoryPriceParam,
@@ -68,6 +73,28 @@ export class KoreaInvestmentQuotationClient {
         });
 
         return response.output;
+    }
+
+    /**
+     * 주식현재가 일자별
+     * @param params
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-daily-price
+     */
+    public async inquireDailyPrice(
+        params: DomesticStockInquireDailyPriceParam,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<DomesticStockInquireDailyPriceOutput[]>
+        >({
+            tradeId: 'FHKST01010400',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-daily-price',
+            params,
+        });
+
+        return {
+            output: response.output,
+        };
     }
 
     /**
@@ -466,6 +493,36 @@ export class KoreaInvestmentQuotationClient {
 
         return {
             output: response.output,
+        };
+    }
+
+    /**
+     * 국내주식업종기간별시세(일/주/월/년)
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice
+     */
+    public async inquireDailyIndexChartPrice(
+        params: Omit<
+            DomesticStockInquireDailyIndexChartPriceParam,
+            'FID_COND_MRKT_DIV_CODE'
+        >,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticStockInquireDailyIndexChartPriceOutput1,
+                DomesticStockInquireDailyIndexChartPriceOutput2[]
+            >
+        >({
+            tradeId: 'FHKUP03500100',
+            url: '/uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice',
+            params: {
+                ...params,
+                FID_COND_MRKT_DIV_CODE: 'U',
+            } as DomesticStockInquireDailyIndexChartPriceParam,
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
         };
     }
 

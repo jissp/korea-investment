@@ -1,4 +1,109 @@
-import { MarketDivCode } from '@modules/korea-investment/common';
+import { MarketDivCode, PeriodType } from '@modules/korea-investment/common';
+
+/**
+ * 주식현재가 일자별 Param
+ */
+export interface DomesticStockInquireDailyPriceParam {
+    /**
+     * 조건 시장 분류 코드
+     * J:KRX, NX:NXT, UN:통합
+     */
+    FID_COND_MRKT_DIV_CODE: MarketDivCode;
+
+    /**
+     * 입력 종목코드
+     * 종목코드 (ex 005930 삼성전자)
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 기간 분류 코드
+     * D : (일)최근 30거래일, W : (주)최근 30주, M : (월)최근 30개월
+     */
+    FID_PERIOD_DIV_CODE: PeriodType;
+
+    /**
+     * 수정주가 원주가 가격
+     * 0 : 수정주가미반영, 1 : 수정주가반영
+     */
+    FID_ORG_ADJ_PRC: '0' | '1';
+}
+
+/**
+ * 주식현재가 일자별 Output
+ */
+export class DomesticStockInquireDailyPriceOutput {
+    /**
+     * 주식 영업 일자
+     */
+    stck_bsop_date: string;
+
+    /**
+     * 주식 시가2
+     */
+    stck_oprc: string;
+
+    /**
+     * 주식 최고가
+     */
+    stck_hgpr: string;
+
+    /**
+     * 주식 최저가
+     */
+    stck_lwpr: string;
+
+    /**
+     * 주식 종가
+     */
+    stck_clpr: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 전일 대비 거래량 비율
+     */
+    prdy_vrss_vol_rate: string;
+
+    /**
+     * 전일 대비
+     */
+    prdy_vrss: string;
+
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 전일 대비율
+     */
+    prdy_ctrt: string;
+
+    /**
+     * HTS 외국인 소진율
+     */
+    hts_frgn_ehrt: string;
+
+    /**
+     * 외국인 순매수 수량
+     */
+    frgn_ntby_qty: string;
+
+    /**
+     * 락 구분 코드
+     * 01 : 권리락, 02 : 배당락, 03 : 분배락 등
+     */
+    flng_cls_code: string;
+
+    /**
+     * 누적 분할 비율
+     */
+    acml_prtt_rate: string;
+}
 
 export interface DomesticStockQuotationInquirePrice2Output {
     /**
@@ -2670,4 +2775,162 @@ export class DomesticStockSearchInfoOutput {
 
     /** 최초등록일자 */
     frst_erlm_dt: string;
+}
+
+/**
+ * 국내주식 업종기간별시세 Param
+ */
+export interface DomesticStockInquireDailyIndexChartPriceParam {
+    /**
+     * 조건 시장 분류 코드
+     * 업종 : U
+     */
+    FID_COND_MRKT_DIV_CODE: 'U';
+
+    /**
+     * 업종 상세코드
+     * 0001 : 종합, 0002 : 대형주 등 (포탈 FAQ 참조)
+     */
+    FID_INPUT_ISCD: string;
+
+    /**
+     * 조회 시작일자 (YYYYMMDD)
+     */
+    FID_INPUT_DATE_1: string;
+
+    /**
+     * 조회 종료일자 (YYYYMMDD)
+     */
+    FID_INPUT_DATE_2: string;
+
+    /**
+     * 기간분류코드
+     * D:일봉, W:주봉, M:월봉, Y:년봉
+     */
+    FID_PERIOD_DIV_CODE: PeriodType;
+}
+
+/**
+ * 국내주식 업종기간별시세 Output1 (기본 정보)
+ */
+export class DomesticStockInquireDailyIndexChartPriceOutput1 {
+    /**
+     * 전일 대비 부호
+     */
+    prdy_vrss_sign: string;
+
+    /**
+     * 업종 지수 전일 대비율
+     */
+    bstp_nmix_prdy_ctrt: string;
+
+    /**
+     * 전일 지수
+     */
+    prdy_nmix: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * HTS 한글 종목명
+     */
+    hts_kor_isnm: string;
+
+    /**
+     * 업종 지수 현재가
+     */
+    bstp_nmix_prpr: string;
+
+    /**
+     * 업종 구분 코드
+     */
+    bstp_cls_code: string;
+
+    /**
+     * 전일 거래량
+     */
+    prdy_vol: string;
+
+    /**
+     * 업종 지수 시가2
+     */
+    bstp_nmix_oprc: string;
+
+    /**
+     * 업종 지수 최고가
+     */
+    bstp_nmix_hgpr: string;
+
+    /**
+     * 업종 지수 최저가
+     */
+    bstp_nmix_lwpr: string;
+
+    /**
+     * 선물 전일 시가
+     */
+    futs_prdy_oprc: string;
+
+    /**
+     * 선물 전일 최고가
+     */
+    futs_prdy_hgpr: string;
+
+    /**
+     * 선물 전일 최저가
+     */
+    futs_prdy_lwpr: string;
+}
+
+/**
+ * 국내주식 업종기간별시세 Output2 (일자별 목록)
+ */
+export class DomesticStockInquireDailyIndexChartPriceOutput2 {
+    /**
+     * 주식 영업 일자
+     */
+    stck_bsop_date: string;
+
+    /**
+     * 업종 지수 현재가
+     */
+    bstp_nmix_prpr: string;
+
+    /**
+     * 업종 지수 시가2
+     */
+    bstp_nmix_oprc: string;
+
+    /**
+     * 업종 지수 최고가
+     */
+    bstp_nmix_hgpr: string;
+
+    /**
+     * 업종 지수 최저가
+     */
+    bstp_nmix_lwpr: string;
+
+    /**
+     * 누적 거래량
+     */
+    acml_vol: string;
+
+    /**
+     * 누적 거래 대금
+     */
+    acml_tr_pbmn: string;
+
+    /**
+     * 변경 여부
+     */
+    mod_yn: string;
 }

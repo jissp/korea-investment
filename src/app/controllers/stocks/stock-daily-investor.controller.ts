@@ -6,17 +6,13 @@ import {
     ApiQuery,
 } from '@nestjs/swagger';
 import { ExistingStockGuard } from '@app/common';
-import { StockService } from '@app/modules/repositories/stock';
 import { StockInvestorService } from '@app/modules/services/stock-investor';
 import { GetStockInvestorsResponse } from './dto';
 import { GetStockInvestorByEstimateResponse } from '@app/controllers/stocks/dto/responses/get-stock-investor-by-estimate.response';
 
 @Controller('v1/stocks')
 export class StockDailyInvestorController {
-    constructor(
-        private readonly stockService: StockService,
-        private readonly stockInvestorService: StockInvestorService,
-    ) {}
+    constructor(private readonly stockInvestorService: StockInvestorService) {}
 
     @ApiOperation({
         summary: '투자자 동향 조회',
