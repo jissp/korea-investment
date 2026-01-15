@@ -1,11 +1,11 @@
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
+import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
-import { KoreaInvestmentAccountCrawlerType } from '../korea-investment-account-crawler.types';
-import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
-import { AccountStockGroupStockTransformer } from '../transformers';
+import { StockCrawlerFlowType } from '../stock-crawler.types';
+import { AccountStockGroupStockTransformer } from '../../korea-investment-account-crawler/transformers';
 
 @Injectable()
 export class AccountStockPriceProcessor {
@@ -14,9 +14,7 @@ export class AccountStockPriceProcessor {
         private readonly accountStockGroupStockService: AccountStockGroupStockService,
     ) {}
 
-    @OnQueueProcessor(
-        KoreaInvestmentAccountCrawlerType.UpdateAccountStockGroupStockPrices,
-    )
+    @OnQueueProcessor(StockCrawlerFlowType.UpdateAccountStockGroupStockPrices)
     async processUpdateAccountStockGroupStockPrices(job: Job) {
         const childrenResponses =
             await this.koreaInvestmentRequestApiHelper.getChildResponses<

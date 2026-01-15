@@ -3,7 +3,6 @@ export enum KoreaInvestmentAccountCrawlerType {
     RequestAccountStocks = 'RequestAccountStocks',
     RequestAccountStockGroups = 'RequestAccountStockGroups',
     RequestAccountStocksByGroup = 'RequestAccountStocksByGroup',
-    UpdateAccountStockGroupStockPrices = 'UpdateAccountStockGroupStockPrices',
 }
 
 export enum KoreaInvestmentAccountCrawlerEventType {

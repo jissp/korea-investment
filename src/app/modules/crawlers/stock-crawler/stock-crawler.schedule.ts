@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
@@ -13,6 +14,11 @@ import {
 } from '@app/modules/korea-investment-request-api/common';
 import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import { StockCrawlerFlowType } from './stock-crawler.types';
+import { getCurrentMarketDivCode } from '@common/domains';
+import { isNil } from '@nestjs/common/utils/shared.utils';
+import { MarketType } from '@app/common';
+import { StockService } from '@app/modules/repositories/stock';
+import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
 
 @Injectable()
 export class StockCrawlerSchedule implements OnModuleInit {
@@ -20,17 +26,22 @@ export class StockCrawlerSchedule implements OnModuleInit {
 
     constructor(
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
+        private readonly stockService: StockService,
+        private readonly accountStockGroupStockService: AccountStockGroupStockService,
         private readonly favoriteStockService: FavoriteStockService,
         private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
         @Inject(StockCrawlerFlowType.RequestDailyItemChartPrice)
         private readonly requestDailyItemChartPriceFlow: FlowProducer,
         @Inject(StockCrawlerFlowType.RequestStockInvestor)
         private readonly requestStockInvestorFlow: FlowProducer,
+        @Inject(StockCrawlerFlowType.UpdateAccountStockGroupStockPrices)
+        private readonly updateAccountStockGroupStockPricesFlow: FlowProducer,
     ) {}
 
     onModuleInit() {
         // this.handleCrawlingStockInvestor();
-        this.handleCrawlingStockDailyItemChartPrice();
+        // this.handleCrawlingStockDailyItemChartPrice();
+        this.handleUpdateAccountStockGroupStockPrices();
     }
 
     @Cron('0 16 * * *') // 매일 16시에 실행 (장 마감 후)
@@ -79,68 +90,55 @@ export class StockCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @Cron('00 */1 * * *')
-    async handleCrawlingStockDailyItemChartPrice() {
+    @Cron('*/10 * * * * *')
+    @PreventConcurrentExecution()
+    async handleUpdateAccountStockGroupStockPrices() {
         try {
-            // const favoriteStocks = await this.favoriteStockService.findAll();
-            // const stockCodes = uniqueValues(
-            //     favoriteStocks.map((favoriteStock) => favoriteStock.stockCode),
-            // );
-            //
-            // const currentDate = new Date();
-            // const fromDate = new Date(currentDate);
-            // fromDate.setDate(currentDate.getDate() - 90);
-            //
-            // const queueName = StockCrawlerFlowType.RequestDailyItemChartPrice;
-            // await Promise.all(
-            //     stockCodes.map((stockCode) => {
-            //         return this.requestDailyItemChartPriceFlow.add(
-            //             {
-            //                 name: queueName,
-            //                 queueName,
-            //                 data: {
-            //                     stockCode,
-            //                 },
-            //                 children: [
-            //                     {
-            //                         name: KoreaInvestmentRequestApiType,
-            //                         queueName: KoreaInvestmentRequestApiType,
-            //                         data: {
-            //                             url: '/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice',
-            //                             tradeId: 'FHKST03010100',
-            //                             params: {
-            //                                 FID_COND_MRKT_DIV_CODE:
-            //                                     getCurrentMarketDivCode() ||
-            //                                     MarketDivCode.KRX,
-            //                                 FID_INPUT_ISCD: stockCode,
-            //                                 FID_PERIOD_DIV_CODE: 'D',
-            //                                 FID_ORG_ADJ_PRC: '1',
-            //                                 FID_INPUT_DATE_1:
-            //                                     this.koreaInvestmentHelperService.formatDateParam(
-            //                                         fromDate,
-            //                                     ),
-            //                                 FID_INPUT_DATE_2:
-            //                                     this.koreaInvestmentHelperService.formatDateParam(
-            //                                         currentDate,
-            //                                     ),
-            //                             },
-            //                         } as KoreaInvestmentCallApiParam<DomesticStockQuotationsInquireDailyItemChartPriceParam>,
-            //                     },
-            //                 ],
-            //             },
-            //             {
-            //                 queuesOptions: {
-            //                     [queueName]: {
-            //                         defaultJobOptions: getDefaultJobOptions(),
-            //                     },
-            //                     [KoreaInvestmentRequestApiType]: {
-            //                         defaultJobOptions: getDefaultJobOptions(),
-            //                     },
-            //                 },
-            //             },
-            //         );
-            //     }),
-            // );
+            const marketDivCode = getCurrentMarketDivCode();
+            if (isNil(marketDivCode)) {
+                return;
+            }
+
+            const stocksByStockGroup =
+                await this.accountStockGroupStockService.getAll();
+            const stockCodes = uniqueValues(
+                stocksByStockGroup.map((stock) => stock.stockCode),
+            );
+
+            const stocks = await this.stockService.getStocksByStockCode({
+                marketType: MarketType.Domestic,
+                stockCodes,
+            });
+
+            const queueName =
+                StockCrawlerFlowType.UpdateAccountStockGroupStockPrices;
+            await Promise.all(
+                _.chunk(stocks, 30).map((stocks) => {
+                    const stockCodes = stocks.map((stock) => stock.shortCode);
+
+                    return this.updateAccountStockGroupStockPricesFlow.add(
+                        {
+                            name: queueName,
+                            queueName,
+                            children: [
+                                this.requestApiHelper.generateRequestApiForIntstockMultiPrice(
+                                    stockCodes,
+                                ),
+                            ],
+                        },
+                        {
+                            queuesOptions: {
+                                [queueName]: {
+                                    defaultJobOptions: getDefaultJobOptions(),
+                                },
+                                [KoreaInvestmentRequestApiType.Additional]: {
+                                    defaultJobOptions: getDefaultJobOptions(),
+                                },
+                            },
+                        },
+                    );
+                }),
+            );
         } catch (error) {
             this.logger.error(error);
         }

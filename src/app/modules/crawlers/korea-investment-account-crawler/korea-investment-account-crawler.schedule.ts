@@ -1,22 +1,15 @@
-import * as _ from 'lodash';
 import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { isNil } from '@nestjs/common/utils/shared.utils';
-import { uniqueValues } from '@common/utils';
-import { getCurrentMarketDivCode } from '@common/domains';
+import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
-import { MarketType } from '@app/common';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
 import { AccountService } from '@app/modules/repositories/account';
-import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
-import { StockService } from '@app/modules/repositories/stock';
 import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
-import { PreventConcurrentExecution } from '@common/decorators';
 
 @Injectable()
 export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
@@ -27,19 +20,13 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
     constructor(
         private readonly koreaInvestmentConfigService: KoreaInvestmentConfigService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly accountStockGroupStockService: AccountStockGroupStockService,
         private readonly accountService: AccountService,
-        private readonly stockService: StockService,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccount)
         private readonly requestKoreaInvestmentAccountFlow: FlowProducer,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccountStocks)
         private readonly requestKoreaInvestmentAccountStockFlow: FlowProducer,
         @Inject(KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups)
         private readonly requestAccountStockGroupsFlow: FlowProducer,
-        @Inject(
-            KoreaInvestmentAccountCrawlerType.UpdateAccountStockGroupStockPrices,
-        )
-        private readonly updateAccountStockGroupStockPricesFlow: FlowProducer,
     ) {}
 
     onModuleInit() {
@@ -47,7 +34,6 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
         this.handleCrawlingKoreaInvestmentAccountStocks();
         this.handleCrawlingKoreaInvestmentAccountStockGroups();
         this.handleCrawlingKoreaInvestmentAccountFavoriteStocksByGroup();
-        this.handleUpdateAccountStockGroupStockPrices();
     }
 
     @Cron('*/1 * * * *')
@@ -206,60 +192,6 @@ export class KoreaInvestmentAccountCrawlerSchedule implements OnModuleInit {
                         },
                     },
                 },
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
-    }
-
-    @Cron('*/10 * * * * *')
-    @PreventConcurrentExecution()
-    async handleUpdateAccountStockGroupStockPrices() {
-        try {
-            const marketDivCode = getCurrentMarketDivCode();
-            if (isNil(marketDivCode)) {
-                return;
-            }
-
-            const stocksByStockGroup =
-                await this.accountStockGroupStockService.getAll();
-            const stockCodes = uniqueValues(
-                stocksByStockGroup.map((stock) => stock.stockCode),
-            );
-
-            const stocks = await this.stockService.getStocksByStockCode({
-                marketType: MarketType.Domestic,
-                stockCodes,
-            });
-
-            const queueName =
-                KoreaInvestmentAccountCrawlerType.UpdateAccountStockGroupStockPrices;
-            await Promise.all(
-                _.chunk(stocks, 30).map((stocks) => {
-                    const stockCodes = stocks.map((stock) => stock.shortCode);
-
-                    return this.updateAccountStockGroupStockPricesFlow.add(
-                        {
-                            name: queueName,
-                            queueName,
-                            children: [
-                                this.requestApiHelper.generateRequestApiForIntstockMultiPrice(
-                                    stockCodes,
-                                ),
-                            ],
-                        },
-                        {
-                            queuesOptions: {
-                                [queueName]: {
-                                    defaultJobOptions: getDefaultJobOptions(),
-                                },
-                                [KoreaInvestmentRequestApiType.Additional]: {
-                                    defaultJobOptions: getDefaultJobOptions(),
-                                },
-                            },
-                        },
-                    );
-                }),
             );
         } catch (error) {
             this.logger.error(error);

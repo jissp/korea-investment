@@ -21,7 +21,6 @@ const flowTypes = [
     KoreaInvestmentAccountCrawlerType.RequestAccountStocks,
     KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups,
     KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup,
-    KoreaInvestmentAccountCrawlerType.UpdateAccountStockGroupStockPrices,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
 

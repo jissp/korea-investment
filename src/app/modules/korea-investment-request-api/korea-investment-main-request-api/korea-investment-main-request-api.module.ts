@@ -9,7 +9,6 @@ import {
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentMainRequestApiProcessor } from './korea-investment-main-request-api.processor';
-import { KoreaInvestmentMainRequestApiService } from './korea-investment-main-request-api.service';
 
 const queueTypes = [KoreaInvestmentRequestApiType.Main];
 const queueProviders = QueueModule.getQueueProviders(queueTypes);
@@ -24,13 +23,8 @@ const queueProviders = QueueModule.getQueueProviders(queueTypes);
     providers: [
         ...queueProviders,
         KoreaInvestmentMainRequestApiProcessor,
-        KoreaInvestmentMainRequestApiService,
         KoreaInvestmentRequestApiHelper,
     ],
-    exports: [
-        ...queueProviders,
-        KoreaInvestmentMainRequestApiService,
-        KoreaInvestmentRequestApiHelper,
-    ],
+    exports: [...queueProviders, KoreaInvestmentRequestApiHelper],
 })
 export class KoreaInvestmentMainRequestApiModule {}

@@ -2,7 +2,6 @@ import { Axios, AxiosRequestConfig } from 'axios';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getRedisKey, RedisService } from '@modules/redis';
 import { KoreaInvestmentBaseHeader } from '@modules/korea-investment/common';
-import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
 import {
     KoreaInvestmentHelperConfig,
@@ -18,7 +17,6 @@ export class KoreaInvestmentHelperService {
 
     constructor(
         private readonly redisService: RedisService,
-        private readonly configService: KoreaInvestmentConfigService,
         private readonly oAuthClient: KoreaInvestmentOauthClient,
         @Inject(KoreaInvestmentHelperProvider.Config)
         private readonly config: KoreaInvestmentHelperConfig,
@@ -92,7 +90,7 @@ export class KoreaInvestmentHelperService {
         }
 
         const { access_token, access_token_token_expired } =
-            await this.oAuthClient.getToken(this.configService.getCredential());
+            await this.oAuthClient.getToken(this.config.credential);
 
         const expireSeconds = this.calculateTokenExpireSeconds(
             access_token_token_expired,
@@ -117,7 +115,7 @@ export class KoreaInvestmentHelperService {
         }
 
         const { approval_key } = await this.oAuthClient.getWebSocketToken(
-            this.configService.getCredential(),
+            this.config.credential,
         );
 
         await this.redisService.set(redisKey, approval_key, {

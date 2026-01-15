@@ -8,7 +8,6 @@ import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
-import { KoreaInvestmentAdditionalRequestApiService } from './korea-investment-additional-request-api.service';
 import { KoreaInvestmentAdditionalRequestApiProcessor } from './korea-investment-additional-request-api.processor';
 
 const queueTypes = [KoreaInvestmentRequestApiType.Additional];
@@ -24,13 +23,8 @@ const queueProviders = QueueModule.getQueueProviders(queueTypes);
     providers: [
         ...queueProviders,
         KoreaInvestmentAdditionalRequestApiProcessor,
-        KoreaInvestmentAdditionalRequestApiService,
         KoreaInvestmentRequestApiHelper,
     ],
-    exports: [
-        ...queueProviders,
-        KoreaInvestmentAdditionalRequestApiService,
-        KoreaInvestmentRequestApiHelper,
-    ],
+    exports: [...queueProviders, KoreaInvestmentRequestApiHelper],
 })
 export class KoreaInvestmentAdditionalRequestApiModule {}
