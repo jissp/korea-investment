@@ -10,7 +10,7 @@ export class StockInvestorPromptTransformer implements Pipe<
     private readonly MAX_STOCK_INVESTOR_ITEMS = 7;
 
     /**
-     * 뉴스 정보를 프롬프트로 변환합니다.
+     * 일별 투자자 동향 정보를 프롬프트로 변환합니다.
      * @param investorOutputs
      */
     transform(
@@ -19,15 +19,13 @@ export class StockInvestorPromptTransformer implements Pipe<
         const latestInvestorOutputs =
             this.extractLatestStockInvestorOutputs(investorOutputs);
 
-        const newsPrompt = latestInvestorOutputs
+        return latestInvestorOutputs
             .map((output) => this.transformRowPrompt(output))
             .join('\n');
-
-        return `뉴스 정보 \n${newsPrompt}`;
     }
 
     /**
-     * 개별 뉴스 정보를 프롬프트로 변환합니다.
+     * 개별 투자자 동향 정보를 프롬프트로 변환합니다.
      * @param output
      * @private
      */
@@ -40,7 +38,7 @@ export class StockInvestorPromptTransformer implements Pipe<
         const frgnQuantity = Number(output.frgn_ntby_qty);
         const orgnQuantity = Number(output.orgn_ntby_qty);
 
-        return `- ${date}: 종가: ${stockPrice}, 개인 매수량: ${prsnQuantity}, 외국인 매수량: ${frgnQuantity}, 기관 매수량: ${orgnQuantity}`;
+        return `- **${date}**: 종가: ${stockPrice}, 개인 매수량: ${prsnQuantity}, 외국인 매수량: ${frgnQuantity}, 기관 매수량: ${orgnQuantity}`;
     }
 
     /**

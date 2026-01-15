@@ -44,7 +44,8 @@ export class AnalysisController {
     @ApiParam({
         name: 'reportTarget',
         type: String,
-        description: '리포트 대상(예: 유형이 종목일 경우 종목코드)',
+        description:
+            '리포트 대상(예: 유형이 종목일 경우 종목코드, 최신 뉴스 분석인 경우 reportType 그대로 입력)',
         example: '005930',
     })
     @ApiNoContentResponse()
@@ -54,15 +55,10 @@ export class AnalysisController {
         @Param('reportTarget') reportTarget: string,
     ) {
         try {
-            if (reportType === ReportType.Stock) {
-                await this.stockAnalyzerService.requestAnalyzeStock(
-                    reportTarget,
-                );
-            } else if (reportType === ReportType.KeywordGroup) {
-                await this.stockAnalyzerService.requestAnalyzeKeywordGroup(
-                    Number(reportTarget),
-                );
-            }
+            await this.stockAnalyzerService.requestAnalysis(
+                reportType,
+                reportTarget,
+            );
         } catch (error) {
             throw new InternalServerErrorException(error);
         }

@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
     KeywordGroupNewsDto,
     KeywordNewsDto,
+    NewsCategory,
     NewsDto,
     StockNewsDto,
 } from './news.types';
@@ -106,6 +107,29 @@ export class NewsService {
      */
     public async getNewsList({ limit = 100 }: { limit?: number }) {
         return this.newsRepository.find({
+            order: {
+                publishedAt: 'DESC',
+            },
+            take: limit,
+        });
+    }
+
+    /**
+     * 특정 카테고리의 최근 뉴스 목록을 조회합니다.
+     * @param category
+     * @param limit
+     */
+    public async getNewsListByCategory({
+        category,
+        limit = 100,
+    }: {
+        category: NewsCategory;
+        limit?: number;
+    }) {
+        return this.newsRepository.find({
+            where: {
+                category,
+            },
             order: {
                 publishedAt: 'DESC',
             },

@@ -18,9 +18,9 @@ export class KoreaInvestmentMainRequestApiProcessor extends BaseKoreaInvestmentR
     }
 
     @OnQueueProcessor(KoreaInvestmentRequestApiType.Main, {
-        concurrency: 1,
+        concurrency: 2,
         limiter: {
-            max: 1,
+            max: 2,
             duration: 1000,
         },
     })

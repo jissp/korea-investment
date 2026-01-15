@@ -1,13 +1,20 @@
 import { Pipe } from '@common/types';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
-import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import {
+    DomesticStockInvestorTrendEstimateOutput2,
+    DomesticStockQuotationsInquireInvestorOutput,
+} from '@modules/korea-investment/korea-investment-quotation-client';
+import { StockNews } from '@app/modules/repositories/news';
 import { NewsPromptTransformer } from './news-prompt.transformer';
 import { StockInvestorPromptTransformer } from './stock-investor-prompt.transformer';
+import { StockInvestorByEstimatePromptTransformer } from './stock-investor-by-estimate-prompt.transformer';
 
 type AnalyzeStockPromptArgs = {
     stockName: string;
     naverNewsItems: NaverApiNewsItem[];
+    stockNewsItems: StockNews[];
     stockInvestors: DomesticStockQuotationsInquireInvestorOutput[];
+    stockInvestorByEstimates: DomesticStockInvestorTrendEstimateOutput2[];
 };
 
 /**
@@ -24,74 +31,83 @@ export class AnalyzeStockPromptTransformer implements Pipe<
     transform({
         stockName,
         naverNewsItems,
+        stockNewsItems,
         stockInvestors,
+        stockInvestorByEstimates,
     }: AnalyzeStockPromptArgs): string {
-        const newsPromptTransformer = new NewsPromptTransformer();
-        const stockInvestorPromptTransformer =
-            new StockInvestorPromptTransformer();
-
-        const newsPrompt = newsPromptTransformer.transform(naverNewsItems);
+        const newsPrompt = new NewsPromptTransformer().transform({
+            naverNewsItems,
+            stockNewsItems,
+        });
         const stockInvestorPrompt =
-            stockInvestorPromptTransformer.transform(stockInvestors);
+            new StockInvestorPromptTransformer().transform(stockInvestors);
+        const todayInvestorByEstimatePrompt =
+            new StockInvestorByEstimatePromptTransformer().transform(
+                stockInvestorByEstimates,
+            );
 
-        return `당신은 뉴스 데이터와 수급 현황을 바탕으로 시장의 이면을 읽어내는 전문 주식 분석가이자 퀀트 투자자입니다. 
-제공된 데이터와 구글 실시간 검색을 바탕으로 **${stockName}**의 현재 가치를 진단하고, 향후 흐름을 예측하세요.
+        return `당신은 뉴스 데이터, 수급 현황, 재무 지표를 바탕으로 시장의 이면을 읽어내는 20년 경력의 베테랑 주식 애널리스트이자 퀀트 투자자입니다. 제공된 데이터와 구글 실시간 검색을 바탕으로 **${stockName}**의 현재 가치를 진단하고 향후 흐름을 예측하세요.
 
 # 분석 지침
-변동성 원인 규명: 최근 주가의 급등락이 있다면 그 원인을 뉴스 및 이슈와 직접 연결하여 분석하세요. (예: 트럼프 관세 정책, 실적 발표, 기술적 반등 등)
 
-이슈와 테마의 연결: 단순 뉴스 나열이 아닌, 현재 시장의 주도 테마(방산, 반도체, AI 등)와 해당 종목의 상관관계를 명시하세요.
+입체적 원인 규명: 최근 주가 변동을 뉴스, 매크로 정책(관세, 금리 등), 실적과 직접 연결하여 분석하세요.
 
-수급 및 가치 평가: 투자자별 매매 동향을 통해 현재 주가 수준이 '과열'인지 '저점'인지 판단하세요.
+수급 의도 파악: 외국인과 기관의 유입/이탈 데이터를 단순 나열하지 말고, 그들이 움직인 전략적 이유(차익 실현, 저가 매수 등)를 추론하세요.
 
-미래 시나리오: 향후 발생할 수 있는 리스크와 호재(지켜봐야 할 이슈)를 구분하여 제시하세요.
+테마 및 밸류에이션: 현재 주도 테마와의 상관관계를 명시하고, 재무 지표(PER, PBR 등)를 통해 현재 주가가 '과열'인지 '저점'인지 판단하세요.
+
+전략적 제안: 향후 발생할 촉매제와 리스크를 구분하고, 구체적인 투자 포지션과 손절 기준을 제시하세요.
 
 답변 스타일: 전문 용어를 사용하되, 불필요한 수식어는 배제하고 핵심 위주로 간결하게 작성하세요.
-반드시 [분석 결과 응답 형식](#분석-결과-응답-형식)의 코드 블록을 제외한 형식으로 작성하세요.
 
 # 제공 데이터
-## 뉴스 데이터
+
+#### 뉴스 데이터 
 ${newsPrompt}
 
-## 투자자 동향
+#### 투자자 동향 
 ${stockInvestorPrompt}
 
-# 분석 결과 응답 형식
-\`\`\`
+#### 시간별 외인 동향 
+${todayInvestorByEstimatePrompt}
+
+# 분석 결과 응답 형식 (포맷 유지)
+
 # 최근 주가 흐름 및 변동 사유
-### 현재 흐름 
+## 현재 흐름
 [상승/하락/횡보 상황 요약]
 
-### 변동 원인
-[급등/급락의 구체적 이유 - 예: OO 정책 수혜, XX 실적 쇼크 등]
+## 변동 원인
+[급등/급락의 구체적 이유 및 펀더멘털/기술적 요인 분석]
 
-# 주요 투자자 매매 동향
-### 수급 특징
-[외국인/기관의 집중 매수/매수 여부 및 의도 분석]
+## 주요 투자자 매매 동향
+수급 특징
+[외국인/기관의 매매 패턴 및 수급 주체별 의도 분석]
 
 # 핵심 이슈 및 시장 환경
-### 현재 이슈
-[주가에 직접적인 영향을 주는 매크로 및 개별 뉴스]
+## 현재 이슈
+[주가에 영향을 주는 매크로 환경 및 개별 뉴스, 산업 내 위치]
 
-### 모니터링 포인트
-[향후 주가 방향을 결정지을 핵심 일정이나 지표]
+## 모니터링 포인트
+[향후 주가 방향을 결정지을 핵심 일정, 지표, 기술적 지지/저항선]
 
 # 주가 전망 (Short-term & Mid-term)
-### 상방 요인 
-[주가를 끌어올릴 촉매제]
+## 상방 요인
+[주가를 끌어올릴 핵심 촉매제 및 목표치]
 
-### 하방 요인 
-[주의해야 할 리스크 및 저항선]
+## 하방 요인
+[주의해야 할 리스크 및 손절 라인]
 
-# 연관 종목 및 섹터
-- [종목명]: [상관관계 및 사유]
+## 연관 종목 및 섹터
+[종목명]: [상관관계 및 섹터 내 비교 분석]
 
 # 핵심 키워드
-- [키워드]: [이유]
+[키워드]: [선정 이유]
 
-#  투자 포지션 제안
-- [추천 포지션: 매수 / 보유 / 관망 / 매도]
-- 사유: [한 줄 요약]
+# 투자 포지션 제안
+[추천 포지션: 매수 / 보유 / 관망 / 매도]
+
+사유: [한 줄 요약]
 \`\`\``;
     }
 }

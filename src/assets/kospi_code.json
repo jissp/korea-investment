@@ -8830,16 +8830,6 @@
     "name": "에코프로머티"
   },
   {
-    "shortCode": "450140",
-    "code": "KR7450140009",
-    "name": "코오롱모빌리티그룹"
-  },
-  {
-    "shortCode": "45014K",
-    "code": "KR745014K018",
-    "name": "코오롱모빌리티그룹우"
-  },
-  {
     "shortCode": "450180",
     "code": "KR7450180005",
     "name": "KODEX 한중전기차(합성)"
@@ -10485,6 +10475,11 @@
     "name": "DH오토리드 9WR"
   },
   {
+    "shortCode": "J3686001G",
+    "code": "KRA3686001G2",
+    "name": "아이씨에이치 5R"
+  },
+  {
     "shortCode": "Q500061",
     "code": "KRG500000614",
     "name": "신한 인버스 코스피 200 선물 ETN"
@@ -11223,11 +11218,6 @@
     "shortCode": "Q550064",
     "code": "KRG550000647",
     "name": "N2 레버리지 은 선물 ETN(H)"
-  },
-  {
-    "shortCode": "Q550065",
-    "code": "KRG550000654",
-    "name": "N2 인버스 레버리지 은 선물 ETN(H)"
   },
   {
     "shortCode": "Q550069",

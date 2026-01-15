@@ -21,7 +21,9 @@ export class AnalyzeKeywordGroupPromptTransformer implements Pipe<
     transform({ groupName, naverNewsItems }: AnalyzeStockPromptArgs): string {
         const newsPromptTransformer = new NewsPromptTransformer();
 
-        const newsPrompt = newsPromptTransformer.transform(naverNewsItems);
+        const newsPrompt = newsPromptTransformer.transform({
+            naverNewsItems,
+        });
 
         return `당신은 뉴스 데이터와 거시 경제 지표를 분석하여 시장의 주도 테마를 포착하는 **섹터 전략가(Sector Strategist)**입니다.
 

@@ -49,7 +49,7 @@ export class AiAnalysisReportService {
      */
     public async getReportsByType({
         reportType,
-        limit = 100,
+        limit = 10,
     }: {
         reportType: ReportType;
         limit?: number;
