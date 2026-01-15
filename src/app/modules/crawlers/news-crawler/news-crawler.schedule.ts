@@ -5,9 +5,11 @@ import { Cron } from '@nestjs/schedule';
 import { toDateYmdByDate, uniqueValues } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
+import {
+    KoreaInvestmentRequestApiHelper,
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api/common';
 import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
-import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
 import {
     CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
@@ -22,7 +24,6 @@ export class NewsCrawlerSchedule implements OnModuleInit {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly keywordService: KeywordService,
-        private readonly favoriteStockService: FavoriteStockService,
         @Inject(NewsCrawlerQueueType.RequestDomesticNewsTitle)
         private readonly requestDomesticNewsTitleFlow: FlowProducer,
         @Inject(NewsCrawlerQueueType.CrawlingNaverNews)
@@ -48,24 +49,39 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
             const queueName = NewsCrawlerQueueType.RequestDomesticNewsTitle;
 
-            await this.requestDomesticNewsTitleFlow.add({
-                name: queueName,
-                queueName,
-                children: [
-                    this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle(
-                        {
-                            FID_INPUT_DATE_1: `00${startDate}`,
-                            FID_NEWS_OFER_ENTP_CODE: '',
-                            FID_COND_MRKT_CLS_CODE: '',
-                            FID_INPUT_ISCD: '',
-                            FID_TITL_CNTT: '',
-                            FID_INPUT_HOUR_1: '',
-                            FID_RANK_SORT_CLS_CODE: '',
-                            FID_INPUT_SRNO: '',
+            await this.requestDomesticNewsTitleFlow.add(
+                {
+                    name: queueName,
+                    queueName,
+                    children: [
+                        this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle(
+                            {
+                                FID_INPUT_DATE_1: `00${startDate}`,
+                                FID_NEWS_OFER_ENTP_CODE: '',
+                                FID_COND_MRKT_CLS_CODE: '',
+                                FID_INPUT_ISCD: '',
+                                FID_TITL_CNTT: '',
+                                FID_INPUT_HOUR_1: '',
+                                FID_RANK_SORT_CLS_CODE: '',
+                                FID_INPUT_SRNO: '',
+                            },
+                        ),
+                    ],
+                    opts: {
+                        jobId: queueName,
+                    },
+                },
+                {
+                    queuesOptions: {
+                        [queueName]: {
+                            defaultJobOptions: getDefaultJobOptions(),
                         },
-                    ),
-                ],
-            });
+                        [KoreaInvestmentRequestApiType.Additional]: {
+                            defaultJobOptions: getDefaultJobOptions(),
+                        },
+                    },
+                },
+            );
         } catch (error) {
             this.logger.error(error);
         }
