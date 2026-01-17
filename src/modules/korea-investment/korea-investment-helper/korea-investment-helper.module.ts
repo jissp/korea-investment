@@ -2,6 +2,7 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import { DynamicModule, HttpStatus, Module } from '@nestjs/common';
 import { RedisModule } from '@modules/redis';
+import { CustomerType } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentConfigModule,
     KoreaInvestmentConfigService,
@@ -13,7 +14,6 @@ import {
     KoreaInvestmentHelperProvider,
 } from './korea-investment-helper.types';
 import { KoreaInvestmentHelperService } from './korea-investment-helper.service';
-import { CustomerType } from '@modules/korea-investment/common';
 
 @Module({})
 export class KoreaInvestmentHelperModule {

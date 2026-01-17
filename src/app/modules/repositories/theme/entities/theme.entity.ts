@@ -6,6 +6,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { YN } from '@app/common/types/market.types';
 
 @Entity('themes')
 export class Theme {
@@ -35,6 +36,22 @@ export class Theme {
         description: '테마명',
     })
     name!: string;
+
+    /**
+     * 즐겨찾기 여부
+     */
+    @Column({
+        type: 'enum',
+        enum: YN,
+        default: YN.N,
+        comment: '즐겨찾기 여부',
+    })
+    @ApiProperty({
+        enum: YN,
+        description: '즐겨찾기 여부',
+        default: YN.N,
+    })
+    isFavorite!: YN;
 
     @CreateDateColumn({
         type: 'datetime',

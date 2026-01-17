@@ -11,8 +11,9 @@ import { assertStockCode } from '@common/domains';
 import { MarketDivCode, PeriodType } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
+import { StockDailyPriceTransformer } from '@app/common';
 import { ExistingStockGuard } from '@app/common/guards';
-import { MarketType } from '@app/common/types';
+import { MarketType, YN } from '@app/common/types';
 import { StockPriceTransformer } from '@app/common/transformers/stock-price.transformer';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { StockService } from '@app/modules/repositories/stock';
@@ -22,7 +23,6 @@ import {
     GetStockResponse,
     GetStocksResponse,
 } from './dto';
-import { StockDailyPriceTransformer } from '@app/common';
 
 @Controller('v1/stocks')
 export class StockController {
@@ -101,9 +101,10 @@ export class StockController {
 
         const response =
             await this.koreaInvestmentQuotationClient.inquireDailyPrice({
-                FID_COND_MRKT_DIV_CODE: stock.isNextTrade
-                    ? MarketDivCode.통합
-                    : MarketDivCode.KRX,
+                FID_COND_MRKT_DIV_CODE:
+                    stock.isNextTrade === YN.Y
+                        ? MarketDivCode.통합
+                        : MarketDivCode.KRX,
                 FID_INPUT_ISCD: stock.shortCode,
                 FID_ORG_ADJ_PRC: '1',
                 FID_PERIOD_DIV_CODE: periodType,
@@ -141,6 +142,7 @@ export class StockController {
             stockCodeChunks.map((stockCodes) => {
                 const params =
                     this.koreaInvestmentRequestApiHelper.buildIntstockMultiPriceParam(
+                        MarketDivCode.KRX,
                         stockCodes,
                     );
 

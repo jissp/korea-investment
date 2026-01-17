@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
+import { MarketDivCode } from '@modules/korea-investment/common';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
     DomesticStockQuotationVolumeRankOutput,
@@ -74,6 +75,7 @@ export class StockRankCrawlerProcessor {
                     } as RequestPopulatedHtsTopViewJobData,
                     children: [
                         this.koreaInvestmentRequestApiHelper.generateRequestApiForIntstockMultiPrice(
+                            MarketDivCode.KRX,
                             htsTopViews.map(({ stockCode }) => stockCode),
                         ),
                     ],

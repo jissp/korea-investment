@@ -1317,9 +1317,10 @@ export class DomesticProgramTradeTodayOutput1 {
 
 export interface DomesticInvestorTradeByStockDailyParam {
     /**
-     * 조건 시장 분류 코드 (J: KRX 등)
+     * 조건 시장 분류 코드
+     * J:KRX, NX:NXT, UN:통합
      */
-    FID_COND_MRKT_DIV_CODE: string;
+    FID_COND_MRKT_DIV_CODE: MarketDivCode;
 
     /**
      * 입력 종목코드 (6자리)

@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { YN } from '@app/common/types/market.types';
 import { Theme, ThemeStock } from './entities';
 
 @Injectable()
@@ -13,10 +14,37 @@ export class ThemeService {
     ) {}
 
     /**
+     * 테마 코드로 테마를 조회합니다.
+     * @param code
+     * @private
+     */
+    private async getThemeByCode(code: string) {
+        return this.repository.findOneBy({ code });
+    }
+
+    /**
      * 테마 목록을 조회합니다.
      */
     public async getThemes(): Promise<Theme[]> {
-        return this.repository.find();
+        return this.repository.find({
+            order: {
+                code: 'DESC',
+            },
+        });
+    }
+
+    /**
+     * 즐겨찾기한 테마 목록을 조회합니다.
+     */
+    public async getFavoriteThemes(): Promise<Theme[]> {
+        return this.repository.find({
+            where: {
+                isFavorite: YN.Y,
+            },
+            order: {
+                code: 'DESC',
+            },
+        });
     }
 
     /**
@@ -68,5 +96,26 @@ export class ThemeService {
                 stockName: 'ASC',
             },
         });
+    }
+
+    /**
+     * 테마의 즐겨찾기 여부를 수정합니다.
+     * @throws NotFoundException
+     * @param code
+     * @param isFavorite
+     */
+    public async updateThemeFavorite(
+        code: string,
+        isFavorite: boolean,
+    ): Promise<void> {
+        const theme = await this.getThemeByCode(code);
+        if (!theme) {
+            throw new NotFoundException('존재하지 않는 테마입니다.');
+        }
+
+        await this.repository.update(
+            { code },
+            { isFavorite: isFavorite ? YN.Y : YN.N },
+        );
     }
 }

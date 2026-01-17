@@ -41,7 +41,7 @@ export class KoreaInvestmentHolidayService {
      * @param date
      */
     public async getLatestBusinessDayByDate(date: string) {
-        return this.repository.findBy({
+        return this.repository.findOneBy({
             date: LessThanOrEqual(date),
             isOpen: YN.Y,
         });
@@ -52,7 +52,7 @@ export class KoreaInvestmentHolidayService {
      * @param date
      */
     public async getLatestBusinessDayWithoutTodayByDate(date: string) {
-        return this.repository.findBy({
+        return this.repository.findOneBy({
             date: LessThan(date),
             isOpen: YN.Y,
         });

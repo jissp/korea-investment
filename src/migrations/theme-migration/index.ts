@@ -10,6 +10,7 @@ import {
     TypeOrmModule,
     TypeOrmModuleOptions,
 } from '@nestjs/typeorm';
+import { YN } from '@app/common/types/market.types';
 import {
     Theme,
     ThemeDto,
@@ -116,6 +117,7 @@ export class Migrator implements IMigrator {
                     return this.upsertTheme({
                         code: theme.themeCode,
                         name: theme.themeName,
+                        isFavorite: YN.N,
                     });
                 }),
             );

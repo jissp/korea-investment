@@ -2242,7 +2242,7 @@ export class DomesticStockInvestorTrendEstimateOutput2 {
      * 입력구분
      * 1: 09시 30분, 2: 10시 00분, 3: 11시 20분, 4: 13시 20분, 5: 14시 30분
      */
-    bsop_hour_gb: string;
+    bsop_hour_gb: '1' | '2' | '3' | '4' | '5';
 
     /**
      * 외국인수량(가집계)

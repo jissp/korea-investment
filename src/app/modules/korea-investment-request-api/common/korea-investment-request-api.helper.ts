@@ -1,10 +1,14 @@
 import { Job } from 'bullmq';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable } from '@nestjs/common';
+import { MarketDivCode } from '@modules/korea-investment/common';
 import {
+    DomesticStockInvestorTrendEstimateParam,
+    DomesticStockQuotationsInquireInvestorParam,
     DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationVolumeRankParam } from '@modules/korea-investment/korea-investment-rank-client';
 import {
     KoreaInvestmentCallApiMultiResult,
     KoreaInvestmentCallApiParam,
@@ -13,7 +17,6 @@ import {
 } from './korea-investment-request-api.type';
 import {
     DomesticInvestorTradeByStockDailyParam,
-    DomesticInvestorTrendEstimateParam,
     DomesticProgramTradeTodayParam,
     DomesticSearchStockInfoParam,
     KoreaInvestmentAccountParam,
@@ -21,8 +24,6 @@ import {
     KoreaInvestmentInterestGroupListParam,
     KoreaInvestmentInterestStockListByGroupParam,
 } from './korea-investment-request-api.interface';
-import { DomesticStockQuotationVolumeRankParam } from '@modules/korea-investment/korea-investment-rank-client';
-import { MarketDivCode } from '@modules/korea-investment/common';
 
 @Injectable()
 export class KoreaInvestmentRequestApiHelper {
@@ -165,6 +166,24 @@ export class KoreaInvestmentRequestApiHelper {
     }
 
     /**
+     * 주식현재가 투자자
+     *
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/inquire-investor
+     */
+    public generateDomesticInvestor(
+        params: DomesticStockQuotationsInquireInvestorParam,
+    ) {
+        return this.generateRequestApi<DomesticStockQuotationsInquireInvestorParam>(
+            KoreaInvestmentRequestApiType.Additional,
+            {
+                url: '/uapi/domestic-stock/v1/quotations/inquire-investor',
+                tradeId: 'FHKST01010900',
+                params,
+            },
+        );
+    }
+
+    /**
      * 종목별 투자자매매동향(일별)
      *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily
@@ -183,18 +202,16 @@ export class KoreaInvestmentRequestApiHelper {
     }
 
     /**
-     * 종목별 외인기관 추정가집계
-     *
      * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/investor-trend-estimate
      */
-    public generateDomesticInvestorTrendEstimate(
-        params: DomesticInvestorTrendEstimateParam,
+    public generateDomesticInvestorByEstimate(
+        params: DomesticStockInvestorTrendEstimateParam,
     ) {
-        return this.generateRequestApi<DomesticInvestorTrendEstimateParam>(
+        return this.generateRequestApi<DomesticStockInvestorTrendEstimateParam>(
             KoreaInvestmentRequestApiType.Additional,
             {
-                url: '/uapi/domestic-stock/v1/quotations/investor-trend-estimate',
                 tradeId: 'HHPTJ04160200',
+                url: '/uapi/domestic-stock/v1/quotations/investor-trend-estimate',
                 params,
             },
         );
@@ -282,9 +299,13 @@ export class KoreaInvestmentRequestApiHelper {
 
     /**
      * 관심종목(멀티종목) 시세조회
+     * @param marketDivCode
      * @param iscdList
      */
-    public generateRequestApiForIntstockMultiPrice(iscdList: string[]) {
+    public generateRequestApiForIntstockMultiPrice(
+        marketDivCode: MarketDivCode,
+        iscdList: string[],
+    ) {
         if (iscdList.length > this.MULTI_PRICE_MAX_STOCK_CODES) {
             throw new Error(
                 `Stock code list exceeds maximum limit (${this.MULTI_PRICE_MAX_STOCK_CODES})`,
@@ -296,19 +317,24 @@ export class KoreaInvestmentRequestApiHelper {
             {
                 url: '/uapi/domestic-stock/v1/quotations/intstock-multprice',
                 tradeId: 'FHKST11300006',
-                params: this.buildIntstockMultiPriceParam(iscdList),
+                params: this.buildIntstockMultiPriceParam(
+                    marketDivCode,
+                    iscdList,
+                ),
             },
         );
     }
 
     /**
+     * @param marketDivCode
      * @param iscdList
      */
     public buildIntstockMultiPriceParam(
+        marketDivCode: MarketDivCode,
         iscdList: string[],
     ): DomesticStockQuotationsIntstockMultPriceParam {
         const params: DomesticStockQuotationsIntstockMultPriceParam = {
-            FID_COND_MRKT_DIV_CODE_1: 'UN',
+            FID_COND_MRKT_DIV_CODE_1: marketDivCode,
             FID_INPUT_ISCD_1: '',
         };
 
@@ -319,7 +345,7 @@ export class KoreaInvestmentRequestApiHelper {
             const inputIscdKey =
                 `FID_INPUT_ISCD_${indexKey}` as keyof DomesticStockQuotationsIntstockMultPriceParam;
 
-            params[marketDivCodeKey] = 'UN';
+            params[marketDivCodeKey] = marketDivCode;
             params[inputIscdKey] = iscd;
         });
 

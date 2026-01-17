@@ -1,5 +1,10 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
+import {
+    ApiNoContentResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiParam,
+} from '@nestjs/swagger';
 import { ThemeService } from '@app/modules/repositories/theme';
 import { GetThemesResponse, GetThemeStocksResponse } from './dto';
 
@@ -19,6 +24,22 @@ export class ThemeController {
     @Get()
     public async getThemes(): Promise<GetThemesResponse> {
         const themes = await this.themeService.getThemes();
+
+        return {
+            data: themes,
+        };
+    }
+
+    @ApiOperation({
+        summary: '즐겨찾기 테마 목록 조회',
+        description: '즐겨찾기한 테마 목록을 조회합니다.',
+    })
+    @ApiOkResponse({
+        type: GetThemesResponse,
+    })
+    @Get('favorites')
+    public async getFavoriteThemes(): Promise<GetThemesResponse> {
+        const themes = await this.themeService.getFavoriteThemes();
 
         return {
             data: themes,
@@ -72,5 +93,41 @@ export class ThemeController {
         return {
             data: themes,
         };
+    }
+
+    @ApiOperation({
+        summary: '테마 즐겨찾기 추가',
+        description: '테마를 즐겨찾기에 추가합니다.',
+    })
+    @ApiParam({
+        name: 'themeCode',
+        description: '테마 코드',
+        type: String,
+        required: true,
+    })
+    @ApiNoContentResponse()
+    @Post(':themeCode/favorite')
+    public async addThemeFavorite(
+        @Param('themeCode') themeCode: string,
+    ): Promise<void> {
+        await this.themeService.updateThemeFavorite(themeCode, true);
+    }
+
+    @ApiOperation({
+        summary: '테마 즐겨찾기 제거',
+        description: '테마를 즐겨찾기에서 제거합니다.',
+    })
+    @ApiParam({
+        name: 'themeCode',
+        description: '테마 코드',
+        type: String,
+        required: true,
+    })
+    @ApiNoContentResponse()
+    @Delete(':themeCode/favorite')
+    public async removeThemeFavorite(
+        @Param('themeCode') themeCode: string,
+    ): Promise<void> {
+        await this.themeService.updateThemeFavorite(themeCode, false);
     }
 }

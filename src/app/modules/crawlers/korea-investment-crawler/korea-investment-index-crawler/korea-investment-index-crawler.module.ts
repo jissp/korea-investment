@@ -1,9 +1,5 @@
 import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
-import {
-    CredentialType,
-    KoreaInvestmentHelperModule,
-} from '@modules/korea-investment/korea-investment-helper';
 import { KoreaInvestmentAdditionalRequestApiModule } from '@app/modules/korea-investment-request-api/korea-investment-additional-request-api';
 import { MarketIndexModule } from '@app/modules/repositories/market-index';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
@@ -22,7 +18,6 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         QueueModule.forFeature({
             flowTypes,
         }),
-        KoreaInvestmentHelperModule.forFeature(CredentialType.Additional),
         KoreaInvestmentAdditionalRequestApiModule,
         MarketIndexModule,
     ],
