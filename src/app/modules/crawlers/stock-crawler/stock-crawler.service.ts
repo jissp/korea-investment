@@ -50,7 +50,10 @@ export class StockCrawlerService {
             .leftJoin(
                 StockDailyInvestor,
                 dailyInvestorAlias,
-                `${favoriteStockAlias}.stock_code = ${dailyInvestorAlias}.stock_code AND date = '${date}'`,
+                `${favoriteStockAlias}.stock_code = ${dailyInvestorAlias}.stock_code AND date = :date`,
+                {
+                    date,
+                },
             )
             .where(`${dailyInvestorAlias}.id IS NULL`)
             .getMany();

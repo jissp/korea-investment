@@ -119,7 +119,6 @@ export class StockCrawlerProcessor {
                 await this.stockHourForeignerInvestorService.insert({
                     ...dto,
                     date: dateYmd,
-                    stockCode: stock.shortCode,
                 });
             }
         } catch (error) {

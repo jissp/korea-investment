@@ -41,7 +41,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
         this.handleUpdateAccountStockGroupStockPrices();
     }
 
-    @Cron('*/5 * * * *') // 매일 16시에 실행 (장 마감 후)
+    @Cron('*/5 * * * *')
     @PreventConcurrentExecution()
     async handleCrawlingStockInvestor() {
         const currentDate = new Date();

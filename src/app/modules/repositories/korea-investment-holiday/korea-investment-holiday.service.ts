@@ -41,9 +41,14 @@ export class KoreaInvestmentHolidayService {
      * @param date
      */
     public async getLatestBusinessDayByDate(date: string) {
-        return this.repository.findOneBy({
-            date: LessThanOrEqual(date),
-            isOpen: YN.Y,
+        return this.repository.findOne({
+            where: {
+                date: LessThanOrEqual(date),
+                isOpen: YN.Y,
+            },
+            order: {
+                date: 'DESC',
+            },
         });
     }
 
