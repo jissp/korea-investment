@@ -1,16 +1,26 @@
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { toDateYmdByDate } from '@common/utils';
 import { OnQueueProcessor } from '@modules/queue';
 import {
+    DomesticStockInvestorTrendEstimateOutput2,
+    DomesticStockInvestorTrendEstimateParam,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
     DomesticStockQuotationsInquireInvestorOutput,
     DomesticStockQuotationsInquireInvestorParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
-import { StockDailyInvestorService } from '@app/modules/repositories/stock-daily-investor';
+import {
+    StockDailyInvestorService,
+    StockHourForeignerInvestorService,
+} from '@app/modules/repositories/stock-investor';
+import { Stock } from '@app/modules/repositories/stock';
 import { StockCrawlerFlowType } from '../stock-crawler.types';
-import { DomesticStockInvestorTransformer } from '../transformers';
+import {
+    DomesticStockInvestorTransformer,
+    StockInvestorByEstimateTransformer,
+} from '../transformers';
 
 @Injectable()
 export class StockCrawlerProcessor {
@@ -19,8 +29,9 @@ export class StockCrawlerProcessor {
         new DomesticStockInvestorTransformer();
 
     constructor(
-        private readonly stockDailyInvestorService: StockDailyInvestorService,
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
+        private readonly stockDailyInvestorService: StockDailyInvestorService,
+        private readonly stockHourForeignerInvestorService: StockHourForeignerInvestorService,
     ) {}
 
     @OnQueueProcessor(StockCrawlerFlowType.RequestStockInvestor)
@@ -52,6 +63,65 @@ export class StockCrawlerProcessor {
             await this.stockDailyInvestorService.upsert(
                 transformedStockDailyInvestors,
             );
+        } catch (error) {
+            this.logger.error(error);
+
+            throw error;
+        }
+    }
+
+    @OnQueueProcessor(StockCrawlerFlowType.RequestStockHourInvestorByForeigner)
+    async processRequestStockHourInvestorByForeigner(
+        job: Job<{
+            date: string;
+            stock: Stock;
+        }>,
+    ) {
+        try {
+            const { date, stock } = job.data;
+            const currentDate = new Date(date);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
+                    DomesticStockInvestorTrendEstimateParam,
+                    unknown,
+                    DomesticStockInvestorTrendEstimateOutput2[]
+                >(job);
+
+            const outputs = childrenResponses.flatMap(
+                ({ response }) => response.output2,
+            );
+
+            const transformer = new StockInvestorByEstimateTransformer();
+
+            const stockHourForeignerInvestorDtoList = outputs.map((output) =>
+                transformer.transform({
+                    stock,
+                    output,
+                }),
+            );
+
+            for (const dto of stockHourForeignerInvestorDtoList) {
+                const dateYmd = toDateYmdByDate({
+                    date: currentDate,
+                    separator: '-',
+                });
+
+                const isExists =
+                    await this.stockHourForeignerInvestorService.exists(
+                        dto.stockCode,
+                        dateYmd,
+                        dto.timeCode,
+                    );
+                if (isExists) {
+                    continue;
+                }
+
+                await this.stockHourForeignerInvestorService.insert({
+                    ...dto,
+                    date: dateYmd,
+                    stockCode: stock.shortCode,
+                });
+            }
         } catch (error) {
             this.logger.error(error);
 

@@ -1,6 +1,6 @@
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockDailyInvestorDto } from '@app/modules/repositories/stock-daily-investor';
+import { StockDailyInvestorDto } from '@app/modules/repositories/stock-investor';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
 

@@ -67,3 +67,40 @@ export function toDateByKoreaInvestmentTime(time: string): string {
 function formatTwoDigits(num: number): string {
     return num.toString().padStart(2, '0');
 }
+
+export function toTimeCodeByDate(
+    date: Date,
+): '1' | '2' | '3' | '4' | '5' | null {
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    const totalMinutes = hours * 60 + minutes;
+
+    // 09:30
+    if (totalMinutes < 570) {
+        return null;
+    }
+
+    // 10:00
+    if (totalMinutes < 600) {
+        return '1';
+    }
+
+    // 10:00
+    if (totalMinutes < 680) {
+        return '2';
+    }
+
+    // 11:20
+    if (totalMinutes < 800) {
+        return '3';
+    }
+
+    // 13:20
+    if (totalMinutes < 870) {
+        return '4';
+    }
+
+    // 14:30 이후
+    return '5';
+}

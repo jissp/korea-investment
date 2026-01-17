@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StockDailyInvestor } from '@app/modules/repositories/stock-daily-investor';
+import { StockDailyInvestor } from '@app/modules/repositories/stock-investor';
 
 export class GetStockInvestorsResponse {
     @ApiProperty({

@@ -1,7 +1,7 @@
 import { Pipe } from '@common/types';
 import { DomesticStockInvestorTrendEstimateOutput2 } from '@modules/korea-investment/korea-investment-quotation-client';
 import { Stock } from '@app/modules/repositories/stock';
-import { StockInvestorByEstimateDto } from '@app/controllers';
+import { StockHourForeignerInvestorDto } from '@app/modules/repositories/stock-investor';
 
 interface TransformerParams {
     stock: Stock;
@@ -10,19 +10,17 @@ interface TransformerParams {
 
 export class StockInvestorByEstimateTransformer implements Pipe<
     TransformerParams,
-    StockInvestorByEstimateDto
+    Omit<StockHourForeignerInvestorDto, 'date'>
 > {
     transform({
         stock,
         output,
-    }: TransformerParams): StockInvestorByEstimateDto {
+    }: TransformerParams): Omit<StockHourForeignerInvestorDto, 'date'> {
         return {
-            time: output.bsop_hour_gb,
+            timeCode: output.bsop_hour_gb,
             stockCode: stock.shortCode,
-            stockName: stock.name,
-            person: Number(output.frgn_fake_ntby_qty),
+            foreigner: Number(output.frgn_fake_ntby_qty),
             organization: Number(output.orgn_fake_ntby_qty),
-            sum: Number(output.sum_fake_ntby_qty),
         };
     }
 }

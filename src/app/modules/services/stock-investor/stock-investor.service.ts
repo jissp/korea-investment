@@ -1,15 +1,20 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { toDateYmdByDate } from '@common/utils';
+import { isNil } from '@nestjs/common/utils/shared.utils';
+import { toDateYmdByDate, toTimeCodeByDate } from '@common/utils';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockInvestorByEstimateTransformer, YN } from '@app/common';
+import { YN } from '@app/common';
 import {
     StockDailyInvestor,
     StockDailyInvestorService,
-} from '@app/modules/repositories/stock-daily-investor';
+    StockHourForeignerInvestor,
+    StockHourForeignerInvestorService,
+} from '@app/modules/repositories/stock-investor';
 import { StockService } from '@app/modules/repositories/stock';
-import { DomesticStockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
-import { StockInvestorByEstimateDto } from '@app/controllers/stocks/dto/responses/get-stock-investor-by-estimate.response';
+import {
+    DomesticStockInvestorTransformer,
+    StockInvestorByEstimateTransformer,
+} from '@app/modules/crawlers/stock-crawler/transformers';
 
 @Injectable()
 export class StockInvestorService {
@@ -19,6 +24,7 @@ export class StockInvestorService {
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
         private readonly stockService: StockService,
         private readonly stockDailyInvestorService: StockDailyInvestorService,
+        private readonly stockHourForeignerInvestorService: StockHourForeignerInvestorService,
     ) {}
 
     /**
@@ -74,8 +80,14 @@ export class StockInvestorService {
      */
     public async getDailyInvestorByEstimate(
         stockCode: string,
-    ): Promise<StockInvestorByEstimateDto[]> {
+    ): Promise<StockHourForeignerInvestor[]> {
         try {
+            const currentDate = new Date();
+            const timeCode = toTimeCodeByDate(currentDate);
+            if (isNil(timeCode)) {
+                return [];
+            }
+
             const stock = await this.stockService.getStock(stockCode);
             if (!stock) {
                 throw new NotFoundException(
@@ -83,19 +95,28 @@ export class StockInvestorService {
                 );
             }
 
-            const transformer = new StockInvestorByEstimateTransformer();
-            const outputs =
-                await this.koreaInvestmentQuotationClient.inquireInvestorByEstimate(
-                    {
-                        MKSC_SHRN_ISCD: stock.shortCode,
-                    },
+            const dateYmd = toDateYmdByDate({
+                date: currentDate,
+                separator: '-',
+            });
+
+            const isExists =
+                await this.stockHourForeignerInvestorService.exists(
+                    stockCode,
+                    dateYmd,
+                    timeCode,
                 );
 
-            return outputs.map((output) =>
-                transformer.transform({
-                    stock,
-                    output,
-                }),
+            if (!isExists) {
+                await this.fetchAndSaveStockHourInvestorsByEstimate(
+                    stockCode,
+                    dateYmd,
+                );
+            }
+
+            return this.stockHourForeignerInvestorService.getListByStockCode(
+                stockCode,
+                dateYmd,
             );
         } catch (error) {
             this.logger.error(error);
@@ -131,5 +152,59 @@ export class StockInvestorService {
         );
 
         await this.stockDailyInvestorService.upsert(transformedStockInvestors);
+    }
+
+    /**
+     * 한국투자증권 API를 통해 금일 외국인 동향 정보를 조회하고 저장합니다.
+     * @param stockCode
+     * @param date
+     * @private
+     */
+    private async fetchAndSaveStockHourInvestorsByEstimate(
+        stockCode: string,
+        date: string,
+    ) {
+        const stock = await this.stockService.getStock(stockCode);
+        if (isNil(stock)) {
+            return [];
+        }
+
+        const outputs =
+            await this.koreaInvestmentQuotationClient.inquireInvestorByEstimate(
+                {
+                    MKSC_SHRN_ISCD: stock.shortCode,
+                },
+            );
+
+        const transformer = new StockInvestorByEstimateTransformer();
+        const dtoList = outputs.map((output) => ({
+            ...transformer.transform({
+                stock,
+                output,
+            }),
+            date,
+            stockCode: stock.shortCode,
+        }));
+
+        await Promise.all(
+            dtoList.map(async (dto) => {
+                if (
+                    await this.stockHourForeignerInvestorService.exists(
+                        stockCode,
+                        date,
+                        dto.timeCode,
+                    )
+                ) {
+                    return;
+                }
+
+                return this.stockHourForeignerInvestorService.insert(dto);
+            }),
+        );
+
+        return this.stockHourForeignerInvestorService.getListByStockCode(
+            stock.shortCode,
+            date,
+        );
     }
 }
