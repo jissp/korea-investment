@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
-import { KoreaInvestmentConfigModule } from '@modules/korea-investment/korea-investment-config';
 import {
     CredentialType,
     KoreaInvestmentHelperModule,
@@ -23,7 +22,6 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         QueueModule.forFeature({
             flowTypes,
         }),
-        KoreaInvestmentConfigModule,
         KoreaInvestmentHelperModule.forFeature(CredentialType.Additional),
         KoreaInvestmentAdditionalRequestApiModule,
         MarketIndexModule,

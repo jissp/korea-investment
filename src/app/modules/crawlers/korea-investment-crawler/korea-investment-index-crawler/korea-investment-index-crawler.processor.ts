@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { OnQueueProcessor } from '@modules/queue';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import { MarketIndexService } from '@app/modules/repositories/market-index';
 import {
     KoreaInvestmentCallApiMultiResult,
@@ -24,7 +24,6 @@ import {
     OverseasGovernmentBondTransformer,
     OverseasIndexTransformer,
 } from './transformers';
-import { toDateByKoreaInvestmentYmd } from '@common/utils';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerProcessor {
@@ -34,7 +33,6 @@ export class KoreaInvestmentIndexCrawlerProcessor {
 
     constructor(
         private readonly marketIndexService: MarketIndexService,
-        private readonly koreaInvestmentHelperService: KoreaInvestmentHelperService,
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
     ) {}
 

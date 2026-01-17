@@ -2,8 +2,8 @@ import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PreventConcurrentExecution } from '@common/decorators';
+import { toDateYmdByDate } from '@common/utils';
 import { getDefaultJobOptions } from '@modules/queue';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 import {
     DOMESTIC_INDEX_CODES,
     OVERSEAS_GOVERNMENT_BOND_CODES,
@@ -18,7 +18,6 @@ import {
     KoreaInvestmentDomesticInquireIndexDailyPriceParam,
     OverseasQuotationInquireDailyChartPriceParam,
 } from './korea-investment-index-crawler.interface';
-import { toDateYmdByDate } from '@common/utils';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
@@ -27,7 +26,6 @@ export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {
     );
 
     constructor(
-        private readonly helperService: KoreaInvestmentHelperService,
         private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
         @Inject(KoreaInvestmentIndexCrawlerFlowType.RequestKoreaDailyIndex)
         private readonly requestKoreaDailyIndexFlow: FlowProducer,
