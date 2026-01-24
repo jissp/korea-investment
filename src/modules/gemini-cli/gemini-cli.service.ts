@@ -5,7 +5,7 @@ import {
     CallbackEvent,
     GeminiCliOptions,
     GeminiCliProvider,
-    GeminiCliResponse,
+    GeminiCliResult,
     RequestCallbackEvent,
 } from './gemini-cli.types';
 import { GeminiCliProcessManagerService } from './gemini-cli-process-manager.service';
@@ -34,16 +34,51 @@ export class GeminiCliService {
         callbackEvent: RequestCallbackEvent<T>;
     }) {
         const geminiProcess = spawn('gemini', [
+            prompt,
             '--model',
             this.config.model,
-            '--prompt',
-            prompt,
             '--output-format',
             'json',
         ]);
         this.geminiCliProcessManagerService.addProcess(geminiProcess);
 
         this.bindProcessEvents(geminiProcess, callbackEvent);
+    }
+
+    public requestSyncPrompt(prompt: string): Promise<GeminiCliResult> {
+        return new Promise((resolve, reject) => {
+            try {
+                const geminiProcess = spawn('gemini', [
+                    prompt,
+                    '--model',
+                    this.config.model,
+                    '--output-format',
+                    'json',
+                ]);
+                this.geminiCliProcessManagerService.addProcess(geminiProcess);
+
+                // stdout 데이터를 버퍼에 누적
+                geminiProcess.stdout.on('data', (data) => {
+                    resolve(JSON.parse(data.toString()));
+                });
+
+                geminiProcess.stderr.on('error', (error) => {
+                    reject(error);
+                });
+
+                geminiProcess.on('close', () => {
+                    this.geminiCliProcessManagerService.deleteProcess(
+                        geminiProcess,
+                    );
+                });
+            } catch (error) {
+                if (error instanceof Error) {
+                    reject(error);
+                } else {
+                    reject(new Error('Unknown error occurred'));
+                }
+            }
+        });
     }
 
     /**
@@ -60,7 +95,7 @@ export class GeminiCliService {
         geminiProcess.stdout.on('data', (data) => {
             const eventMessage = {
                 eventData: requestCallbackEvent.eventData,
-                prompt: JSON.parse(data.toString()) as GeminiCliResponse,
+                prompt: JSON.parse(data.toString()) as GeminiCliResult,
             } as CallbackEvent<T>;
 
             // 이벤트 발행

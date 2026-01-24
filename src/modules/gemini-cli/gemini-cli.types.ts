@@ -12,10 +12,10 @@ export interface RequestCallbackEvent<T> {
 }
 export interface CallbackEvent<T> {
     eventData: T;
-    prompt: GeminiCliResponse;
+    prompt: GeminiCliResult;
 }
 
-export interface GeminiCliResponse {
+export interface GeminiCliResult {
     session_id: string;
     response: string;
     status: any;
