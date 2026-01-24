@@ -1,6 +1,7 @@
 import * as ws from 'ws';
 import { Subject } from 'rxjs';
 import { Injectable, Logger } from '@nestjs/common';
+import { isConnected } from '@common/domains';
 import {
     BasePingPongMessage,
     BaseResponse,
@@ -86,8 +87,14 @@ export class KoreaInvestmentWsFactory {
             this.logger.error(
                 `Korea Investment WebSocket error: ${error.message}`,
             );
-            // messageSubject.error(error);
-            messageSubject.unsubscribe();
+
+            if (isConnected(webSocket)) {
+                webSocket.close();
+                webSocket.removeAllListeners();
+            }
+            if (!messageSubject.closed) {
+                messageSubject.complete();
+            }
         };
 
         webSocket.on('message', onMessage);

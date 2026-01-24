@@ -5,27 +5,14 @@ import {
     TransformResult,
 } from '@modules/korea-investment/korea-investment-web-socket';
 import { KoreaInvestmentCollectorEventType } from './korea-investment-collector.types';
-import { KoreaInvestmentCollectorSocket } from './korea-investment-collector.socket';
 
 @Injectable()
 export class KoreaInvestmentCollectorListener {
     constructor(
         private readonly logger: Logger,
         private readonly helperService: KoreaInvestmentWebSocketHelperService,
-        private readonly koreaInvestmentCollectorSocket: KoreaInvestmentCollectorSocket,
         private readonly eventEmitter: EventEmitter2,
     ) {}
-
-    @OnEvent(KoreaInvestmentCollectorEventType.Closed)
-    public async handleSocketClosed() {
-        try {
-            if (!this.koreaInvestmentCollectorSocket.isConnected()) {
-                await this.koreaInvestmentCollectorSocket.reconnect();
-            }
-        } catch (error) {
-            this.logger.error(error);
-        }
-    }
 
     @OnEvent(
         KoreaInvestmentCollectorEventType.MessageReceivedFromKoreaInvestment,

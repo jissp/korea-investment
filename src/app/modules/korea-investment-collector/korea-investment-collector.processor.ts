@@ -66,7 +66,9 @@ export class KoreaInvestmentCollectorProcessor {
             }));
 
             // 패킷 전송
-            messages.map((message) => this.collectorSocket.send(message));
+            await Promise.all(
+                messages.map((message) => this.collectorSocket.send(message)),
+            );
         } catch (error) {
             this.logger.error(error);
 

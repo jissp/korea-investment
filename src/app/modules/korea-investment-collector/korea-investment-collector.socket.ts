@@ -26,8 +26,8 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
         private readonly queue: Queue<KoreaInvestmentRequestRealTimeJobPayload>,
     ) {}
 
-    onModuleInit() {
-        this.connect();
+    async onModuleInit() {
+        await this.connect();
     }
 
     /**
@@ -40,24 +40,26 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
     /**
      * socket을 연결합니다.
      */
-    public connect() {
-        if (isConnected(this.socket)) {
-            return;
-        }
+    public async connect() {
+        return new Promise((resolve, reject) => {
+            if (isConnected(this.socket)) {
+                return resolve(this.socket);
+            }
 
-        const { webSocket, onMessageObservable } = this.factory.create();
-        webSocket.on('open', () =>
-            this.eventEmitter.emit(KoreaInvestmentCollectorEventType.Opened),
-        );
-        webSocket.on('close', () =>
-            this.eventEmitter.emit(KoreaInvestmentCollectorEventType.Closed),
-        );
+            const { webSocket, onMessageObservable } = this.factory.create();
+            webSocket.on('open', () => resolve(this.socket));
+            webSocket.on('error', (ws: WebSocket, error: Error) =>
+                reject(error),
+            );
 
-        this.socket = webSocket;
-        this.messageSubscription = onMessageObservable.subscribe((message) => {
-            this.eventEmitter.emit(
-                KoreaInvestmentCollectorEventType.MessageReceivedFromKoreaInvestment,
-                message,
+            this.socket = webSocket;
+            this.messageSubscription = onMessageObservable.subscribe(
+                (message) => {
+                    this.eventEmitter.emit(
+                        KoreaInvestmentCollectorEventType.MessageReceivedFromKoreaInvestment,
+                        message,
+                    );
+                },
             );
         });
     }
@@ -66,31 +68,46 @@ export class KoreaInvestmentCollectorSocket implements OnModuleInit {
      * socket을 닫습니다.
      */
     public disconnect() {
-        if (!this.isConnected()) {
-            return;
-        }
+        return new Promise((resolve, reject) => {
+            try {
+                if (!this.isConnected()) {
+                    return resolve(true);
+                }
 
-        this.messageSubscription?.unsubscribe();
-        this.messageSubscription = null;
+                this.messageSubscription?.unsubscribe();
+                this.messageSubscription = null;
 
-        this.socket.close();
+                this.socket.close();
+                return resolve(true);
+            } catch (error) {
+                return reject(
+                    error instanceof Error
+                        ? error
+                        : new Error('Unknown error occurred'),
+                );
+            }
+        });
     }
 
     /**
      * socket을 재연결합니다.
      */
-    public reconnect() {
+    public async reconnect() {
         // TODO 추후 기존 구독 내역을 자동으로 복원할 수 있어야 한다. RedisSet을 통해서 구현하는게 쉬울지도.
-        this.disconnect();
-        this.connect();
+        await this.disconnect();
+        await this.connect();
     }
 
     /**
      * socket을 통해 메세지를 전송합니다.
      * @param message
      */
-    public send<T>(message: T) {
-        if (this.socket.readyState === this.socket.OPEN) {
+    public async send<T>(message: T) {
+        if (!this.isConnected()) {
+            await this.reconnect();
+        }
+
+        if (this.isConnected()) {
             this.socket.send(JSON.stringify(message));
         }
     }
