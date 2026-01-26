@@ -5,8 +5,10 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        - NODE_ENV=local
+        - NODE_ENV=prod
         - APP_NAME=backend-korea-investment
+    ports:
+      - '3100:3100'
     networks:
       - korea-investment-network
   mysql:
