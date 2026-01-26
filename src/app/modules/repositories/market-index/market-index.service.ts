@@ -1,4 +1,4 @@
-import { In, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { toDateYmdByDate } from '@common/utils';
@@ -30,6 +30,29 @@ export class MarketIndexService {
             date,
             code,
         });
+    }
+
+    /**
+     * 지정된 기간 동안의 국내 주가 정보를 조회합니다.
+     * @param days 조회할 기간 (일 단위, 기본값: 7일)
+     */
+    public async getIndicesByDays(days: number = 7) {
+        try {
+            const targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() - days);
+            const startDate = toDateYmdByDate({
+                separator: '-',
+                date: targetDate,
+            });
+
+            return this.marketIndexRepository.findBy({
+                marketType: MarketType.Domestic,
+                date: MoreThanOrEqual(startDate),
+            });
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
     }
 
     /**

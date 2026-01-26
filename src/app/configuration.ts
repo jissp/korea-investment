@@ -1,3 +1,5 @@
+import { GeminiCliModel } from '@modules/gemini-cli';
+
 export interface IConfiguration {
     database: {
         host: string;
@@ -60,6 +62,14 @@ export interface IConfiguration {
     };
     gemini: {
         model: string;
+    };
+    slack?: {
+        signingSecret: string;
+        appToken: string;
+        token: string;
+        channel: {
+            stock: string;
+        };
     };
 }
 
@@ -125,6 +135,14 @@ export default (): IConfiguration => ({
     },
     gemini: {
         model: getEnv('GEMINI_CLI_MODEL'),
+    },
+    slack: {
+        signingSecret: getEnv('SLACK_SIGNING_SECRET'),
+        appToken: getEnv('SLACK_APP_TOKEN'),
+        token: getEnv('SLACK_BOT_TOKEN'),
+        channel: {
+            stock: getEnv('SLACK_STOCK_CHANNEL_ID'),
+        },
     },
 });
 

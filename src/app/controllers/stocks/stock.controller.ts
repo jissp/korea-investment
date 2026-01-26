@@ -16,7 +16,7 @@ import { ExistingStockGuard } from '@app/common/guards';
 import { MarketType, YN } from '@app/common/types';
 import { StockPriceTransformer } from '@app/common/transformers/stock-price.transformer';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
-import { StockService } from '@app/modules/repositories/stock';
+import { Stock, StockService } from '@app/modules/repositories/stock';
 import {
     GetStockDailyPricesResponse,
     GetStockPricesResponse,
@@ -136,20 +136,33 @@ export class StockController {
         @Query('stockCodes') stockCodes: string,
     ): Promise<GetStockPricesResponse> {
         const splitStockCodes = stockCodes.split(',');
-        const stockCodeChunks = _.chunk(splitStockCodes, 30);
+
+        const stocks = await this.stockService.getStocksByStockCode({
+            marketType: MarketType.Domestic,
+            stockCodes: splitStockCodes,
+        });
+        const groupedStocks = _.groupBy(stocks, (stock) => stock.isNextTrade);
 
         const responses = await Promise.all(
-            stockCodeChunks.map((stockCodes) => {
-                const params =
-                    this.koreaInvestmentRequestApiHelper.buildIntstockMultiPriceParam(
-                        MarketDivCode.KRX,
-                        stockCodes,
-                    );
+            Object.entries(groupedStocks).flatMap(
+                ([isNxt, stocks]: [YN, Stock[]]) => {
+                    const marketDivCode =
+                        isNxt === YN.Y ? MarketDivCode.통합 : MarketDivCode.KRX;
+                    const stockChunks = _.chunk(stocks, 30);
 
-                return this.koreaInvestmentQuotationClient.inquireIntstockMultiPrice(
-                    params,
-                );
-            }),
+                    return stockChunks.map((stocks) => {
+                        const params =
+                            this.koreaInvestmentRequestApiHelper.buildIntstockMultiPriceParam(
+                                marketDivCode,
+                                stocks.map((stock) => stock.shortCode),
+                            );
+
+                        return this.koreaInvestmentQuotationClient.inquireIntstockMultiPrice(
+                            params,
+                        );
+                    });
+                },
+            ),
         );
 
         const transformer = new StockPriceTransformer();
