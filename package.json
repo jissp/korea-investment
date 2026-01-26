@@ -9,7 +9,7 @@
         "build": "nest build",
         "start": "dotenv -e src/app/env/.env nest start",
         "start:dev": "nest start --watch",
-        "start:prod": "node dist/src/main",
+        "start:prod": "dotenv -e .env node dist/src/main",
         "test": "jest",
         "test:watch": "jest --watch",
         "test:e2e": "jest --config ./jest-e2e.json",
@@ -102,10 +102,10 @@
             "dotenv/config"
         ],
         "moduleNameMapper": {
-            "^@app/(.*)$": "<rootDir>/src/app/$1",
-            "^@assets/(.*)$": "<rootDir>/src/assets/$1",
-            "^@common/(.*)$": "<rootDir>/src/common/$1",
-            "^@modules/(.*)$": "<rootDir>/src/modules/$1"
+            "^@app/(.*)$": "<rootDir>/app/$1",
+            "^@assets/(.*)$": "<rootDir>/assets/$1",
+            "^@common/(.*)$": "<rootDir>/common/$1",
+            "^@modules/(.*)$": "<rootDir>/modules/$1"
         }
     }
 }

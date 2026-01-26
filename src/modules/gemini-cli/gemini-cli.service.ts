@@ -1,12 +1,9 @@
-import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
-    CallbackEvent,
     GeminiCliOptions,
     GeminiCliProvider,
     GeminiCliResult,
-    RequestCallbackEvent,
 } from './gemini-cli.types';
 import { GeminiCliProcessManagerService } from './gemini-cli-process-manager.service';
 
@@ -16,7 +13,6 @@ export class GeminiCliService {
 
     constructor(
         private readonly geminiCliProcessManagerService: GeminiCliProcessManagerService,
-        private readonly eventEmitter: EventEmitter2,
         @Inject(GeminiCliProvider.GeminiCliConfig)
         private readonly config: GeminiCliOptions,
     ) {}
@@ -24,95 +20,75 @@ export class GeminiCliService {
     /**
      * Gemini CLI를 통해 prompt를 전달합니다.
      * @param prompt
-     * @param callbackEvent
+     * @param options
      */
-    public requestPrompt<T = any>({
-        prompt,
-        callbackEvent,
-    }: {
-        prompt: string;
-        callbackEvent: RequestCallbackEvent<T>;
-    }) {
-        const geminiProcess = spawn('gemini', [
-            prompt,
-            '--model',
-            this.config.model,
-            '--output-format',
-            'json',
-        ]);
-        this.geminiCliProcessManagerService.addProcess(geminiProcess);
-
-        this.bindProcessEvents(geminiProcess, callbackEvent);
-    }
-
-    public requestSyncPrompt(prompt: string): Promise<GeminiCliResult> {
+    public requestSyncPrompt(
+        prompt: string,
+        options?: GeminiCliOptions,
+    ): Promise<GeminiCliResult> {
         return new Promise((resolve, reject) => {
-            try {
-                const geminiProcess = spawn('gemini', [
-                    prompt,
-                    '--model',
-                    this.config.model,
-                    '--output-format',
-                    'json',
-                ]);
-                this.geminiCliProcessManagerService.addProcess(geminiProcess);
+            const model = options?.model ?? this.config.model;
 
-                // stdout 데이터를 버퍼에 누적
-                geminiProcess.stdout.on('data', (data) => {
-                    resolve(JSON.parse(data.toString()));
-                });
+            const cleanEnv = { ...process.env };
+            delete cleanEnv.NODE_OPTIONS;
 
-                geminiProcess.stderr.on('error', (error) => {
-                    reject(error);
-                });
+            const geminiProcess = spawn(
+                'gemini',
+                ['--model', model, '--output-format', 'json'],
+                {
+                    env: cleanEnv,
+                },
+            );
 
-                geminiProcess.on('close', () => {
+            geminiProcess.stdin.write(prompt);
+            geminiProcess.stdin.end();
+
+            this.geminiCliProcessManagerService.addProcess(geminiProcess);
+
+            // --output-format=json 이라 무조건 1번의 data만 응답됨.
+            let outputData: string = '';
+            geminiProcess.stdout.on('data', (data) => {
+                outputData += data.toString();
+            });
+
+            geminiProcess.on('error', (error) => {
+                if (!geminiProcess.killed) {
+                    geminiProcess.kill();
+                }
+
+                reject(error);
+            });
+
+            geminiProcess.on('close', () => {
+                if (!outputData) {
+                    return reject(
+                        new Error('Gemini CLI process closed without output'),
+                    );
+                }
+
+                try {
+                    const dataObject = JSON.parse(outputData);
+
+                    resolve(dataObject);
+
+                    this.logger.log('Gemini CLI process closed');
                     this.geminiCliProcessManagerService.deleteProcess(
                         geminiProcess,
                     );
-                });
-            } catch (error) {
-                if (error instanceof Error) {
-                    reject(error);
-                } else {
-                    reject(new Error('Unknown error occurred'));
+                } catch (error) {
+                    this.logger.log(
+                        'Gemini CLI process Error',
+                        outputData,
+                        error,
+                    );
+
+                    if (error instanceof Error) {
+                        reject(error);
+                    } else {
+                        reject(new Error(error.mesage));
+                    }
                 }
-            }
-        });
-    }
-
-    /**
-     * Gemini CLI 프로세스의 이벤트를 처리합니다.
-     * @param geminiProcess
-     * @param requestCallbackEvent
-     * @private
-     */
-    private bindProcessEvents<T = any>(
-        geminiProcess: ChildProcessWithoutNullStreams,
-        requestCallbackEvent: RequestCallbackEvent<T>,
-    ) {
-        // stdout 데이터를 버퍼에 누적
-        geminiProcess.stdout.on('data', (data) => {
-            const eventMessage = {
-                eventData: requestCallbackEvent.eventData,
-                prompt: JSON.parse(data.toString()) as GeminiCliResult,
-            } as CallbackEvent<T>;
-
-            // 이벤트 발행
-            this.eventEmitter.emit(
-                requestCallbackEvent.eventName,
-                eventMessage,
-            );
-        });
-
-        geminiProcess.stderr.on('error', (error) => {
-            this.logger.error(`Gemini CLI error: ${error.message}`);
-
-            this.geminiCliProcessManagerService.deleteProcess(geminiProcess);
-        });
-
-        geminiProcess.on('close', () => {
-            this.geminiCliProcessManagerService.deleteProcess(geminiProcess);
+            });
         });
     }
 }

@@ -1,7 +1,9 @@
 import * as _ from 'lodash';
-import { Injectable, Logger } from '@nestjs/common';
+import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { uniqueValues } from '@common/utils';
 import { getStockName } from '@common/domains';
+import { GeminiCliModel } from '@modules/gemini-cli';
 import {
     NaverApiClientFactory,
     NaverApiNewsItem,
@@ -16,14 +18,21 @@ import {
 import { YN } from '@app/common';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import { NewsService, StockNews } from '@app/modules/repositories/news';
-import { ReportType } from '@app/modules/repositories/ai-analysis-report';
-import { AnalyzeStockPromptTransformer } from '../transformers';
-import { AnalysisCompletedEventBody } from '../stock-analyzer.types';
+import {
+    PromptToGeminiCliBody,
+    StockAnalyzerFlowType,
+    StockAnalyzerQueueType,
+} from '../stock-analyzer.types';
+import {
+    InvestorPromptTransformer,
+    NewsPromptTransformer,
+    StockIssuePromptTransformer,
+} from '../transformers';
 import { IAnalysisAdapter } from './analysis-adapter.interface';
 
 const DEFAULT_CHUNK_SIZE = 5;
 
-interface StockAnalysisData {
+export interface StockAnalysisData {
     stock: Stock;
     stockInvestors: DomesticStockQuotationsInquireInvestorOutput[];
     stockInvestorByEstimates: DomesticStockInvestorTrendEstimateOutput2[];
@@ -50,7 +59,7 @@ export class StockAnalysisAdapter implements IAnalysisAdapter<StockAnalysisData>
     async collectData(stockCode: string): Promise<StockAnalysisData> {
         const stock = await this.stockService.getStock(stockCode);
         if (!stock) {
-            throw new Error(`Stock not found: ${stockCode}`);
+            throw new NotFoundException(`Stock not found: ${stockCode}`);
         }
 
         const marketDivCode =
@@ -84,35 +93,53 @@ export class StockAnalysisAdapter implements IAnalysisAdapter<StockAnalysisData>
         };
     }
 
-    /**
-     * 데이터를 프롬프트로 변환합니다.
-     * @param data
-     */
-    transformToPrompt(data: StockAnalysisData): string {
-        const transformer = new AnalyzeStockPromptTransformer();
-
-        return transformer.transform({
-            stockName: getStockName(data.stock.shortCode),
-            stockNewsItems: data.stockNews,
-            stockInvestors: data.stockInvestors,
-            naverNewsItems: data.naverNewsItems,
-            stockInvestorByEstimates: data.stockInvestorByEstimates,
-        });
+    public transformToTitle(data: StockAnalysisData) {
+        return `${data.stock.name} 종목 분석`;
     }
 
-    /**
-     * 분석 완료 이벤트 객체를 생성합니다.
-     * @param target
-     * @param data
-     */
-    getEventConfig(
-        target: string,
-        data: StockAnalysisData,
-    ): AnalysisCompletedEventBody {
+    public transformToFlowChildJob(data: StockAnalysisData): FlowChildJob {
+        const queueName = StockAnalyzerFlowType.RequestStockAnalysis;
+
         return {
-            reportType: ReportType.Stock,
-            reportTarget: data.stock.shortCode,
-            title: `${data.stock.name} 종목 분석 리포트`,
+            queueName,
+            name: queueName,
+            data,
+            children: [
+                {
+                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    name: '종목의 현재 이슈, 정책 등을 조회',
+                    data: {
+                        prompt: new StockIssuePromptTransformer().transform({
+                            stockName: getStockName(data.stock.shortCode),
+                        }),
+                        model: GeminiCliModel.Gemini3Pro,
+                    } as PromptToGeminiCliBody,
+                },
+                {
+                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    name: '종목의 최근 뉴스 정보 분석',
+                    data: {
+                        prompt: new NewsPromptTransformer().transform({
+                            news: data.stockNews,
+                            naverNewsItems: data.naverNewsItems,
+                        }),
+                        model: GeminiCliModel.Gemini3Pro,
+                    } as PromptToGeminiCliBody,
+                },
+                {
+                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    name: '종목의 투자자 동향 분석',
+                    data: {
+                        prompt: new InvestorPromptTransformer().transform({
+                            stockName: data.stock.name,
+                            stockInvestors: data.stockInvestors,
+                            stockInvestorByEstimates:
+                                data.stockInvestorByEstimates,
+                        }),
+                        model: GeminiCliModel.Gemini3Flash,
+                    } as PromptToGeminiCliBody,
+                },
+            ],
         };
     }
 

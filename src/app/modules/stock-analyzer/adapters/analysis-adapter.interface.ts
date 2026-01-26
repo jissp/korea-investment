@@ -1,4 +1,4 @@
-import { AnalysisCompletedEventBody } from '../stock-analyzer.types';
+import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 
 export interface IAnalysisAdapter<TCollectedData> {
     /**
@@ -8,18 +8,14 @@ export interface IAnalysisAdapter<TCollectedData> {
     collectData(target: string): Promise<TCollectedData>;
 
     /**
+     * 작업의 Title을 변환합니다.
+     * @param data
+     */
+    transformToTitle(data: TCollectedData): string;
+
+    /**
      * 데이터를 프롬프트로 변환합니다.
      * @param data
      */
-    transformToPrompt(data: TCollectedData): string;
-
-    /**
-     * 분석 완료 이벤트 객체를 생성합니다.
-     * @param target
-     * @param data
-     */
-    getEventConfig(
-        target: string,
-        data: TCollectedData,
-    ): AnalysisCompletedEventBody;
+    transformToFlowChildJob(data: TCollectedData): FlowChildJob;
 }

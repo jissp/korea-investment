@@ -1,13 +1,14 @@
 import * as _ from 'lodash';
 import { Pipe } from '@common/types';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
-import { News, StockNews } from '@app/modules/repositories/news';
+import { News } from '@app/modules/repositories/news';
 
-interface NewsPromptArgs {
-    newsItems?: News[];
+const MAX_NEWS_ITEMS = 100;
+
+type PromptArgs = {
     naverNewsItems?: NaverApiNewsItem[];
-    stockNewsItems?: StockNews[];
-}
+    news: News[];
+};
 
 interface NormalizedNews {
     title: string;
@@ -15,34 +16,56 @@ interface NormalizedNews {
     publishedAt: string;
 }
 
-/**
- * 뉴스 정보를 프롬프트로 변환하는 역할의 클래스입니다.
- */
-export class NewsPromptTransformer implements Pipe<NewsPromptArgs, string> {
-    private readonly MAX_NEWS_ITEMS = 100;
+const PROMPT = (transformedNewsPrompt: string) => {
+    const currentDate = new Date();
 
+    return `
+# 당신은 전문 금융 시장 분석가 (Financial Market Analyst) 입니다.
+
+제공된 데이터와 ${currentDate.toISOString()} 기준 최신 시장 정보를 결합하여 객관적인 시장 리포트를 작성하세요.
+
+# 제공 데이터
+${transformedNewsPrompt}
+
+# 분석 지침
+
+1. 현재 프로젝트 파일은 무시하고 당신이 가진 지식으로만 답변하세요.
+
+2. 실시간 데이터 통합: Google 검색을 통해 제공된 데이터와 관련있는 현재 국내외 시장의 주요 이슈를 확인하세요.
+- 매크로 정책(관세, 금리 등)
+- 국내 상법 개정 및 밸류업 정책
+- 정상회담 또는 대통령 발언
+- 지정학적 / 지경학적 리스크 (전쟁, 내전 등)
+- 그 외 기타 사항
+
+3. 시장 수급 데이터: 영업일 기준으로 해당 종목의 최근 3일간 선물 거래량, 미결제약정, 외인/기관 매매 패턴을 확인하세요.
+
+4. 위에서 확인한 데이터들이 실제 존재하는 데이터인지 재확인하고, 출처가 불분명한 루머는 제외하십시오.
+
+5. 위에서 확인한 데이터들을 분석하여 불필요한 내용은 배제하고 리포트를 작성하세요.
+`;
+};
+
+export class NewsPromptTransformer implements Pipe<PromptArgs, string> {
     /**
-     * 뉴스 정보를 프롬프트로 변환합니다.
-     * @param data
+     * @param value
      */
-    transform({
-        newsItems = [],
-        naverNewsItems = [],
-        stockNewsItems = [],
-    }: NewsPromptArgs): string {
+    transform({ naverNewsItems, news }: PromptArgs): string {
         const normalizedNewsItems = [
-            ...newsItems.map((news) => this.normalizeNewsByNews(news)),
-            ...stockNewsItems.map((news) => this.normalizeNewsByNews(news)),
-            ...naverNewsItems.map((news) =>
+            ...news.map((news) => this.normalizeNewsByNews(news)),
+            ...(naverNewsItems ?? []).map((news) =>
                 this.normalizeNewsByNaverNews(news),
             ),
         ];
-        const sortedNewsItems = this.extractNewsItems(normalizedNewsItems);
-        const latestNewsItems = sortedNewsItems.slice(0, this.MAX_NEWS_ITEMS);
 
-        return latestNewsItems
+        const sortedNewsItems = this.extractNewsItems(normalizedNewsItems);
+        const latestNewsItems = sortedNewsItems.slice(0, MAX_NEWS_ITEMS);
+
+        const transformedNewsPrompt = latestNewsItems
             .map((newsItem) => this.transformRowPrompt(newsItem))
             .join('\n');
+
+        return PROMPT(transformedNewsPrompt);
     }
 
     /**
@@ -56,15 +79,6 @@ export class NewsPromptTransformer implements Pipe<NewsPromptArgs, string> {
         }
 
         return `- ${title}  \n${description}`;
-    }
-
-    /**
-     * B HTML 태그를 제거합니다.
-     * @param text
-     * @private
-     */
-    private removeTag(text: string) {
-        return text.replace('<b>', '').replace('</b>', '');
     }
 
     /**
@@ -110,5 +124,14 @@ export class NewsPromptTransformer implements Pipe<NewsPromptArgs, string> {
         ).reverse();
 
         return _.uniqBy(sortedNewsItems, (newsItem) => newsItem.title);
+    }
+
+    /**
+     * B HTML 태그를 제거합니다.
+     * @param text
+     * @private
+     */
+    private removeTag(text: string) {
+        return text.replace('<b>', '').replace('</b>', '');
     }
 }
