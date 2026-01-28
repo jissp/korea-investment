@@ -12,6 +12,13 @@ export interface WebSocketHeader {
     content_type: 'utf-8';
 }
 
+export interface SubscribePayload {
+    header: WebSocketHeader;
+    body: {
+        input: SubscribeRequest;
+    };
+}
+
 export interface SubscribeRequest {
     tr_id: string;
     tr_key: string;

@@ -1,7 +1,13 @@
 import { Worker, WorkerOptions } from 'bullmq';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import {
+    Inject,
+    Injectable,
+    Logger,
+    OnModuleInit,
+    Optional,
+} from '@nestjs/common';
 import {
     QueueMetadataKey,
     QueueMetadataValue,
@@ -10,6 +16,9 @@ import {
 
 @Injectable()
 export class QueueExplorer implements OnModuleInit {
+    private readonly workers = new Set<Worker>();
+    private readonly logger = new Logger(QueueExplorer.name);
+
     constructor(
         private readonly discoveryService: DiscoveryService,
         private readonly metadataScanner: MetadataScanner,
@@ -62,7 +71,13 @@ export class QueueExplorer implements OnModuleInit {
         );
 
         queueName.forEach((name: string) => {
-            new Worker(name, methodRef.bind(instance), _workerOptions);
+            const worker = new Worker(
+                name,
+                methodRef.bind(instance),
+                _workerOptions,
+            );
+            this.workers.add(worker);
+            this.logger.debug(`Registered worker for queue: ${name}`);
         });
     }
 }

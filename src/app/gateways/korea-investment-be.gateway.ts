@@ -17,10 +17,10 @@ import { KoreaInvestmentCollectorEventType } from '@app/modules/korea-investment
 export class KoreaInvestmentBeGateway
     implements OnGatewayConnection, OnGatewayDisconnect
 {
+    private readonly logger: Logger = new Logger(KoreaInvestmentBeGateway.name);
+
     @WebSocketServer()
     protected server: Server;
-
-    constructor(private readonly logger: Logger) {}
 
     /**
      * @param client

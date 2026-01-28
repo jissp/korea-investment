@@ -9,6 +9,8 @@ async function bootstrap() {
 
     const app = await NestFactory.create(AppModule);
 
+    app.enableShutdownHooks();
+
     // Swagger 설정
     setSwaggerConfigs(app, {
         title: 'Korea Investment API',
@@ -17,9 +19,11 @@ async function bootstrap() {
     });
 
     // Class Validator 적용
-    app.useGlobalPipes(new ValidationPipe({
-        transform: true,
-    }));
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+        }),
+    );
 
     await app.listen(appPort);
 

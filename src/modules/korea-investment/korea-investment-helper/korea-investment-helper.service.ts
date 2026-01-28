@@ -91,7 +91,10 @@ export class KoreaInvestmentHelperService {
 
         const { access_token, access_token_token_expired } =
             await this.oAuthClient.getToken(this.config.credential);
-
+        if (!access_token) {
+            this.logger.error('토큰 발급 실패');
+            throw new Error('토큰 발급 실패');
+        }
         const expireSeconds = this.calculateTokenExpireSeconds(
             access_token_token_expired,
         );

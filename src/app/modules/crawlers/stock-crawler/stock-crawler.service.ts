@@ -55,7 +55,9 @@ export class StockCrawlerService {
                     date,
                 },
             )
-            .where(`${dailyInvestorAlias}.id IS NULL`)
+            .where(
+                `${dailyInvestorAlias}.id IS NULL OR ${dailyInvestorAlias}.person = 0`,
+            )
             .getMany();
 
         return this.stockService.getStocksByStockCode({

@@ -1,7 +1,7 @@
-import { SubscribeType } from '@modules/korea-investment/korea-investment-web-socket';
+import { SubscribeType } from '@modules/korea-investment/korea-investment-web-socket/korea-investment-web-socket.types';
 
 export enum KoreaInvestmentCollectorQueueType {
-    RequestRealTimeData = 'RequestRealTimeData',
+    SubscribeStock = 'SubscribeStock',
 }
 
 export interface KoreaInvestmentRequestRealTimeJobPayload {

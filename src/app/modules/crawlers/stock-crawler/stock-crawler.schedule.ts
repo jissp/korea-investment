@@ -47,7 +47,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
         const currentDate = new Date();
         const hour = currentDate.getHours();
 
-        if (hour < 9) {
+        if (hour < 16) {
             currentDate.setDate(currentDate.getDate() - 1);
         }
 
@@ -69,6 +69,9 @@ export class StockCrawlerSchedule implements OnModuleInit {
             await this.stockCrawlerService.getStocksForCrawlingStockInvestor(
                 latestBusinessDay.date,
             );
+        if (stocks.length === 0) {
+            return;
+        }
 
         const queueName = StockCrawlerFlowType.RequestStockInvestor;
 

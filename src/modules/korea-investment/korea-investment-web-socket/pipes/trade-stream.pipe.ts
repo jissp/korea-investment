@@ -1,13 +1,16 @@
 import { Pipe } from '@common/types';
-import { H0unanc0Data } from '../types/h0unanc0.types';
+import { H0uncnt0Data } from '../types/h0uncnt0.types';
 
 /**
- * 국내주식 실시간예상체결 (통합)
+ * 국내주식 실시간체결가 (통합/KRX/NXT)
+ * 통합: H0UNCNT0
+ * KRX: H0STCNT0
+ * NXT: H0STCNT0
  *
- * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/tryitout/H0UNANC0
+ * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/tryitout/H0UNCNT0
  */
-export class H0unanc0Pipe implements Pipe<string[], H0unanc0Data> {
-    public transform(value: string[]): H0unanc0Data {
+export class TradeStreamPipe implements Pipe<string[], H0uncnt0Data> {
+    public transform(value: string[]): H0uncnt0Data {
         const [
             MKSC_SHRN_ISCD,
             STCK_CNTG_HOUR,

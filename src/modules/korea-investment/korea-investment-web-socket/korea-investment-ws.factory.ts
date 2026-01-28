@@ -12,8 +12,9 @@ import { KoreaInvestmentWebSocketHelperService } from './korea-investment-web-so
 
 @Injectable()
 export class KoreaInvestmentWsFactory {
+    private readonly logger = new Logger(KoreaInvestmentWsFactory.name);
+
     constructor(
-        private readonly logger: Logger,
         private readonly webSocketHelper: KoreaInvestmentWebSocketHelperService,
         private readonly pipe: KoreaInvestmentWebSocketPipe,
     ) {}
@@ -22,6 +23,8 @@ export class KoreaInvestmentWsFactory {
      * 웹 소켓 생성
      */
     public create() {
+        this.logger.debug('Creating Korea Investment WebSocket');
+
         const url = this.webSocketHelper.getWebSocketUrl();
         const koreaInvestmentWs = new ws(url);
 
