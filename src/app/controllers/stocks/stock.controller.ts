@@ -206,10 +206,9 @@ export class StockController {
         description: '종목 코드',
     })
     @ApiNoContentResponse()
+    @UseGuards(ExistingStockGuard)
     @Post(':stockCode/subscribe')
     public async subscribe(@Param('stockCode') stockCode: string) {
-        assertStockCode(stockCode);
-
         await this.koreaInvestmentCollectorSocket.subscribe(stockCode);
     }
 
@@ -222,6 +221,7 @@ export class StockController {
         description: '종목 코드',
     })
     @ApiNoContentResponse()
+    @UseGuards(ExistingStockGuard)
     @Post(':stockCode/unsubscribe')
     public async unsubscribe(@Param('stockCode') stockCode: string) {
         assertStockCode(stockCode);

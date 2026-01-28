@@ -2,8 +2,8 @@ import { AiAnalysisReport } from './ai-analysis-report.entity';
 
 export enum ReportType {
     Stock = 'stock',
-    KeywordGroup = 'keywordGroup',
-    LatestNews = 'LatestNews',
+    Market = 'market',
+    ExhaustionTrace = 'exhaustionTrace',
 }
 
 export type AiAnalysisReportDto = Omit<

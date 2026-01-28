@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
+import { Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
-import { MarketIndex } from '@app/modules/repositories/market-index';
 import { DOMESTIC_INDEX_CODES, OVERSEAS_INDEX_CODES } from '@app/common';
+import { MarketIndex } from '@app/modules/repositories/market-index';
 
 type PromptArgs = {
     marketIndices: MarketIndex[];
@@ -20,18 +21,16 @@ ${marketIndicesPrompt}
 
 # 분석 지침
 
-1. 현재 프로젝트 파일은 무시하고 당신이 가진 지식으로만 답변하세요.
-
-2. 실시간 데이터 통합: Google 검색을 통해 최근 시장 지수 변동 흐름과 관련있는 현재 국내외 시장의 주요 이슈를 확인하세요. 
-- 매크로 정책(관세, 금리 등)
+1. 실시간 데이터 통합: Google 검색을 통해 최근 시장 지수 변동 흐름과 관련있는 현재 국내외 시장의 주요 이슈를 확인하세요.
+- 매크로 정책(관세, 금리, 환율 등)
 - 국내 상법 개정 및 밸류업 정책
 - 정상회담 또는 대통령 발언
 - 지정학적 / 지경학적 리스크 (전쟁, 내전 등)
 - 그 외 기타 사항
 
-3. 데이터 신뢰도 검증: 반드시 실제 존재하는 최신 데이터인지 재확인하고, 출처가 불분명한 루머는 제외하십시오.
+2. 데이터 신뢰도 검증: 반드시 실제 존재하는 최신 데이터인지 재확인하고, 출처가 불분명한 루머는 제외하십시오.
 
-4. 위에서 확인한 데이터들을 분석하여 불필요한 내용은 배제하고 리포트를 작성하세요.
+3. 확인한 데이터들을 그대로 응답하세요.
 `;
 };
 
@@ -40,6 +39,7 @@ const indexMap = _.keyBy(
     'code',
 );
 
+@Injectable()
 export class IndexPromptTransformer implements Pipe<PromptArgs, string> {
     /**
      * @param marketIndices

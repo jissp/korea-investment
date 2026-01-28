@@ -2,19 +2,16 @@ import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions } from '@modules/queue';
 import { ReportType } from '@app/modules/repositories/ai-analysis-report';
-import {
-    StockAnalyzerFlowType,
-    StockAnalyzerQueueType,
-} from './stock-analyzer.types';
-import { StockAnalysisAdapterFactory } from './stock-analysis-adapter.factory';
+import { AiAnalyzerFlowType, AiAnalyzerQueueType } from './ai-analyzer.types';
+import { AiAnalyzerAdapterFactory } from './ai-analyzer-adapter.factory';
 
 @Injectable()
-export class StockAnalyzerService {
-    private readonly logger = new Logger(StockAnalyzerService.name);
+export class AiAnalyzerService {
+    private readonly logger = new Logger(AiAnalyzerService.name);
 
     constructor(
-        private readonly stockAnalysisAdapterFactory: StockAnalysisAdapterFactory,
-        @Inject(StockAnalyzerFlowType.RequestAnalysis)
+        private readonly adapterFactory: AiAnalyzerAdapterFactory,
+        @Inject(AiAnalyzerFlowType.RequestAnalysis)
         private readonly requestAnalysisFlow: FlowProducer,
     ) {}
 
@@ -25,10 +22,10 @@ export class StockAnalyzerService {
      */
     public async requestAnalysis(reportType: ReportType, reportTarget: string) {
         try {
-            const adapter = this.stockAnalysisAdapterFactory.create(reportType);
+            const adapter = this.adapterFactory.create(reportType);
             const collectedData = await adapter.collectData(reportTarget);
 
-            const queueName = StockAnalyzerFlowType.RequestAnalysis;
+            const queueName = AiAnalyzerFlowType.RequestAnalysis;
             await this.requestAnalysisFlow.add(
                 {
                     queueName,
@@ -45,7 +42,7 @@ export class StockAnalyzerService {
                         [queueName]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
-                        [StockAnalyzerQueueType.PromptToGeminiCli]: {
+                        [AiAnalyzerQueueType.PromptToGeminiCli]: {
                             defaultJobOptions: getDefaultJobOptions(),
                         },
                     },

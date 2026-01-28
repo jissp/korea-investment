@@ -10,32 +10,35 @@ import {
     MarketIndex,
     MarketIndexService,
 } from '@app/modules/repositories/market-index';
-import { IAnalysisAdapter } from './analysis-adapter.interface';
 import {
+    AiAnalyzerQueueType,
+    BaseAnalysisAdapter,
+    NewsPromptTransformer,
     PromptToGeminiCliBody,
-    StockAnalyzerFlowType,
-    StockAnalyzerQueueType,
-} from '../stock-analyzer.types';
-import { IndexPromptTransformer, NewsPromptTransformer } from '../transformers';
+} from '@app/modules/ai-analyzer';
+import { MarketAnalyzerFlowType } from './market-analyzer.types';
+import { IndexPromptTransformer } from './transformers';
 
-interface LatestNewsAnalysisData {
+interface MarketAnalysisData {
     newsItems: News[];
     marketIndices: MarketIndex[];
 }
 
 @Injectable()
-export class LatestNewsAnalysisAdapter implements IAnalysisAdapter<LatestNewsAnalysisData> {
-    private readonly logger = new Logger(LatestNewsAnalysisAdapter.name);
+export class MarketAnalyzerAdapter implements BaseAnalysisAdapter<MarketAnalysisData> {
+    private readonly logger = new Logger(MarketAnalyzerAdapter.name);
 
     constructor(
         private readonly marketIndexService: MarketIndexService,
         private readonly newsService: NewsService,
+        private readonly indexPromptTransformer: IndexPromptTransformer,
+        private readonly newsPromptTransformer: NewsPromptTransformer,
     ) {}
 
     /**
      * 분석에 필요한 데이터를 수집합니다.
      */
-    async collectData(): Promise<LatestNewsAnalysisData> {
+    async collectData(): Promise<MarketAnalysisData> {
         const newsItems = await this.getNewsItems();
         const marketIndices = await this.marketIndexService.getIndicesByDays(7);
 
@@ -56,41 +59,41 @@ export class LatestNewsAnalysisAdapter implements IAnalysisAdapter<LatestNewsAna
     public transformToFlowChildJob({
         newsItems,
         marketIndices,
-    }: LatestNewsAnalysisData): FlowChildJob {
-        const queueName = StockAnalyzerFlowType.RequestLatestNews;
+    }: MarketAnalysisData): FlowChildJob {
+        const queueName = MarketAnalyzerFlowType.Request;
 
         return {
             queueName,
             name: queueName,
             children: [
                 {
-                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    queueName: AiAnalyzerQueueType.PromptToGeminiCli,
                     name: '최근 시장 지수 변동 분석',
                     data: {
-                        prompt: new IndexPromptTransformer().transform({
+                        prompt: this.indexPromptTransformer.transform({
                             marketIndices,
                         }),
-                        model: GeminiCliModel.Gemini3Pro,
+                        model: GeminiCliModel.Gemini3Flash,
                     } as PromptToGeminiCliBody,
                 },
                 {
-                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    queueName: AiAnalyzerQueueType.PromptToGeminiCli,
                     name: '시장 최신 이슈 조회',
                     data: {
-                        prompt: new NewsPromptTransformer().transform({
+                        prompt: this.newsPromptTransformer.transform({
                             news: newsItems,
                         }),
-                        model: GeminiCliModel.Gemini3Pro,
+                        model: GeminiCliModel.Gemini3Flash,
                     } as PromptToGeminiCliBody,
                 },
             ],
         };
     }
 
-    private async getNewsItems() {
+    private async getNewsItems(limit: number = 100) {
         return this.newsService.getNewsListByCategory({
             category: NewsCategory.StockPlus,
-            limit: 50,
+            limit,
         });
     }
 }

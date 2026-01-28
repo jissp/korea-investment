@@ -12,7 +12,7 @@ import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
-import { StockAnalyzerModule } from '@app/modules/stock-analyzer';
+import { AiAnalyzerModule } from '@app/modules/ai-analyzer';
 import { CrawlerModule } from '@app/modules/crawlers';
 import { AppServiceModule } from '@app/modules/services';
 import { RepositoryModule } from '@app/modules/repositories';
@@ -85,7 +85,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
         CrawlerModule,
-        StockAnalyzerModule,
+        AiAnalyzerModule,
         AppServiceModule,
         RepositoryModule,
         KoreaInvestmentRequestApiModule,

@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { toDateYmdByDate } from '@common/utils';
@@ -68,5 +68,30 @@ export class StockDailyInvestorService {
             },
             take: limit,
         });
+    }
+
+    /**
+     * 최근 N일간 모든 종목의 투자자 동향 정보 조회
+     * @param days
+     */
+    public async getAllStockDailyInvestorsByDays(days: number = 7) {
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() - days);
+        const startDate = toDateYmdByDate({
+            separator: '-',
+            date: targetDate,
+        });
+
+        const query =
+            this.stockDailyInvestorRepository.createQueryBuilder('sdi');
+
+        // 최근 N일 데이터 조회
+        return query
+            .where({
+                date: MoreThanOrEqual(startDate),
+            })
+            .orderBy('sdi.stock_code', 'ASC')
+            .addOrderBy('sdi.date', 'DESC')
+            .getMany();
     }
 }

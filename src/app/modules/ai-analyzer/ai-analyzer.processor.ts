@@ -1,29 +1,29 @@
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { GeminiCliService } from '@modules/gemini-cli';
 import { OnQueueProcessor } from '@modules/queue';
+import { GeminiCliService } from '@modules/gemini-cli';
 import { AiAnalysisReportService } from '@app/modules/repositories/ai-analysis-report';
 import {
+    AiAnalyzerFlowType,
+    AiAnalyzerQueueType,
     PromptToGeminiCliBody,
     RequestAnalysisBody,
-    StockAnalyzerFlowType,
-    StockAnalyzerQueueType,
-} from '../stock-analyzer.types';
+} from './ai-analyzer.types';
 
 @Injectable()
-export class StockAnalyzerPromptProcessor {
-    private readonly logger = new Logger(StockAnalyzerPromptProcessor.name);
+export class AiAnalyzerProcessor {
+    private readonly logger = new Logger(AiAnalyzerProcessor.name);
 
     constructor(
         private readonly geminiCliService: GeminiCliService,
         private readonly aiAnalysisReportService: AiAnalysisReportService,
     ) {}
 
-    @OnQueueProcessor(StockAnalyzerFlowType.RequestAnalysis)
+    @OnQueueProcessor(AiAnalyzerFlowType.RequestAnalysis)
     async processRequestAnalysis(job: Job<RequestAnalysisBody>) {
         try {
             const { reportType, reportTarget, title } = job.data;
-            const childrenValues = await job.getChildrenValues();
+            const childrenValues = await job.getChildrenValues<string>();
             const results = Object.values(childrenValues);
 
             await this.aiAnalysisReportService.addReport({
@@ -40,22 +40,24 @@ export class StockAnalyzerPromptProcessor {
         }
     }
 
-    @OnQueueProcessor(StockAnalyzerQueueType.PromptToGeminiCli, {
+    @OnQueueProcessor(AiAnalyzerQueueType.PromptToGeminiCli, {
         concurrency: 3,
     })
     async processPromptToGeminiCli(job: Job<PromptToGeminiCliBody>) {
         try {
             const { prompt, model } = job.data;
 
-            const { response } = await this.geminiCliService.requestSyncPrompt(
+            const result = await this.geminiCliService.requestSyncPrompt(
                 prompt,
                 {
                     model,
                 },
             );
 
-            this.logger.log('processed');
-            return response;
+            this.logger.debug(result);
+            this.logger.debug('processed');
+
+            return result.response;
         } catch (error) {
             this.logger.error(error);
             throw error;

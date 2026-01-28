@@ -12,7 +12,7 @@ import {
     ApiParam,
     ApiTags,
 } from '@nestjs/swagger';
-import { StockAnalyzerService } from '@app/modules/stock-analyzer';
+import { AiAnalyzerService } from '@app/modules/ai-analyzer';
 import {
     AiAnalysisReportService,
     ReportType,
@@ -26,7 +26,7 @@ import {
 @Controller('v1/analysis')
 export class AnalysisController {
     constructor(
-        private readonly stockAnalyzerService: StockAnalyzerService,
+        private readonly stockAnalyzerService: AiAnalyzerService,
         private readonly aiAnalysisReportService: AiAnalysisReportService,
     ) {}
 

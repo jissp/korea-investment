@@ -19,16 +19,16 @@ import { YN } from '@app/common';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import { NewsService, StockNews } from '@app/modules/repositories/news';
 import {
-    PromptToGeminiCliBody,
-    StockAnalyzerFlowType,
-    StockAnalyzerQueueType,
-} from '../stock-analyzer.types';
-import {
-    InvestorPromptTransformer,
+    AiAnalyzerQueueType,
+    BaseAnalysisAdapter,
     NewsPromptTransformer,
+    PromptToGeminiCliBody,
+} from '@app/modules/ai-analyzer';
+import { StockAnalyzerFlowType } from './stock-analyzer.types';
+import {
+    RiggedStockIssuePromptTransformer,
     StockIssuePromptTransformer,
-} from '../transformers';
-import { IAnalysisAdapter } from './analysis-adapter.interface';
+} from './transformers';
 
 const DEFAULT_CHUNK_SIZE = 5;
 
@@ -42,14 +42,17 @@ export interface StockAnalysisData {
 }
 
 @Injectable()
-export class StockAnalysisAdapter implements IAnalysisAdapter<StockAnalysisData> {
-    private readonly logger = new Logger(StockAnalysisAdapter.name);
+export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisData> {
+    private readonly logger = new Logger(StockAnalyzerAdapter.name);
 
     constructor(
         private readonly naverApiClientFactory: NaverApiClientFactory,
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
         private readonly stockService: StockService,
         private readonly newsService: NewsService,
+        private readonly newsPromptTransformer: NewsPromptTransformer,
+        private readonly stockIssuePromptTransformer: StockIssuePromptTransformer,
+        private readonly riggedStockIssuePromptTransformer: RiggedStockIssuePromptTransformer,
     ) {}
 
     /**
@@ -98,7 +101,7 @@ export class StockAnalysisAdapter implements IAnalysisAdapter<StockAnalysisData>
     }
 
     public transformToFlowChildJob(data: StockAnalysisData): FlowChildJob {
-        const queueName = StockAnalyzerFlowType.RequestStockAnalysis;
+        const queueName = StockAnalyzerFlowType.Request;
 
         return {
             queueName,
@@ -106,36 +109,38 @@ export class StockAnalysisAdapter implements IAnalysisAdapter<StockAnalysisData>
             data,
             children: [
                 {
-                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    queueName: AiAnalyzerQueueType.PromptToGeminiCli,
                     name: '종목의 현재 이슈, 정책 등을 조회',
                     data: {
-                        prompt: new StockIssuePromptTransformer().transform({
-                            stockName: getStockName(data.stock.shortCode),
+                        prompt: this.stockIssuePromptTransformer.transform({
+                            stockName: data.stock.name,
                         }),
-                        model: GeminiCliModel.Gemini3Pro,
+                        model: GeminiCliModel.Gemini3Flash,
                     } as PromptToGeminiCliBody,
                 },
                 {
-                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
+                    queueName: AiAnalyzerQueueType.PromptToGeminiCli,
                     name: '종목의 최근 뉴스 정보 분석',
                     data: {
-                        prompt: new NewsPromptTransformer().transform({
+                        prompt: this.newsPromptTransformer.transform({
                             news: data.stockNews,
                             naverNewsItems: data.naverNewsItems,
                         }),
-                        model: GeminiCliModel.Gemini3Pro,
+                        model: GeminiCliModel.Gemini3Flash,
                     } as PromptToGeminiCliBody,
                 },
                 {
-                    queueName: StockAnalyzerQueueType.PromptToGeminiCli,
-                    name: '종목의 투자자 동향 분석',
+                    queueName: AiAnalyzerQueueType.PromptToGeminiCli,
+                    name: '종목의 세력 설계 분석',
                     data: {
-                        prompt: new InvestorPromptTransformer().transform({
-                            stockName: data.stock.name,
-                            stockInvestors: data.stockInvestors,
-                            stockInvestorByEstimates:
-                                data.stockInvestorByEstimates,
-                        }),
+                        prompt: this.riggedStockIssuePromptTransformer.transform(
+                            {
+                                stockName: data.stock.name,
+                                stockInvestors: data.stockInvestors,
+                                stockInvestorByEstimates:
+                                    data.stockInvestorByEstimates,
+                            },
+                        ),
                         model: GeminiCliModel.Gemini3Flash,
                     } as PromptToGeminiCliBody,
                 },

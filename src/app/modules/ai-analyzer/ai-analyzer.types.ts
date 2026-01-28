@@ -1,13 +1,15 @@
 import { GeminiCliModel } from '@modules/gemini-cli';
 import { ReportType } from '@app/modules/repositories/ai-analysis-report';
 
-export enum StockAnalyzerFlowType {
-    RequestAnalysis = 'RequestAnalysis',
-    RequestStockAnalysis = 'RequestStockAnalysis',
-    RequestLatestNews = 'RequestLatestNews',
+export enum AiAnalyzerProvider {
+    AdapterMap = 'AdapterMap',
 }
 
-export enum StockAnalyzerQueueType {
+export enum AiAnalyzerFlowType {
+    RequestAnalysis = 'RequestAnalysis',
+}
+
+export enum AiAnalyzerQueueType {
     PromptToGeminiCli = 'PromptToGeminiCli',
 }
 
