@@ -16,7 +16,7 @@ const nxtEnd = 20 * 60; // 960
  * - NXT: 시간외 단일가 (15:30 ~ 16:00)
  * - null: 장 종료
  */
-export function getCurrentMarketDivCode(date?: Date): Nullable<MarketDivCode> {
+export function getMarketDivCodeByDate(date?: Date): Nullable<MarketDivCode> {
     const targetDate = date ? new Date(date.getTime()) : new Date();
     const hours = targetDate.getHours();
     const minutes = targetDate.getMinutes();
@@ -35,4 +35,16 @@ export function getCurrentMarketDivCode(date?: Date): Nullable<MarketDivCode> {
     }
 
     return null;
+}
+
+/**
+ * isNxtTrade 여부에 따른 MarketDivCode를 반환합니다.
+ * @param isNextTrade
+ */
+export function getMarketDivCodeByIsNextTrade(isNextTrade: string | boolean) {
+    if (typeof isNextTrade === 'boolean') {
+        return isNextTrade ? MarketDivCode.통합 : MarketDivCode.KRX;
+    }
+
+    return isNextTrade === 'Y' ? MarketDivCode.통합 : MarketDivCode.KRX;
 }

@@ -1,7 +1,7 @@
 import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { getCurrentMarketDivCode } from '@common/domains';
+import { getMarketDivCodeByDate } from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import {
@@ -67,7 +67,7 @@ export class StockRankCrawlerSchedule implements OnModuleInit {
                         this.koreaInvestmentRequestApiHelper.generateRequestApiForRankingVolume(
                             {
                                 marketDivCode:
-                                    getCurrentMarketDivCode() ||
+                                    getMarketDivCodeByDate() ||
                                     MarketDivCode.KRX,
                             },
                         ),

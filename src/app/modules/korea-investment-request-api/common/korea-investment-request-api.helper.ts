@@ -180,6 +180,9 @@ export class KoreaInvestmentRequestApiHelper {
                 tradeId: 'FHKST01010900',
                 params,
             },
+            {
+                priority: 10000,
+            },
         );
     }
 

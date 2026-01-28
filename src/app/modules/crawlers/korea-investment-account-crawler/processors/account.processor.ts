@@ -204,7 +204,11 @@ export class AccountProcessor {
             );
 
             const groupName = output1.inter_grp_name;
-            if (groupName.includes('키워드')) {
+            if (
+                ['키워드', '관심'].some((keyword) =>
+                    groupName.includes(keyword),
+                )
+            ) {
                 await this.favoriteStockService.upsert(
                     stockInfoList.map(({ stockCode, stockName }) => ({
                         type: FavoriteType.StockGroup,

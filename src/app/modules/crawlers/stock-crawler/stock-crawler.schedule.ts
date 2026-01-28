@@ -1,12 +1,15 @@
 import * as _ from 'lodash';
 import { FlowProducer } from 'bullmq';
-import { FlowJob } from 'bullmq/dist/esm/interfaces';
+import { FlowJob, FlowOpts } from 'bullmq/dist/esm/interfaces';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { toDateYmdByDate, toTimeCodeByDate } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
-import { getCurrentMarketDivCode } from '@common/domains';
+import {
+    getMarketDivCodeByDate,
+    getMarketDivCodeByIsNextTrade,
+} from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { YN } from '@app/common';
@@ -75,7 +78,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
 
         const queueName = StockCrawlerFlowType.RequestStockInvestor;
 
-        const flowOptions = {
+        const flowOptions: FlowOpts = {
             queuesOptions: {
                 [queueName]: {
                     defaultJobOptions: getDefaultJobOptions(),
@@ -85,22 +88,26 @@ export class StockCrawlerSchedule implements OnModuleInit {
                 },
             },
         };
-        const stockFlowJobs = stocks.map(
-            (stock): FlowJob => ({
+        const stockFlowJobs = stocks.map((stock): FlowJob => {
+            const marketDivCode = getMarketDivCodeByIsNextTrade(
+                stock.isNextTrade,
+            );
+
+            return {
                 name: queueName,
                 queueName,
                 children: [
                     this.requestApiHelper.generateDomesticInvestor({
                         FID_INPUT_ISCD: stock.shortCode,
-                        FID_COND_MRKT_DIV_CODE:
-                            stock.isNextTrade === YN.Y
-                                ? MarketDivCode.통합
-                                : MarketDivCode.KRX,
+                        FID_COND_MRKT_DIV_CODE: marketDivCode,
                     }),
                 ],
-            }),
-        );
-        await Promise.all(
+                opts: {
+                    jobId: `stock_${stock.shortCode.toString()}`,
+                },
+            };
+        });
+        await Promise.allSettled(
             stockFlowJobs.map((stockFlowJob) =>
                 this.requestStockInvestorFlow.add(stockFlowJob, flowOptions),
             ),
@@ -169,7 +176,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
                 ],
             }),
         );
-        await Promise.all(
+        await Promise.allSettled(
             stockFlowJobs.map((stockFlowJob) =>
                 this.requestStockHourInvestorByForeignerFlow.add(
                     stockFlowJob,
@@ -183,7 +190,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async handleUpdateAccountStockGroupStockPrices() {
         try {
-            const marketDivCode = getCurrentMarketDivCode();
+            const marketDivCode = getMarketDivCodeByDate();
             if (isNil(marketDivCode)) {
                 return;
             }

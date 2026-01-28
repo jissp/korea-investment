@@ -11,6 +11,7 @@ import {
     BaseAnalysisAdapter,
     PromptToGeminiCliBody,
 } from '@app/modules/ai-analyzer';
+import { ExhaustionTraceAnalyzerFlowType } from './exhaustion-trace-analyzer.types';
 
 interface StockExhaustionTraceData {
     stockCode: string;
@@ -67,13 +68,19 @@ export class ExhaustionTraceAnalyzerAdapter implements BaseAnalysisAdapter<Exhau
     public transformToFlowChildJob({
         stocks,
     }: ExhaustionTraceAnalysisData): FlowChildJob {
+        const queueName = ExhaustionTraceAnalyzerFlowType.Request;
+
         return {
-            queueName: AiAnalyzerQueueType.PromptToGeminiCli,
-            name: `세력 추적 분석`,
-            data: {
-                prompt: this.transformToPrompt(stocks),
-                model: GeminiCliModel.Gemini3Flash,
-            } as PromptToGeminiCliBody,
+            queueName,
+            name: queueName,
+            children: _.chunk(stocks, 20).map((chunk) => ({
+                queueName: AiAnalyzerQueueType.PromptToGeminiCli,
+                name: `세력 추적 분석`,
+                data: {
+                    prompt: this.transformToPrompt(chunk),
+                    model: GeminiCliModel.Gemini3Flash,
+                } as PromptToGeminiCliBody,
+            })),
         };
     }
 
@@ -93,11 +100,11 @@ export class ExhaustionTraceAnalyzerAdapter implements BaseAnalysisAdapter<Exhau
             .map((stock) => {
                 const stockInvestorPrompt = stock.investors
                     .map((inv) => {
-                        return `- **${inv.date}**: 종가: ${inv.price}, 개인 매수량: ${inv.person}, 외국인 매수량: ${inv.foreigner}, 기관 매수량: ${inv.organization}`;
+                        return `- ${inv.date}: 종가: ${inv.price}, 개인: ${inv.person}, 외국인: ${inv.foreigner}, 기관: ${inv.organization}`;
                     })
                     .join('\n');
 
-                return `${stock.stockName} 종목 투자자 동향 \n\n ${stockInvestorPrompt}`;
+                return `**${stock.stockName}** \n\n${stockInvestorPrompt}`;
             })
             .join('\n\n');
 
@@ -117,7 +124,7 @@ ${totalInvestorPrompt}
 
 3. 체결 강도 및 호가: 큰 물량의 매도세가 반복적으로 나오는지 확인하세요.
 
-4. 설거지 확률을 별 0개에서 5개로 점수를 매기고, 대응 전략 제안.
+4. 설거지 확률을 0~10점까지의 점수를 매기고, 대응 전략을 제안하세요.
 
 5. 제공된 모든 종목을 대상으로 종몰별로 응답 형식에 맞게 응답하세요. 이 때 코드 블록은 반드시 제외해야 합니다.
 
