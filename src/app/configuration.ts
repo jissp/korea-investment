@@ -1,5 +1,3 @@
-import { GeminiCliModel } from '@modules/gemini-cli';
-
 export interface IConfiguration {
     database: {
         host: string;
@@ -69,6 +67,7 @@ export interface IConfiguration {
         token: string;
         channel: {
             stock: string;
+            geminiLog: string;
         };
     };
 }
@@ -142,6 +141,7 @@ export default (): IConfiguration => ({
         token: getEnv('SLACK_BOT_TOKEN'),
         channel: {
             stock: getEnv('SLACK_STOCK_CHANNEL_ID'),
+            geminiLog: getEnv('SLACK_STOCK_GEMINI_LOG_CHANNEL_ID'),
         },
     },
 });

@@ -10,6 +10,7 @@ import { QueueModule } from '@modules/queue';
 import { GeminiCliModule } from '@modules/gemini-cli';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
+import { SlackModule } from '@modules/slack';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { AiAnalyzerModule } from '@app/modules/ai-analyzer';
@@ -84,6 +85,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentCollectorModule.forRoot(),
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
+        SlackModule.forRoot(),
         CrawlerModule,
         AiAnalyzerModule,
         AppServiceModule,

@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GeminiCliModule } from '@modules/gemini-cli';
 import { QueueModule } from '@modules/queue';
+import { BotName, SlackModule } from '@modules/slack';
 import { NaverApiModule } from '@modules/naver/naver-api';
 import {
     AiAnalysisReportModule,
@@ -41,6 +43,12 @@ const AnalyzerModules = [
         QueueModule.forFeature({
             flowTypes,
             queueTypes,
+        }),
+        SlackModule.forFeature(BotName.StockBot, {
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) =>
+                configService.get<string>('SLACK_STOCK_GEMINI_LOG_CHANNEL_ID'),
         }),
         GeminiCliModule,
         NaverApiModule,

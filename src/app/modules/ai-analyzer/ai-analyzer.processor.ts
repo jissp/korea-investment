@@ -9,6 +9,7 @@ import {
     PromptToGeminiCliBody,
     RequestAnalysisBody,
 } from './ai-analyzer.types';
+import { SlackService } from '@modules/slack';
 
 @Injectable()
 export class AiAnalyzerProcessor {
@@ -16,6 +17,7 @@ export class AiAnalyzerProcessor {
 
     constructor(
         private readonly geminiCliService: GeminiCliService,
+        private readonly slackService: SlackService,
         private readonly aiAnalysisReportService: AiAnalysisReportService,
     ) {}
 
@@ -36,8 +38,6 @@ export class AiAnalyzerProcessor {
                 title,
                 content: results[0],
             });
-
-            // await this.slackService.send(event.prompt.response);
         } catch (error) {
             this.logger.error(error);
             throw error;
@@ -57,6 +57,9 @@ export class AiAnalyzerProcessor {
                     model,
                 },
             );
+
+            await this.slackService.send(prompt);
+            await this.slackService.send(result.response);
 
             this.logger.debug(result);
             this.logger.debug('processed');
