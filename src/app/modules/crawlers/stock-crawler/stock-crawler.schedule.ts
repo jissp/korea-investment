@@ -48,11 +48,6 @@ export class StockCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async handleCrawlingStockInvestor() {
         const currentDate = new Date();
-        const hour = currentDate.getHours();
-
-        // if (hour < 16) {
-        //     currentDate.setDate(currentDate.getDate() - 1);
-        // }
 
         const todayYmd = toDateYmdByDate({
             date: currentDate,
