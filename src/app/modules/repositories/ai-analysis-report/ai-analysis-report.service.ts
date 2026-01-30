@@ -20,6 +20,18 @@ export class AiAnalysisReportService {
     }
 
     /**
+     * AI 분석 리포트를 삭제합니다.
+     * @param reportType
+     * @param reportTarget
+     */
+    public async deleteReport(reportType: ReportType, reportTarget: string) {
+        return this.aiAnalysisReportRepository.delete({
+            reportType,
+            reportTarget,
+        });
+    }
+
+    /**
      * AI 분석 리포트를 조회합니다.
      * @param reportType
      * @param reportTarget

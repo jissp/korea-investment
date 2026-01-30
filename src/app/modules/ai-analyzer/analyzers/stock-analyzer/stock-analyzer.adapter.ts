@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { uniqueValues } from '@common/utils';
@@ -175,7 +175,7 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
 
         const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
 
-        const keywordChunk = _.chunk(keywords, DEFAULT_CHUNK_SIZE);
+        const keywordChunk = chunk(keywords, DEFAULT_CHUNK_SIZE);
 
         const responses = await Promise.all(
             keywordChunk.flatMap((keywords) =>

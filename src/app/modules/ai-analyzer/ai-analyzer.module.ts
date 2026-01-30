@@ -6,10 +6,7 @@ import {
     AiAnalysisReportModule,
     ReportType,
 } from '@app/modules/repositories/ai-analysis-report';
-import {
-    ExhaustionTraceAnalyzerAdapter,
-    ExhaustionTraceAnalyzerModule,
-} from '@app/modules/ai-analyzer/analyzers/exhaustion-trace-analyzer';
+import { ExhaustionTraceAnalyzerModule } from '@app/modules/ai-analyzer/analyzers/exhaustion-trace-analyzer';
 import {
     MarketAnalyzerAdapter,
     MarketAnalyzerModule,
@@ -55,24 +52,15 @@ const AnalyzerModules = [
         ...queueProviders,
         {
             provide: AiAnalyzerProvider.AdapterMap,
-            inject: [
-                StockAnalyzerAdapter,
-                MarketAnalyzerAdapter,
-                ExhaustionTraceAnalyzerAdapter,
-            ],
+            inject: [StockAnalyzerAdapter, MarketAnalyzerAdapter],
             useFactory: (
                 stockAnalysisAdapter: StockAnalyzerAdapter,
                 marketAnalysisAdapter: MarketAnalyzerAdapter,
-                exhaustionTraceAnalysisAdapter: ExhaustionTraceAnalyzerAdapter,
             ) => {
                 const map = new Map<ReportType, BaseAnalysisAdapter<any>>();
 
                 map.set(ReportType.Stock, stockAnalysisAdapter);
                 map.set(ReportType.Market, marketAnalysisAdapter);
-                map.set(
-                    ReportType.ExhaustionTrace,
-                    exhaustionTraceAnalysisAdapter,
-                );
 
                 return map;
             },

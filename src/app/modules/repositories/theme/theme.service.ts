@@ -83,6 +83,15 @@ export class ThemeService {
     }
 
     /**
+     * 테마가 존재하는지 확인합니다.
+     */
+    public async existsThemeByCode(code: string): Promise<boolean> {
+        return this.repository.existsBy({
+            code,
+        });
+    }
+
+    /**
      * 테마에 속한 종목들을 조회합니다.
      */
     public async getThemeStocksByThemeCode(

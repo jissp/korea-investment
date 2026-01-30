@@ -1,8 +1,14 @@
 import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
-import { StockInvestorModule } from '@app/modules/repositories/stock-investor';
+import { TransformByInvestorHelper } from '@app/modules/ai-analyzer';
+import { ThemeModule } from '@app/modules/repositories/theme';
+import {
+    ExhaustionTraceAnalyzerAdapter,
+    ExhaustionTraceAnalyzerByThemeAdapter,
+} from './adapters';
 import { ExhaustionTraceAnalyzerFlowType } from './exhaustion-trace-analyzer.types';
-import { ExhaustionTraceAnalyzerAdapter } from './exhaustion-trace-analyzer.adapter';
+import { ExhaustionTraceAnalyzerHelperModule } from './exhaustion-trace-analyzer-helper';
+import { ExhaustionTraceAnalyzerFactory } from './exhaustion-trace-analyzer.factory';
 import { ExhaustionTraceAnalyzerProcessor } from './exhaustion-trace-analyzer.processor';
 
 const flowTypes = [ExhaustionTraceAnalyzerFlowType.Request];
@@ -13,13 +19,17 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         QueueModule.forFeature({
             flowTypes,
         }),
-        StockInvestorModule,
+        ThemeModule,
+        ExhaustionTraceAnalyzerHelperModule,
     ],
     providers: [
+        TransformByInvestorHelper,
+        ExhaustionTraceAnalyzerFactory,
         ExhaustionTraceAnalyzerAdapter,
+        ExhaustionTraceAnalyzerByThemeAdapter,
         ExhaustionTraceAnalyzerProcessor,
         ...flowProviders,
     ],
-    exports: [ExhaustionTraceAnalyzerAdapter],
+    exports: [ExhaustionTraceAnalyzerFactory],
 })
 export class ExhaustionTraceAnalyzerModule {}

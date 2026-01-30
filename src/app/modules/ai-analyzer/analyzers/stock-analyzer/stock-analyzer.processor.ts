@@ -41,8 +41,6 @@ export class StockAnalyzerProcessor extends WorkerHost {
                 mergedResultPrompts,
             });
 
-            console.log(requestPrompt);
-
             const { response } = await this.geminiCliService.requestSyncPrompt(
                 requestPrompt,
                 {
@@ -89,6 +87,8 @@ ${mergedResultPrompts}
 3. 상관관계를 설명할 때 억지로 연결하지 말고, 상관관계가 있을 때만 설명하세요.
 
 4. 제공된 데이터와 위에서 확인한 데이터를 조합하여 분석하세요.
+
+5. 세력의 움직임(예: 설거지 설계, 매집 등)을 분석하세요.
 
 5. 전망은 영업일을 기준으로 분석합니다.
 - 영업일 장 오픈 시간 이전일 때: 오전장, 오후장 전망을 분석
@@ -154,9 +154,9 @@ ${mergedResultPrompts}
         const time = this.transformByInvestorHelper.hourGbToTime(
             output.bsop_hour_gb,
         );
-        const person = Number(output.frgn_fake_ntby_qty);
-        const organization = Number(output.orgn_fake_ntby_qty);
+        const personQuantity = Number(output.frgn_fake_ntby_qty);
+        const organizationQuantity = Number(output.orgn_fake_ntby_qty);
 
-        return `- ${time}: 외국인 매수량: ${person}, 기관 매수량: ${organization}`;
+        return `- ${time}: 외국인 매수량: ${personQuantity}, 기관 매수량: ${organizationQuantity}`;
     }
 }

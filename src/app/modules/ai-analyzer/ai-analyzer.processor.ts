@@ -26,6 +26,10 @@ export class AiAnalyzerProcessor {
             const childrenValues = await job.getChildrenValues<string>();
             const results = Object.values(childrenValues);
 
+            await this.aiAnalysisReportService.deleteReport(
+                reportType,
+                reportTarget,
+            );
             await this.aiAnalysisReportService.addReport({
                 reportType,
                 reportTarget,

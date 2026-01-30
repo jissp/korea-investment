@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { sortBy, uniqBy } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
@@ -152,11 +152,11 @@ export class NewsPromptTransformer implements Pipe<PromptArgs, string> {
             throw new Error('검색된 뉴스 정보가 없습니다.');
         }
 
-        const sortedNewsItems = _.sortBy(newsItems, (newsItem) =>
+        const sortedNewsItems = sortBy(newsItems, (newsItem) =>
             new Date(newsItem.publishedAt).getTime(),
         ).reverse();
 
-        return _.uniqBy(sortedNewsItems, (newsItem) => newsItem.title);
+        return uniqBy(sortedNewsItems, (newsItem) => newsItem.title);
     }
 
     /**

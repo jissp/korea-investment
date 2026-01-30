@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { groupBy, keyBy } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { DOMESTIC_INDEX_CODES, OVERSEAS_INDEX_CODES } from '@app/common';
@@ -34,7 +34,7 @@ ${marketIndicesPrompt}
 `;
 };
 
-const indexMap = _.keyBy(
+const indexMap = keyBy(
     [...DOMESTIC_INDEX_CODES, ...OVERSEAS_INDEX_CODES],
     'code',
 );
@@ -52,7 +52,7 @@ export class IndexPromptTransformer implements Pipe<PromptArgs, string> {
     }
 
     transformPromptByMarketIndices(marketIndices: MarketIndex[]): string {
-        const groupedMarketIndices = _.groupBy(marketIndices, 'code');
+        const groupedMarketIndices = groupBy(marketIndices, 'code');
 
         const transformedPromptByGroup = Object.entries(
             groupedMarketIndices,

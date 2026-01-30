@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { sortBy } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
@@ -56,7 +56,7 @@ export class TransformByInvestorHelper {
             throw new Error('검색된 투자자 동향 정보가 없습니다.');
         }
 
-        const sortedInvestorOutputs = _.sortBy(investorOutputs, (item) =>
+        const sortedInvestorOutputs = sortBy(investorOutputs, (item) =>
             new Date(toDateByKoreaInvestmentYmd(item.stck_bsop_date)).getTime(),
         ).reverse();
 

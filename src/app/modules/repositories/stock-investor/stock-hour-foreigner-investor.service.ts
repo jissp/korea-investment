@@ -1,8 +1,9 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StockHourForeignerInvestor } from './entities';
 import { StockHourForeignerInvestorDto } from './stock-investor.types';
+import { toDateYmdByDate } from '@common/utils';
 
 @Injectable()
 export class StockHourForeignerInvestorService {
@@ -49,6 +50,30 @@ export class StockHourForeignerInvestorService {
             },
             order: {
                 timeCode: 'ASC',
+            },
+        });
+    }
+
+    /**
+     * 특정 종목들의 오늘 시간별 투자자 동향 정보 조회
+     */
+    public async getStockHourForeignerInvestorsByStockCodes(
+        stockCodes: string[],
+    ) {
+        const targetDate = new Date();
+        const startDate = toDateYmdByDate({
+            separator: '-',
+            date: targetDate,
+        });
+
+        return this.repository.find({
+            where: {
+                date: startDate,
+                stockCode: In(stockCodes),
+            },
+            order: {
+                stockCode: 'ASC',
+                date: 'DESC',
             },
         });
     }
