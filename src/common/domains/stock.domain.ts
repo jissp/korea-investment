@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { keyBy, sortBy } from 'lodash';
 import { BadRequestException } from '@nestjs/common';
 import * as KospiCodes from '@assets/kospi_code.json';
 import * as KosdaqCodes from '@assets/kosdaq_code.json';
@@ -14,8 +14,8 @@ const kosdaqCodes: StockCodeItem[] = KosdaqCodes;
 
 const allCodes = [...kospiCodes, ...kosdaqCodes];
 
-const codeMap = _.keyBy(allCodes, 'shortCode');
-const sortedAllCodes = _.sortBy(allCodes, 'name');
+const codeMap = keyBy(allCodes, 'shortCode');
+const sortedAllCodes = sortBy(allCodes, 'name');
 
 export function getStocks() {
     return sortedAllCodes;

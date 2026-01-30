@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { Nullable } from '@common/types';
 import { TransformResult } from './korea-investment-web-socket.types';
@@ -73,6 +73,6 @@ export class KoreaInvestmentWebSocketPipe implements PipeTransform<
         const splitDataContent = dataContent.split('^');
         const recordFieldCount = splitDataContent.length / dataLength;
 
-        return _.chunk(splitDataContent, recordFieldCount);
+        return chunk(splitDataContent, recordFieldCount);
     }
 }

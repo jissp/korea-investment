@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import {
     ApiNoContentResponse,
@@ -141,14 +141,14 @@ export class StockController {
             marketType: MarketType.Domestic,
             stockCodes: splitStockCodes,
         });
-        const groupedStocks = _.groupBy(stocks, (stock) => stock.isNextTrade);
+        const groupedStocks = groupBy(stocks, (stock) => stock.isNextTrade);
 
         const responses = await Promise.all(
             Object.entries(groupedStocks).flatMap(
                 ([isNxt, stocks]: [YN, Stock[]]) => {
                     const marketDivCode =
                         isNxt === YN.Y ? MarketDivCode.통합 : MarketDivCode.KRX;
-                    const stockChunks = _.chunk(stocks, 30);
+                    const stockChunks = chunk(stocks, 30);
 
                     return stockChunks.map((stocks) => {
                         const params =

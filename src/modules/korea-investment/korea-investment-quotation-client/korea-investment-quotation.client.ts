@@ -3,6 +3,8 @@ import { toDateTimeByDate, toDateYmdByDate } from '@common/utils';
 import {
     BaseMultiResponse,
     BaseResponse,
+    ForeignInstitutionTotalOutput,
+    ForeignInstitutionTotalParam,
     MarketDivCode,
 } from '@modules/korea-investment/common';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
@@ -42,6 +44,11 @@ import {
     DomesticStockSearchStockInfoOutput,
     DomesticStockSearchStockInfoParam,
 } from './korea-investment-quotation-client.types';
+import {
+    DomesticInvestorTradeByStockDailyOutput1,
+    DomesticInvestorTradeByStockDailyOutput2,
+    DomesticInvestorTradeByStockDailyParam,
+} from '@app/modules/korea-investment-request-api/common';
 
 interface QuotationRequestConfig {
     tradeId: string;
@@ -518,6 +525,72 @@ export class KoreaInvestmentQuotationClient {
                 ...params,
                 FID_COND_MRKT_DIV_CODE: 'U',
             } as DomesticStockInquireDailyIndexChartPriceParam,
+        });
+
+        return {
+            output: response.output1,
+            output2: response.output2,
+        };
+    }
+
+    /**
+     * 국내기관_외국인 매매종목가집계
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/foreign-institution-total
+     * @param params
+     */
+    public async getForeignInstitutionTotal(
+        params: Pick<
+            ForeignInstitutionTotalParam,
+            | 'FID_INPUT_ISCD'
+            | 'FID_DIV_CLS_CODE'
+            | 'FID_RANK_SORT_CLS_CODE'
+            | 'FID_ETC_CLS_CODE'
+        >,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseResponse<ForeignInstitutionTotalOutput[]>
+        >({
+            tradeId: 'FHPTJ04400000',
+            url: '/uapi/domestic-stock/v1/quotations/foreign-institution-total',
+            params: {
+                FID_COND_MRKT_DIV_CODE: 'V',
+                FID_COND_SCR_DIV_CODE: '16449',
+                FID_INPUT_ISCD: params.FID_INPUT_ISCD,
+                FID_DIV_CLS_CODE: params.FID_DIV_CLS_CODE,
+                FID_RANK_SORT_CLS_CODE: params.FID_RANK_SORT_CLS_CODE,
+                FID_ETC_CLS_CODE: params.FID_ETC_CLS_CODE,
+            } as ForeignInstitutionTotalParam,
+        });
+
+        return {
+            output: response.output,
+        };
+    }
+
+    /**
+     * 종목별 투자자매매동향(일별)
+     * @see https://apiportal.koreainvestment.com/apiservice-apiservice?/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily
+     * @param params
+     */
+    public async getInvestorTradeByStockDaily(
+        params: Pick<
+            DomesticInvestorTradeByStockDailyParam,
+            'FID_COND_MRKT_DIV_CODE' | 'FID_INPUT_ISCD' | 'FID_INPUT_DATE_1'
+        >,
+    ) {
+        const response = await this.makeQuotationRequest<
+            BaseMultiResponse<
+                DomesticInvestorTradeByStockDailyOutput1,
+                DomesticInvestorTradeByStockDailyOutput2[]
+            >
+        >({
+            tradeId: 'FHPTJ04160001',
+            url: '/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily',
+            params: {
+                ...params,
+                FID_ORG_ADJ_PRC: '',
+                FID_ETC_CLS_CODE: '',
+            } as DomesticInvestorTradeByStockDailyParam,
         });
 
         return {

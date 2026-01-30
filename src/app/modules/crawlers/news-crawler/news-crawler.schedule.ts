@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { FlowProducer, Queue } from 'bullmq';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
@@ -101,7 +101,7 @@ export class NewsCrawlerSchedule implements OnModuleInit {
             );
 
             await Promise.all(
-                _.chunk(filteredKeywords, DEFAULT_CHUNK_SIZE).map(
+                chunk(filteredKeywords, DEFAULT_CHUNK_SIZE).map(
                     async (keywords) => {
                         await this.crawlingNaverNewsQueue.add(
                             NewsCrawlerQueueType.CrawlingNaverNews,
@@ -139,7 +139,7 @@ export class NewsCrawlerSchedule implements OnModuleInit {
             // );
 
             await Promise.all(
-                _.chunk(uniqueKeywords, 5).map((keywords) =>
+                chunk(uniqueKeywords, 5).map((keywords) =>
                     this.crawlingNaverNewsForStockCode.add(
                         NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
                         {

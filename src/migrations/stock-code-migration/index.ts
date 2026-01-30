@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { Repository } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NestFactory } from '@nestjs/core';
@@ -94,7 +94,7 @@ export class Migrator implements IMigrator {
     }
 
     private async migrationKospi() {
-        const chunks = _.chunk(kospiCodes, 20);
+        const chunks = chunk(kospiCodes, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((stock) => {
@@ -114,7 +114,7 @@ export class Migrator implements IMigrator {
     }
 
     private async migrationKosdaq() {
-        const chunks = _.chunk(kosdaqCodes, 20);
+        const chunks = chunk(kosdaqCodes, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((stock) => {
@@ -136,7 +136,7 @@ export class Migrator implements IMigrator {
     private async migrationNextTrade() {
         const nextCodes = [...nxtKospiCodes, ...nxtKosdaqCodes];
 
-        const chunks = _.chunk(nextCodes, 20);
+        const chunks = chunk(nextCodes, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((stock) => {

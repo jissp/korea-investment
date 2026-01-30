@@ -33,7 +33,6 @@ class KoreaInvestmentHolidayCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async handleRequestCrawlingHolidayByToday() {
         const fromDate = new Date();
-        fromDate.setDate(1);
 
         const holiday = await this.koreaInvestmentHolidayService.getByDate(
             toDateYmdByDate({
@@ -44,6 +43,8 @@ class KoreaInvestmentHolidayCrawlerSchedule implements OnModuleInit {
         if (holiday) {
             return;
         }
+
+        fromDate.setDate(fromDate.getDate() - 7);
 
         const queueName = KoreaInvestmentHolidayCrawlerFlowType.CrawlingHoliday;
         await this.crawlingHolidayFlow.add(

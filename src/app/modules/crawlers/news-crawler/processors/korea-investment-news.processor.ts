@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
@@ -164,7 +164,7 @@ export class KoreaInvestmentNewsProcessor {
         const transformedNewsItems = filteredOutputs.map((newsItem) =>
             this.transformer.transform(newsItem),
         );
-        const chunks = _.chunk(transformedNewsItems, 10);
+        const chunks = chunk(transformedNewsItems, 10);
         for (const chunk of chunks) {
             await Promise.allSettled([
                 this.newsService.upsert(chunk.map(({ news }) => news)),

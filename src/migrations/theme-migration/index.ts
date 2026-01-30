@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import * as _ from 'lodash';
+import { chunk, keyBy, uniqBy } from 'lodash';
 import { Repository } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NestFactory } from '@nestjs/core';
@@ -40,7 +40,7 @@ const kospiCodes: StockCode[] = KospiCodeJson as unknown as StockCode[];
 const kosdaqCodes: StockCode[] = KosdaqCodeJson as unknown as StockCode[];
 
 const stockCodes: StockCode[] = [...kospiCodes, ...kosdaqCodes];
-const stockMap = _.keyBy(stockCodes, 'shortCode');
+const stockMap = keyBy(stockCodes, 'shortCode');
 
 @Module({
     imports: [
@@ -109,8 +109,8 @@ export class Migrator implements IMigrator {
 
     private async migration() {
         await this.truncate();
-        const uniqThemeList = _.uniqBy(themeList, (theme) => theme.themeCode);
-        const chunks = _.chunk(uniqThemeList, 20);
+        const uniqThemeList = uniqBy(themeList, (theme) => theme.themeCode);
+        const chunks = chunk(uniqThemeList, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((theme) => {
@@ -140,7 +140,7 @@ export class Migrator implements IMigrator {
             },
         );
 
-        const chunks = _.chunk(themeStockDtoList, 20);
+        const chunks = chunk(themeStockDtoList, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((dto) => {

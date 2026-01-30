@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { sortBy } from 'lodash';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -43,6 +43,6 @@ export class TradingVolumeRankService {
         });
 
         // 여기서 sort를 한번 더 하는 이유는 updatedAt 기준으로 내림차순 정렬 후, 거래량 기준으로 내림차순 정렬을 하기 위함입니다.
-        return _.sortBy(tradingVolumeRanks, (v) => v.tradingVolume).reverse();
+        return sortBy(tradingVolumeRanks, (v) => v.tradingVolume).reverse();
     }
 }

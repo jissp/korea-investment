@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import * as _ from 'lodash';
+import { chunk } from 'lodash';
 import { Repository } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NestFactory } from '@nestjs/core';
@@ -88,7 +88,7 @@ export class Migrator implements IMigrator {
     }
 
     private async migration() {
-        const chunks = _.chunk(idxList, 20);
+        const chunks = chunk(idxList, 20);
         for (const chunk of chunks) {
             await Promise.all(
                 chunk.map((idx) => {

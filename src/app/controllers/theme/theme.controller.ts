@@ -76,7 +76,7 @@ export class ThemeController {
     })
     @ApiParam({
         name: 'themeCode',
-        description: '종목 코드',
+        description: '테마 코드',
         type: String,
         required: true,
     })

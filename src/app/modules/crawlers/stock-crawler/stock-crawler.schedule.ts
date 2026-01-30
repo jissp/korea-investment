@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import { FlowProducer } from 'bullmq';
 import { FlowJob, FlowOpts } from 'bullmq/dist/esm/interfaces';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -44,15 +44,15 @@ export class StockCrawlerSchedule implements OnModuleInit {
         this.handleUpdateAccountStockGroupStockPrices();
     }
 
-    @Cron('*/5 * * * *')
+    @Cron('*/10 * * * *')
     @PreventConcurrentExecution()
     async handleCrawlingStockInvestor() {
         const currentDate = new Date();
         const hour = currentDate.getHours();
 
-        if (hour < 16) {
-            currentDate.setDate(currentDate.getDate() - 1);
-        }
+        // if (hour < 16) {
+        //     currentDate.setDate(currentDate.getDate() - 1);
+        // }
 
         const todayYmd = toDateYmdByDate({
             date: currentDate,
@@ -65,7 +65,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
             );
 
         if (!latestBusinessDay) {
-            throw new Error('Latest business day not found');
+            return;
         }
 
         const stocks =
@@ -114,7 +114,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
         );
     }
 
-    // @Cron('*/5 * * * *') // 매일 16시에 실행 (장 마감 후)
+    @Cron('*/5 * * * *')
     @PreventConcurrentExecution()
     async handleCrawlingStockHourInvestorByForeigner() {
         const currentDate = new Date();
@@ -174,6 +174,9 @@ export class StockCrawlerSchedule implements OnModuleInit {
                         MKSC_SHRN_ISCD: stock.shortCode,
                     }),
                 ],
+                opts: {
+                    jobId: `stock_${stock.shortCode}`,
+                },
             }),
         );
         await Promise.allSettled(
@@ -198,7 +201,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
             const stocks =
                 await this.stockCrawlerService.getStocksForUpdateAccountStockGroupStockPrices();
 
-            const groupedStocks = _.groupBy(
+            const groupedStocks = groupBy(
                 stocks,
                 (stock: Stock) => stock.isNextTrade,
             );
@@ -208,7 +211,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
             for (const [isNextTrade, stocks] of Object.entries(
                 groupedStocks,
             ) as [YN, Stock[]][]) {
-                _.chunk(stocks, 30).map((stocks) => {
+                chunk(stocks, 30).map((stocks) => {
                     const stockCodes = stocks.map((stock) => stock.shortCode);
 
                     return this.updateAccountStockGroupStockPricesFlow.add(

@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { keyBy } from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
@@ -112,7 +112,7 @@ export class StockRankCrawlerProcessor {
             ({ response }) => response.output,
         );
 
-        const multiPriceOutputMap = _.keyBy(
+        const multiPriceOutputMap = keyBy(
             multiPriceOutputs,
             (output) => output.inter_shrn_iscd,
         );

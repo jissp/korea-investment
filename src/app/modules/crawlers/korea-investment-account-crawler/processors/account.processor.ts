@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { difference } from 'lodash';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -203,9 +203,10 @@ export class AccountProcessor {
                 }),
             );
 
+            const favoriteGroupNames = ['키워드'];
             const groupName = output1.inter_grp_name;
             if (
-                ['키워드', '관심'].some((keyword) =>
+                favoriteGroupNames.some((keyword) =>
                     groupName.includes(keyword),
                 )
             ) {
@@ -284,8 +285,8 @@ export class AccountProcessor {
      * @private
      */
     private diffKeywords(keywords: string[], addedKeywords: string[]) {
-        const removedKeywords = _.difference(addedKeywords, keywords);
-        const newKeywords = _.difference(keywords, addedKeywords);
+        const removedKeywords = difference(addedKeywords, keywords);
+        const newKeywords = difference(keywords, addedKeywords);
 
         return { removedKeywords, newKeywords };
     }
