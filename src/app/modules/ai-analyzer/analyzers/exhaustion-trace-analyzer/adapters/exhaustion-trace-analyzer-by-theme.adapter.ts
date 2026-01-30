@@ -4,7 +4,6 @@ import {
     StockDailyInvestor,
     StockHourForeignerInvestor,
 } from '@app/modules/repositories/stock-investor';
-import { TransformByInvestorHelper } from '@app/modules/ai-analyzer';
 import { BaseExhaustionTraceAnalyzerAdapter } from '../base-exhaustion-trace-analyzer.adapter';
 import { ExhaustionTraceAnalyzerHelper } from '../exhaustion-trace-analyzer-helper';
 
@@ -14,11 +13,8 @@ export class ExhaustionTraceAnalyzerByThemeAdapter extends BaseExhaustionTraceAn
         ExhaustionTraceAnalyzerByThemeAdapter.name,
     );
 
-    constructor(
-        transformByInvestorHelper: TransformByInvestorHelper,
-        exhaustionTraceAnalyzerHelper: ExhaustionTraceAnalyzerHelper,
-    ) {
-        super(transformByInvestorHelper, exhaustionTraceAnalyzerHelper);
+    constructor(exhaustionTraceAnalyzerHelper: ExhaustionTraceAnalyzerHelper) {
+        super(exhaustionTraceAnalyzerHelper);
     }
 
     public transformToTitle() {

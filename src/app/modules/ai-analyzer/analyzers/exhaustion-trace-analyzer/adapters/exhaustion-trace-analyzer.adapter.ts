@@ -4,7 +4,6 @@ import {
     StockDailyInvestor,
     StockHourForeignerInvestor,
 } from '@app/modules/repositories/stock-investor';
-import { TransformByInvestorHelper } from '@app/modules/ai-analyzer';
 import { ExhaustionTraceAnalyzerHelper } from '../exhaustion-trace-analyzer-helper';
 import { BaseExhaustionTraceAnalyzerAdapter } from '../base-exhaustion-trace-analyzer.adapter';
 
@@ -12,11 +11,8 @@ import { BaseExhaustionTraceAnalyzerAdapter } from '../base-exhaustion-trace-ana
 export class ExhaustionTraceAnalyzerAdapter extends BaseExhaustionTraceAnalyzerAdapter {
     protected readonly logger = new Logger(ExhaustionTraceAnalyzerAdapter.name);
 
-    constructor(
-        transformByInvestorHelper: TransformByInvestorHelper,
-        exhaustionTraceAnalyzerHelper: ExhaustionTraceAnalyzerHelper,
-    ) {
-        super(transformByInvestorHelper, exhaustionTraceAnalyzerHelper);
+    constructor(exhaustionTraceAnalyzerHelper: ExhaustionTraceAnalyzerHelper) {
+        super(exhaustionTraceAnalyzerHelper);
     }
 
     public transformToTitle() {
