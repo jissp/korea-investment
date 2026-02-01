@@ -58,38 +58,128 @@ export class StockDailyInvestor {
     /**
      * 종가
      */
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', default: 0 })
     @ApiProperty({
         description: '종가',
     })
     price!: number;
 
     /**
-     * 개인 매수
+     * 고가
      */
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', default: 0 })
     @ApiProperty({
-        description: '개인 매수량',
+        description: '고가',
     })
-    person!: number;
+    highPrice!: number;
 
     /**
-     * 외국인 매수량
+     * 저가
      */
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', default: 0 })
     @ApiProperty({
-        description: '외국인 매수량',
+        description: '저가',
     })
-    foreigner!: number;
+    lowPrice!: number;
 
     /**
-     * 기관 매수량
+     * 개인 순매수 수량
      */
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', default: 0 })
     @ApiProperty({
-        description: '기관 매수량',
+        description: '개인 순매수 수량',
     })
-    organization!: number;
+    person: number;
+
+    /**
+     * 외국인 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '외국인 순매수 수량',
+    })
+    foreigner: number;
+
+    /**
+     * 기관계 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '기관계 순매수 수량',
+    })
+    organization: number;
+
+    /**
+     * 증권 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '증권 순매수 수량',
+    })
+    financialInvestment: number;
+
+    /**
+     * 투자신탁 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '투자신탁 순매수 수량',
+    })
+    investmentTrust: number;
+
+    /**
+     * 사모 펀드 순매수 거래량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '사모 펀드 순매수 거래량',
+    })
+    privateEquity: number;
+
+    /**
+     * 은행 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '은행 순매수 수량',
+    })
+    bank: number;
+
+    /**
+     * 보험 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '보험 순매수 수량',
+    })
+    insurance: number;
+
+    /**
+     * 종금 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '종금 순매수 수량',
+    })
+    merchantBank: number;
+
+    /**
+     * 기금 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '기금 순매수 수량',
+    })
+    fund: number;
+
+    /**
+     * 기타 순매수 수량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '기타 순매수 수량',
+    })
+    etc: number;
 
     @CreateDateColumn({
         type: 'datetime',

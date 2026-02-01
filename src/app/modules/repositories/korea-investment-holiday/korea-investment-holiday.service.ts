@@ -21,6 +21,14 @@ export class KoreaInvestmentHolidayService {
     }
 
     /**
+     * 특정 요일의 국내휴장일을 조회합니다.
+     * @param date
+     */
+    public async getByDate(date: string) {
+        return this.repository.findOneBy({ date });
+    }
+
+    /**
      * 국내휴장일 데이터를 추가합니다.
      * @param dto
      */
@@ -29,37 +37,25 @@ export class KoreaInvestmentHolidayService {
     }
 
     /**
-     * 국내휴장일 데이터가 존재하는지 확인합니다.
+     * 최근 영업일을 조회합니다.
      * @param date
+     * @param isImportToday
      */
-    public async getByDate(date: string) {
-        return this.repository.findOneBy({ date });
-    }
-
-    /**
-     * 최근 영업일을 조회합니다. (오늘 포함)
-     * @param date
-     */
-    public async getLatestBusinessDayByDate(date: string) {
+    public async getLatestBusinessDayByDate({
+        date,
+        isImportToday = true,
+    }: {
+        date: string;
+        isImportToday?: boolean;
+    }) {
         return this.repository.findOne({
             where: {
-                date: LessThanOrEqual(date),
+                date: isImportToday ? LessThanOrEqual(date) : LessThan(date),
                 isOpen: YN.Y,
             },
             order: {
                 date: 'DESC',
             },
-        });
-    }
-
-    /**
-     * 최근 영업일을 조회합니다. (오늘 미포함)
-     * @param date
-     */
-    public async getLatestBusinessDayWithoutTodayByDate(date: string) {
-        return this.repository.findOneBy({
-            date: LessThan(date),
-            isOpen: YN.Y,
         });
     }
 }

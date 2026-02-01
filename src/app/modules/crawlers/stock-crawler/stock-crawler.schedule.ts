@@ -56,7 +56,9 @@ export class StockCrawlerSchedule implements OnModuleInit {
 
         const latestBusinessDay =
             await this.koreaInvestmentHolidayService.getLatestBusinessDayByDate(
-                todayYmd,
+                {
+                    date: todayYmd,
+                },
             );
 
         if (!latestBusinessDay) {
@@ -92,10 +94,15 @@ export class StockCrawlerSchedule implements OnModuleInit {
                 name: queueName,
                 queueName,
                 children: [
-                    this.requestApiHelper.generateDomesticInvestor({
-                        FID_INPUT_ISCD: stock.shortCode,
-                        FID_COND_MRKT_DIV_CODE: marketDivCode,
-                    }),
+                    this.requestApiHelper.generateDomesticInvestorTradeByStockDaily(
+                        {
+                            FID_INPUT_ISCD: stock.shortCode,
+                            FID_COND_MRKT_DIV_CODE: marketDivCode,
+                            FID_INPUT_DATE_1: todayYmd,
+                            FID_ETC_CLS_CODE: '',
+                            FID_ORG_ADJ_PRC: '',
+                        },
+                    ),
                 ],
                 opts: {
                     jobId: `stock_${stock.shortCode.toString()}`,
@@ -126,7 +133,9 @@ export class StockCrawlerSchedule implements OnModuleInit {
 
         const latestBusinessDay =
             await this.koreaInvestmentHolidayService.getLatestBusinessDayByDate(
-                todayYmd,
+                {
+                    date: todayYmd,
+                },
             );
 
         if (!latestBusinessDay) {

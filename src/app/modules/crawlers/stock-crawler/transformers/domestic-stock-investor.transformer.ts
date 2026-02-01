@@ -1,12 +1,12 @@
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
-import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
-import { StockDailyInvestorDto } from '@app/modules/repositories/stock-investor';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
+import { DomesticInvestorTradeByStockDailyOutput2 } from '@app/modules/korea-investment-request-api/common';
+import { StockDailyInvestorDto } from '@app/modules/repositories/stock-investor';
 
 interface TransformParams {
     stockCode: string;
-    output: DomesticStockQuotationsInquireInvestorOutput;
+    output: DomesticInvestorTradeByStockDailyOutput2;
 }
 export class DomesticStockInvestorTransformer {
     transform({ stockCode, output }: TransformParams): StockDailyInvestorDto {
@@ -16,9 +16,19 @@ export class DomesticStockInvestorTransformer {
             stockCode,
             stockName: getStockName(stockCode),
             price: Number(output.stck_clpr),
+            highPrice: Number(output.stck_hgpr),
+            lowPrice: Number(output.stck_lwpr),
             person: Number(output.prsn_ntby_qty),
             foreigner: Number(output.frgn_ntby_qty),
             organization: Number(output.orgn_ntby_qty),
+            financialInvestment: Number(output.scrt_ntby_qty),
+            investmentTrust: Number(output.ivtr_ntby_qty),
+            privateEquity: Number(output.pe_fund_ntby_vol),
+            bank: Number(output.bank_ntby_qty),
+            insurance: Number(output.insu_ntby_qty),
+            merchantBank: Number(output.mrbn_ntby_qty),
+            fund: Number(output.fund_ntby_qty),
+            etc: Number(output.etc_ntby_qty),
         };
     }
 }

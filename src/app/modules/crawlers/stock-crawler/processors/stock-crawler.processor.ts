@@ -7,10 +7,13 @@ import {
     DomesticStockInvestorTrendEstimateParam,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput,
     DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
-    DomesticStockQuotationsInquireInvestorOutput,
-    DomesticStockQuotationsInquireInvestorParam,
 } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
+import {
+    DomesticInvestorTradeByStockDailyOutput1,
+    DomesticInvestorTradeByStockDailyOutput2,
+    DomesticInvestorTradeByStockDailyParam,
+    KoreaInvestmentRequestApiHelper,
+} from '@app/modules/korea-investment-request-api/common';
 import {
     StockDailyInvestorService,
     StockHourForeignerInvestorService,
@@ -38,15 +41,16 @@ export class StockCrawlerProcessor {
     async processRequestStockInvestor(job: Job) {
         try {
             const childrenResponses =
-                await this.koreaInvestmentRequestApiHelper.getChildResponses<
-                    DomesticStockQuotationsInquireInvestorParam,
-                    DomesticStockQuotationsInquireInvestorOutput[]
+                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
+                    DomesticInvestorTradeByStockDailyParam,
+                    DomesticInvestorTradeByStockDailyOutput1,
+                    DomesticInvestorTradeByStockDailyOutput2[]
                 >(job);
 
             const stockContents = childrenResponses.map(
                 ({ request, response }) => ({
                     stockCode: request.params.FID_INPUT_ISCD,
-                    outputs: response.output,
+                    outputs: response.output2,
                 }),
             );
 

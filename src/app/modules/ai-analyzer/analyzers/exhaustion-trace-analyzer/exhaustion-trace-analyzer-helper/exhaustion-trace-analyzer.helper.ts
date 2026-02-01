@@ -25,6 +25,23 @@ import {
 import { TransformByInvestorHelper } from '@app/modules/ai-analyzer';
 import { StockExhaustionTraceData } from './exhaustion-trace-analyzer-helper.types';
 
+const FieldMap = {
+    price: '종목 종가',
+    highPrice: '종목 고가',
+    lowPrice: '종목 저가',
+    person: '개인 순매수량',
+    foreigner: '외국인 순매수량',
+    organization: '기관계 순매수량',
+    financialInvestment: '증권 순매수량',
+    investmentTrust: '투자신탁 순매수량',
+    privateEquity: '사모 펀드 순매수량',
+    bank: '은행 순매수량',
+    insurance: '보험 순매수량',
+    merchantBank: '종금 순매수량',
+    fund: '기금 순매수량',
+    etc: '기타 순매수량',
+};
+
 @Injectable()
 export class ExhaustionTraceAnalyzerHelper {
     constructor(
@@ -89,12 +106,12 @@ export class ExhaustionTraceAnalyzerHelper {
     ): Promise<StockDailyInvestor[]> {
         const transformer = new DomesticStockInvestorTransformer();
 
-        const rawStockInvestorOutputs = await this.fetchStockInvestors(stocks);
+        const responses = await this.fetchStockInvestors(stocks);
 
         const currentDate = new Date();
 
-        return rawStockInvestorOutputs.flatMap((outputs, index) => {
-            return outputs.map((output) => ({
+        return responses.flatMap(({ output2 }, index) => {
+            return output2.map((output) => ({
                 id: 0,
                 ...transformer.transform({
                     stockCode: stocks[index].shortCode,
@@ -110,14 +127,21 @@ export class ExhaustionTraceAnalyzerHelper {
      * @param stocks
      */
     public async fetchStockInvestors(stocks: Stock[]) {
+        const todayYmd = toDateYmdByDate({
+            separator: '-',
+        });
+
         return Promise.all(
             stocks.map((stock) =>
-                this.koreaInvestmentQuotationClient.inquireInvestor({
-                    FID_INPUT_ISCD: stock.shortCode,
-                    FID_COND_MRKT_DIV_CODE: getMarketDivCodeByIsNextTrade(
-                        stock.isNextTrade,
-                    ),
-                }),
+                this.koreaInvestmentQuotationClient.getInvestorTradeByStockDaily(
+                    {
+                        FID_INPUT_ISCD: stock.shortCode,
+                        FID_COND_MRKT_DIV_CODE: getMarketDivCodeByIsNextTrade(
+                            stock.isNextTrade,
+                        ),
+                        FID_INPUT_DATE_1: todayYmd,
+                    },
+                ),
             ),
         );
     }
@@ -190,9 +214,14 @@ export class ExhaustionTraceAnalyzerHelper {
     }
 
     public extractInvestorPrompt(stock: StockExhaustionTraceData): string {
+        const fields = Object.entries(FieldMap);
         const stockInvestorPrompt = stock.investors
-            .map((inv) => {
-                return `- ${inv.date}: 종가: ${inv.price}, 개인: ${inv.person}, 외국인: ${inv.foreigner}, 기관: ${inv.organization}`;
+            .map((investor) => {
+                const fieldPrompts = fields.map(([field, fieldName]) => {
+                    return `${fieldName}: ${investor[field]}`;
+                });
+
+                return `- **${investor.date}**: ${fieldPrompts.join(', ')}`;
             })
             .join('\n');
 

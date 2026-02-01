@@ -138,13 +138,18 @@ export class StockInvestorService {
         const divCode =
             stock.isNextTrade === YN.Y ? MarketDivCode.통합 : MarketDivCode.KRX;
         const response =
-            await this.koreaInvestmentQuotationClient.inquireInvestor({
-                FID_INPUT_ISCD: stockCode,
-                FID_COND_MRKT_DIV_CODE: divCode,
-            });
+            await this.koreaInvestmentQuotationClient.getInvestorTradeByStockDaily(
+                {
+                    FID_INPUT_ISCD: stockCode,
+                    FID_COND_MRKT_DIV_CODE: divCode,
+                    FID_INPUT_DATE_1: toDateYmdByDate({
+                        separator: '-',
+                    }),
+                },
+            );
 
         const transformer = new DomesticStockInvestorTransformer();
-        const transformedStockInvestors = response.map((output) =>
+        const transformedStockInvestors = response.output2.map((output) =>
             transformer.transform({
                 stockCode,
                 output,
