@@ -42,7 +42,13 @@ export class StockHourForeignerInvestorService {
      * @param stockCode
      * @param date
      */
-    public async getListByStockCode(stockCode: string, date: string) {
+    public async getListByStockCode({
+        stockCode,
+        date,
+    }: {
+        stockCode: string;
+        date: string;
+    }) {
         return this.repository.find({
             where: {
                 stockCode,

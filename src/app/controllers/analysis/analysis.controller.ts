@@ -12,7 +12,7 @@ import {
     ApiParam,
     ApiTags,
 } from '@nestjs/swagger';
-import { AiAnalyzerService } from '@app/modules/ai-analyzer';
+import { AiAnalyzerService } from '@app/modules/analysis/ai-analyzer';
 import {
     AiAnalysisReportService,
     ReportType,

@@ -18,6 +18,7 @@ export class DomesticStockInvestorTransformer {
             price: Number(output.stck_clpr),
             highPrice: Number(output.stck_hgpr),
             lowPrice: Number(output.stck_lwpr),
+            tradeVolume: Number(output.acml_vol),
             person: Number(output.prsn_ntby_qty),
             foreigner: Number(output.frgn_ntby_qty),
             organization: Number(output.orgn_ntby_qty),

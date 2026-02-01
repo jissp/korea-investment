@@ -10,17 +10,21 @@ import {
 import { assertStockCode } from '@common/domains';
 import { MarketDivCode, PeriodType } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
-import { StockDailyPriceTransformer } from '@app/common';
-import { ExistingStockGuard } from '@app/common/guards';
 import { MarketType, YN } from '@app/common/types';
-import { StockPriceTransformer } from '@app/common/transformers/stock-price.transformer';
+import { ExistingStockGuard } from '@app/common/guards';
+import {
+    StockDailyPriceTransformer,
+    StockPriceTransformer,
+} from '@app/common/korea-investment';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
+import { KoreaInvestmentCollectorSocket } from '@app/modules/korea-investment-collector';
+import { AnalyzerService } from '@app/modules/analysis/analyzer';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import {
     GetStockDailyPricesResponse,
     GetStockPricesResponse,
     GetStockResponse,
+    GetStockScoresResponse,
     GetStocksResponse,
 } from './dto';
 
@@ -31,6 +35,7 @@ export class StockController {
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
         private readonly stockService: StockService,
+        private readonly analyzerService: AnalyzerService,
     ) {}
 
     @ApiOperation({
@@ -172,6 +177,34 @@ export class StockController {
 
         return {
             data: stockPriceDtoList,
+        };
+    }
+
+    @ApiOperation({
+        summary: '종목 점수 조회',
+    })
+    @ApiParam({
+        name: 'stockCode',
+        type: String,
+        description: '종목코드',
+    })
+    @ApiOkResponse({
+        type: GetStockScoresResponse,
+    })
+    @Get(':stockCode/scores')
+    public async getStockScores(
+        @Param('stockCode') stockCode: string,
+    ): Promise<GetStockScoresResponse> {
+        const stock = await this.stockService.getStock(stockCode);
+
+        const [exhaustionTraceScore] = await Promise.all([
+            this.analyzerService.getExhaustionTraceScore(stock!),
+        ]);
+
+        return {
+            data: {
+                exhaustionTraceScore,
+            },
         };
     }
 

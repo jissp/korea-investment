@@ -83,6 +83,15 @@ export class StockDailyInvestor {
     lowPrice!: number;
 
     /**
+     * 누적 거래량
+     */
+    @Column({ type: 'integer', default: 0 })
+    @ApiProperty({
+        description: '누적 거래량',
+    })
+    tradeVolume: number;
+
+    /**
      * 개인 순매수 수량
      */
     @Column({ type: 'integer', default: 0 })

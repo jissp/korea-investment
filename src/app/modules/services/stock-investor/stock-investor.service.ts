@@ -114,10 +114,10 @@ export class StockInvestorService {
                 );
             }
 
-            return this.stockHourForeignerInvestorService.getListByStockCode(
-                stockCode,
-                dateYmd,
-            );
+            return this.stockHourForeignerInvestorService.getListByStockCode({
+                stockCode: stockCode,
+                date: dateYmd,
+            });
         } catch (error) {
             this.logger.error(error);
             throw error;
@@ -207,9 +207,9 @@ export class StockInvestorService {
             }),
         );
 
-        return this.stockHourForeignerInvestorService.getListByStockCode(
-            stock.shortCode,
-            date,
-        );
+        return this.stockHourForeignerInvestorService.getListByStockCode({
+            stockCode: stock.shortCode,
+            date: date,
+        });
     }
 }
