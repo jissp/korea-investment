@@ -1,21 +1,23 @@
 import { Module } from '@nestjs/common';
 import { QueueModule } from '@modules/queue';
 import { KoreaInvestmentAdditionalRequestApiModule } from '@app/modules/korea-investment-request-api/korea-investment-additional-request-api';
-import { KoreaInvestmentHolidayModule } from '@app/modules/repositories/korea-investment-holiday';
+import { KoreaInvestmentCalendarModule } from '@app/modules/repositories/korea-investment-calendar';
 import { StockModule } from '@app/modules/repositories/stock';
 import { AccountStockGroupModule } from '@app/modules/repositories/account-stock-group';
 import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { StockInvestorModule } from '@app/modules/repositories/stock-investor';
+import { StockCrawlerFlowType } from './stock-crawler.types';
+import { StockInvestorTransformer } from './transformers';
 import {
     AccountStockPriceProcessor,
     StockCrawlerProcessor,
 } from './processors';
-import { StockCrawlerFlowType } from './stock-crawler.types';
 import { StockCrawlerSchedule } from './stock-crawler.schedule';
 import { StockCrawlerService } from './stock-crawler.service';
+import { StockCrawlerQueueService } from './stock-crawler-queue.service';
 
 const RepositoryModules = [
-    KoreaInvestmentHolidayModule,
+    KoreaInvestmentCalendarModule,
     StockModule,
     AccountStockGroupModule,
     FavoriteStockModule,
@@ -24,7 +26,6 @@ const RepositoryModules = [
 
 const flowTypes = [
     StockCrawlerFlowType.RequestStockInvestor,
-    StockCrawlerFlowType.RequestStockHourInvestorByForeigner,
     StockCrawlerFlowType.RequestDailyItemChartPrice,
     StockCrawlerFlowType.UpdateAccountStockGroupStockPrices,
 ];
@@ -34,6 +35,10 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
     imports: [
         QueueModule.forFeature({
             flowTypes,
+            jobOptions: {
+                removeOnComplete: true,
+                removeOnFail: true,
+            },
         }),
         KoreaInvestmentAdditionalRequestApiModule,
         ...RepositoryModules,
@@ -43,7 +48,9 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         StockCrawlerSchedule,
         StockCrawlerProcessor,
         AccountStockPriceProcessor,
+        StockInvestorTransformer,
         StockCrawlerService,
+        StockCrawlerQueueService,
     ],
     exports: [StockCrawlerSchedule],
 })

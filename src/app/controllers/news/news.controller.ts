@@ -1,6 +1,6 @@
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Controller, Get, Param } from '@nestjs/common';
-import { NewsService } from '@app/modules/services/news-service';
+import { NewsService } from '@app/modules/app-services/news-service';
 import {
     NewsByKeywordGroupResponse,
     NewsByStockResponse,

@@ -1,25 +1,22 @@
-import { Repository } from 'typeorm';
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { uniqueValues } from '@common/utils';
-import { MarketType } from '@app/common';
-import { StockService } from '@app/modules/repositories/stock';
-import { FavoriteStock } from '@app/modules/repositories/favorite-stock';
-import {
-    StockDailyInvestor,
-    StockHourForeignerInvestor,
-} from '@app/modules/repositories/stock-investor';
+import { MarketType } from '@app/common/types';
+import { KoreaInvestmentCalendarService } from '@app/modules/repositories/korea-investment-calendar';
+import { Stock, StockService } from '@app/modules/repositories/stock';
 import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
+import { FavoriteStockService } from '@app/modules/repositories/favorite-stock';
+import { StockInvestorService } from '@app/modules/repositories/stock-investor';
 
 @Injectable()
 export class StockCrawlerService {
     private readonly logger = new Logger(StockCrawlerService.name);
 
     constructor(
+        private readonly koreaInvestmentHolidayService: KoreaInvestmentCalendarService,
         private readonly accountStockGroupStockService: AccountStockGroupStockService,
         private readonly stockService: StockService,
-        @InjectRepository(FavoriteStock)
-        private readonly favoriteStockRepository: Repository<FavoriteStock>,
+        private readonly favoriteStockService: FavoriteStockService,
+        private readonly stockInvestorService: StockInvestorService,
     ) {}
 
     /**
@@ -38,57 +35,46 @@ export class StockCrawlerService {
         });
     }
 
-    /**
-     * UpdateAccountStockGroupStockPrices 대상 Stock 목록을 조회합니다.
-     */
-    public async getStocksForCrawlingStockInvestor(date: string) {
-        const favoriteStockAlias = FavoriteStock.name;
-        const dailyInvestorAlias = StockDailyInvestor.name;
-
-        const nullFavoriteStocks = await this.favoriteStockRepository
-            .createQueryBuilder(favoriteStockAlias)
-            .leftJoin(
-                StockDailyInvestor,
-                dailyInvestorAlias,
-                `${favoriteStockAlias}.stock_code = ${dailyInvestorAlias}.stock_code AND date = :date`,
+    public async assertKoreaInvestmentHoliday(todayYmd: string) {
+        const latestBusinessDay =
+            await this.koreaInvestmentHolidayService.getLatestBusinessDayByDate(
                 {
-                    date,
+                    date: todayYmd,
                 },
-            )
-            .where(
-                `${dailyInvestorAlias}.id IS NULL OR ${dailyInvestorAlias}.person = 0`,
-            )
-            .getMany();
+            );
+
+        if (!latestBusinessDay) {
+            throw new Error('Latest business day not found');
+        }
+
+        return latestBusinessDay;
+    }
+
+    public async getStocksByFavoriteStocks() {
+        const favoriteStocks = await this.favoriteStockService.findAll();
 
         return this.stockService.getStocksByStockCode({
             marketType: MarketType.Domestic,
-            stockCodes: nullFavoriteStocks.map((stock) => stock.stockCode),
+            stockCodes: favoriteStocks.map(
+                (favoriteStock) => favoriteStock.stockCode,
+            ),
         });
     }
 
     /**
-     * RequestStockHourInvestorByForeigner 대상 Stock 목록을 조회합니다.
+     * Stock 별 금일 투자자 동향 정보 유무를 Aggregate 합니다.
+     * @param stocks
      */
-    public async getStocksForRequestStockHourInvestorByForeigner(
-        date: string,
-        timeCode: '1' | '2' | '3' | '4' | '5',
-    ) {
-        const favoriteStockAlias = FavoriteStock.name;
-        const stockHourForeignerInvestorAlias = StockHourForeignerInvestor.name;
-
-        const nullFavoriteStocks = await this.favoriteStockRepository
-            .createQueryBuilder(favoriteStockAlias)
-            .leftJoin(
-                StockHourForeignerInvestor,
-                stockHourForeignerInvestorAlias,
-                `${favoriteStockAlias}.stock_code = ${stockHourForeignerInvestorAlias}.stock_code AND ${stockHourForeignerInvestorAlias}.date = '${date}' AND ${stockHourForeignerInvestorAlias}.time_code = '${timeCode}'`,
-            )
-            .where(`${stockHourForeignerInvestorAlias}.id IS NULL`)
-            .getMany();
-
-        return this.stockService.getStocksByStockCode({
-            marketType: MarketType.Domestic,
-            stockCodes: nullFavoriteStocks.map((stock) => stock.stockCode),
-        });
+    public async aggregateExistsStockInvestor(stocks: Stock[]) {
+        return Promise.all(
+            stocks.map(async (stock) => {
+                return {
+                    stock,
+                    isExists: await this.stockInvestorService.existsByStockCode(
+                        stock.shortCode,
+                    ),
+                };
+            }),
+        );
     }
 }

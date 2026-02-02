@@ -2,10 +2,10 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { AccountStockGroupStockTransformer } from '@app/common/korea-investment';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { AccountStockGroupStockService } from '@app/modules/repositories/account-stock-group';
 import { StockCrawlerFlowType } from '../stock-crawler.types';
-import { AccountStockGroupStockTransformer } from '../../korea-investment-account-crawler/transformers';
 
 @Injectable()
 export class AccountStockPriceProcessor {

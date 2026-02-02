@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { KoreaInvestmentHolidayModule } from './korea-investment-holiday';
+import { KoreaInvestmentCalendarModule } from './korea-investment-calendar';
 import { AccountModule } from './account';
 import { AccountStockGroupModule } from './account-stock-group';
 import { AiAnalysisReportModule } from './ai-analysis-report';
@@ -14,7 +14,7 @@ import { TradingVolumeRankModule } from './trading-volume-rank';
 import { ThemeModule } from './theme';
 
 const repositoryModules = [
-    KoreaInvestmentHolidayModule,
+    KoreaInvestmentCalendarModule,
     AccountModule,
     AccountStockGroupModule,
     AiAnalysisReportModule,

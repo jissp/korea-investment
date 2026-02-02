@@ -7,6 +7,7 @@ import {
     KoreaInvestmentQuotationClientModule,
 } from '@modules/korea-investment/korea-investment-quotation-client';
 import configuration from '@app/configuration';
+import { MarketDivCode } from '@modules/korea-investment/common';
 
 describe('KoreaInvestmentQuotation e2e 테스트', () => {
     let quotationClient: KoreaInvestmentQuotationClient;
@@ -38,15 +39,10 @@ describe('KoreaInvestmentQuotation e2e 테스트', () => {
                 date: currentDate,
             });
 
-            const news = await quotationClient.inquireNewsTitle({
-                FID_INPUT_DATE_1: `00${koreaInvestmentDate}`,
-                FID_NEWS_OFER_ENTP_CODE: '',
-                FID_COND_MRKT_CLS_CODE: '',
-                FID_INPUT_ISCD: '',
-                FID_TITL_CNTT: '',
-                FID_INPUT_HOUR_1: '',
-                FID_RANK_SORT_CLS_CODE: '',
-                FID_INPUT_SRNO: '',
+            const news = await quotationClient.getInvestorTradeByStockDaily({
+                FID_INPUT_ISCD: '001440',
+                FID_INPUT_DATE_1: '2026-02-02',
+                FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
             });
 
             console.log(news);

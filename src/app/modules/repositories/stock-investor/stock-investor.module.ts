@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StockDailyInvestor, StockHourForeignerInvestor } from './entities';
-import { StockDailyInvestorService } from './stock-daily-investor.service';
-import { StockHourForeignerInvestorService } from './stock-hour-foreigner-investor.service';
+import { StockInvestor } from './stock-investor.entity';
+import { StockInvestorService } from './stock-investor.service';
 
-const entities = [StockDailyInvestor, StockHourForeignerInvestor];
-const services = [StockDailyInvestorService, StockHourForeignerInvestorService];
+const entities = [StockInvestor];
+const services = [StockInvestorService];
 
 @Module({
     imports: [TypeOrmModule.forFeature(entities)],

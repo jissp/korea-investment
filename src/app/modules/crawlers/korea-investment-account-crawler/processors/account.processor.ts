@@ -3,7 +3,12 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OnQueueProcessor } from '@modules/queue';
-import { isDelistedStockByName } from '@app/common';
+import { isDelistedStockByName } from '@app/common/domains';
+import {
+    AccountStockGroupTransformer,
+    AccountStockTransformer,
+    AccountTransformer,
+} from '@app/common/korea-investment';
 import {
     KoreaInvestmentAccountOutput2,
     KoreaInvestmentAccountParam,
@@ -35,11 +40,6 @@ import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
 } from '../korea-investment-account-crawler.types';
-import {
-    AccountStockGroupTransformer,
-    AccountStockTransformer,
-    AccountTransformer,
-} from '../transformers';
 
 type StockInfo = { stockName: string; stockCode: string };
 

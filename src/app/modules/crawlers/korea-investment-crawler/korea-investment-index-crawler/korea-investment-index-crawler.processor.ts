@@ -2,6 +2,14 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { OnQueueProcessor } from '@modules/queue';
+import {
+    DomesticDailyIndexTransformer,
+    DomesticIndexTransformer,
+    OverseasDailyGovernmentBondTransformer,
+    OverseasDailyIndexTransformer,
+    OverseasGovernmentBondTransformer,
+    OverseasIndexTransformer,
+} from '@app/common/korea-investment';
 import { MarketIndexService } from '@app/modules/repositories/market-index';
 import {
     KoreaInvestmentCallApiMultiResult,
@@ -16,14 +24,6 @@ import {
     OverseasQuotationInquireDailyChartPriceOutput2,
     OverseasQuotationInquireDailyChartPriceParam,
 } from './korea-investment-index-crawler.interface';
-import {
-    DomesticDailyIndexTransformer,
-    DomesticIndexTransformer,
-    OverseasDailyGovernmentBondTransformer,
-    OverseasDailyIndexTransformer,
-    OverseasGovernmentBondTransformer,
-    OverseasIndexTransformer,
-} from './transformers';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerProcessor {

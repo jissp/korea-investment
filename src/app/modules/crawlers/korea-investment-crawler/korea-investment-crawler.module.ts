@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { KoreaInvestmentHolidayCrawlerModule } from '@app/modules/crawlers/korea-investment-crawler/korea-investment-holiday-crawler';
+import { KoreaInvestmentCalendarCrawlerModule } from '@app/modules/crawlers/korea-investment-crawler/korea-investment-calender-crawler';
 import { KoreaInvestmentIndexCrawlerModule } from '@app/modules/crawlers/korea-investment-crawler/korea-investment-index-crawler';
 
 const modules = [
-    KoreaInvestmentHolidayCrawlerModule,
+    KoreaInvestmentCalendarCrawlerModule,
     KoreaInvestmentIndexCrawlerModule,
 ];
 

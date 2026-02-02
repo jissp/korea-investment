@@ -7,7 +7,7 @@ import {
     ApiOperation,
     ApiParam,
 } from '@nestjs/swagger';
-import { GetCodesResponse } from '@app/common';
+import { GetCodesResponse } from '@app/common/dto';
 import { KeywordGroupService } from '@app/modules/repositories/keyword';
 import { CreateKeywordGroupBody } from './dto';
 

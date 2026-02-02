@@ -74,9 +74,7 @@ export class ExhaustionTraceAnalyzerHelper {
      * DB에서 종목별 투자자 동향을 조회합니다.
      * @param stocks
      */
-    public async getStockInvestors(
-        stocks: Stock[],
-    ): Promise<StockInvestor[]> {
+    public async getStockInvestors(stocks: Stock[]): Promise<StockInvestor[]> {
         const stockCodes = stocks.map((stock) => stock.shortCode);
 
         return this.stockInvestorService.getListByDays({

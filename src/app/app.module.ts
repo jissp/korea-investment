@@ -13,9 +13,10 @@ import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea
 import { SlackModule } from '@modules/slack';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
-import { AiAnalyzerModule } from '@app/modules/ai-analyzer';
+import { AnalyzerModule } from '@app/modules/analysis/analyzer';
+import { AiAnalyzerModule } from '@app/modules/analysis/ai-analyzer';
 import { CrawlerModule } from '@app/modules/crawlers';
-import { AppServiceModule } from '@app/modules/services';
+import { AppServiceModule } from '@app/modules/app-services';
 import { RepositoryModule } from '@app/modules/repositories';
 import configuration, { IConfiguration } from './configuration';
 import {
@@ -30,7 +31,7 @@ import {
     MarketIndexController,
     NewsController,
     StockController,
-    StockDailyInvestorController,
+    StockInvestorController,
     ThemeController,
 } from './controllers';
 import { KoreaInvestmentBeGateway } from './gateways';
@@ -92,6 +93,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         AppServiceModule,
         RepositoryModule,
         KoreaInvestmentRequestApiModule,
+        AnalyzerModule,
     ],
     controllers: [
         MarketController,
@@ -100,7 +102,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         AccountStockController,
         FavoriteStockController,
         StockController,
-        StockDailyInvestorController,
+        StockInvestorController,
         KeywordController,
         KeywordGroupController,
         ThemeController,

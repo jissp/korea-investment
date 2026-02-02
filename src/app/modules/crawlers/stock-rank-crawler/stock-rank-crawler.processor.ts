@@ -10,6 +10,10 @@ import {
 } from '@modules/korea-investment/korea-investment-rank-client';
 import { ExchangeType } from '@app/common/types';
 import {
+    MostViewedStockTransformer,
+    TradingVolumeRankTransformer,
+} from '@app/common/korea-investment';
+import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
@@ -19,10 +23,6 @@ import {
     HtsTopView,
     StockRankCrawlerFlowType,
 } from './stock-rank-crawler.types';
-import {
-    MostViewedStockTransformer,
-    TradingVolumeRankTransformer,
-} from './transformers';
 
 interface RequestPopulatedHtsTopViewJobData {
     htsTopViews: HtsTopView[];

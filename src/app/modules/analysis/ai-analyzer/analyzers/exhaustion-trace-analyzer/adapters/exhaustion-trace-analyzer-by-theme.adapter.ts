@@ -30,9 +30,7 @@ export class ExhaustionTraceAnalyzerByThemeAdapter extends BaseExhaustionTraceAn
         return this.exhaustionTraceAnalyzerHelper.getStocks(stockCodes);
     }
 
-    protected getStockInvestors(
-        stocks: Stock[],
-    ): Promise<StockInvestor[]> {
+    protected getStockInvestors(stocks: Stock[]): Promise<StockInvestor[]> {
         return this.exhaustionTraceAnalyzerHelper.getStockInvestorsFromApi(
             stocks,
         );

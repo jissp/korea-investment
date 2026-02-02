@@ -1,128 +1,38 @@
 import { chunk, groupBy } from 'lodash';
-import { FlowProducer } from 'bullmq';
-import { FlowJob, FlowOpts } from 'bullmq/dist/esm/interfaces';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { isNil } from '@nestjs/common/utils/shared.utils';
-import { toDateYmdByDate, toTimeCodeByDate } from '@common/utils';
+import { toDateYmdByDate } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
-import {
-    getMarketDivCodeByDate,
-    getMarketDivCodeByIsNextTrade,
-} from '@common/domains';
-import { getDefaultJobOptions } from '@modules/queue';
+import { getMarketDivCodeByDate } from '@common/domains';
 import { MarketDivCode } from '@modules/korea-investment/common';
-import { YN } from '@app/common';
-import {
-    KoreaInvestmentRequestApiHelper,
-    KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api/common';
-import { KoreaInvestmentHolidayService } from '@app/modules/repositories/korea-investment-holiday';
+import { YN } from '@app/common/types';
 import { Stock } from '@app/modules/repositories/stock';
-import { StockCrawlerFlowType } from './stock-crawler.types';
 import { StockCrawlerService } from './stock-crawler.service';
+import { StockCrawlerQueueService } from './stock-crawler-queue.service';
 
 @Injectable()
 export class StockCrawlerSchedule implements OnModuleInit {
     private readonly logger = new Logger(StockCrawlerSchedule.name);
 
     constructor(
-        private readonly requestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly koreaInvestmentHolidayService: KoreaInvestmentHolidayService,
+        private readonly queueService: StockCrawlerQueueService,
         private readonly stockCrawlerService: StockCrawlerService,
-        @Inject(StockCrawlerFlowType.RequestStockHourInvestorByForeigner)
-        private readonly requestStockHourInvestorByForeignerFlow: FlowProducer,
-        @Inject(StockCrawlerFlowType.RequestStockInvestor)
-        private readonly requestStockInvestorFlow: FlowProducer,
-        @Inject(StockCrawlerFlowType.UpdateAccountStockGroupStockPrices)
-        private readonly updateAccountStockGroupStockPricesFlow: FlowProducer,
     ) {}
 
     onModuleInit() {
-        this.handleCrawlingStockInvestor();
-        this.handleCrawlingStockHourInvestorByForeigner();
+        this.handleCrawlingStockInvestorForMarketOpened();
+        this.handleCrawlingStockInvestorForMarketClosed();
         this.handleUpdateAccountStockGroupStockPrices();
     }
 
     @Cron('*/10 * * * *')
     @PreventConcurrentExecution()
-    async handleCrawlingStockInvestor() {
+    async handleCrawlingStockInvestorForMarketOpened() {
         const currentDate = new Date();
 
-        const todayYmd = toDateYmdByDate({
-            date: currentDate,
-            separator: '-',
-        });
-
-        const latestBusinessDay =
-            await this.koreaInvestmentHolidayService.getLatestBusinessDayByDate(
-                {
-                    date: todayYmd,
-                },
-            );
-
-        if (!latestBusinessDay) {
-            return;
-        }
-
-        const stocks =
-            await this.stockCrawlerService.getStocksForCrawlingStockInvestor(
-                latestBusinessDay.date,
-            );
-        if (stocks.length === 0) {
-            return;
-        }
-
-        const queueName = StockCrawlerFlowType.RequestStockInvestor;
-
-        const flowOptions: FlowOpts = {
-            queuesOptions: {
-                [queueName]: {
-                    defaultJobOptions: getDefaultJobOptions(),
-                },
-                [KoreaInvestmentRequestApiType.Additional]: {
-                    defaultJobOptions: getDefaultJobOptions(),
-                },
-            },
-        };
-        const stockFlowJobs = stocks.map((stock): FlowJob => {
-            const marketDivCode = getMarketDivCodeByIsNextTrade(
-                stock.isNextTrade,
-            );
-
-            return {
-                name: queueName,
-                queueName,
-                children: [
-                    this.requestApiHelper.generateDomesticInvestorTradeByStockDaily(
-                        {
-                            FID_INPUT_ISCD: stock.shortCode,
-                            FID_COND_MRKT_DIV_CODE: marketDivCode,
-                            FID_INPUT_DATE_1: todayYmd,
-                            FID_ETC_CLS_CODE: '',
-                            FID_ORG_ADJ_PRC: '',
-                        },
-                    ),
-                ],
-                opts: {
-                    jobId: `stock_${stock.shortCode.toString()}`,
-                },
-            };
-        });
-        await Promise.allSettled(
-            stockFlowJobs.map((stockFlowJob) =>
-                this.requestStockInvestorFlow.add(stockFlowJob, flowOptions),
-            ),
-        );
-    }
-
-    @Cron('*/5 * * * *')
-    @PreventConcurrentExecution()
-    async handleCrawlingStockHourInvestorByForeigner() {
-        const currentDate = new Date();
-
-        const timeCode = toTimeCodeByDate(currentDate);
-        if (isNil(timeCode)) {
+        const marketDivCode = getMarketDivCodeByDate(currentDate);
+        if (isNil(marketDivCode)) {
             return;
         }
 
@@ -132,64 +42,66 @@ export class StockCrawlerSchedule implements OnModuleInit {
         });
 
         const latestBusinessDay =
-            await this.koreaInvestmentHolidayService.getLatestBusinessDayByDate(
-                {
-                    date: todayYmd,
-                },
+            await this.stockCrawlerService.assertKoreaInvestmentHoliday(
+                todayYmd,
             );
-
-        if (!latestBusinessDay) {
-            throw new Error('Latest business day not found');
-        }
-
         if (latestBusinessDay.isOpen === YN.N) {
             return;
         }
 
         const stocks =
-            await this.stockCrawlerService.getStocksForRequestStockHourInvestorByForeigner(
-                latestBusinessDay.date,
-                timeCode,
-            );
+            await this.stockCrawlerService.getStocksByFavoriteStocks();
 
-        const queueName =
-            StockCrawlerFlowType.RequestStockHourInvestorByForeigner;
+        const filteredStocks = stocks.filter((stock) => {
+            if (marketDivCode === MarketDivCode.NXT) {
+                return stock.isNextTrade === YN.Y;
+            }
 
-        const flowOptions = {
-            queuesOptions: {
-                [queueName]: {
-                    defaultJobOptions: getDefaultJobOptions(),
-                },
-                [KoreaInvestmentRequestApiType.Additional]: {
-                    defaultJobOptions: getDefaultJobOptions(),
-                },
-            },
-        };
-        const stockFlowJobs = stocks.map(
-            (stock): FlowJob => ({
-                name: queueName,
-                queueName,
-                data: {
-                    date: currentDate.toISOString(),
-                    stock,
-                },
-                children: [
-                    this.requestApiHelper.generateDomesticInvestorByEstimate({
-                        MKSC_SHRN_ISCD: stock.shortCode,
-                    }),
-                ],
-                opts: {
-                    jobId: `stock_${stock.shortCode}`,
-                },
-            }),
+            return true;
+        });
+
+        await this.queueService.addRequestStockInvestorJobs(
+            filteredStocks,
+            todayYmd,
         );
-        await Promise.allSettled(
-            stockFlowJobs.map((stockFlowJob) =>
-                this.requestStockHourInvestorByForeignerFlow.add(
-                    stockFlowJob,
-                    flowOptions,
-                ),
-            ),
+    }
+
+    @Cron('*/10 * * * *')
+    @PreventConcurrentExecution()
+    async handleCrawlingStockInvestorForMarketClosed() {
+        const currentDate = new Date();
+
+        const marketDivCode = getMarketDivCodeByDate(currentDate);
+        if (!isNil(marketDivCode)) {
+            return;
+        }
+
+        const todayYmd = toDateYmdByDate({
+            date: currentDate,
+            separator: '-',
+        });
+
+        const latestBusinessDay =
+            await this.stockCrawlerService.assertKoreaInvestmentHoliday(
+                todayYmd,
+            );
+        if (latestBusinessDay.isOpen === YN.N) {
+            return;
+        }
+
+        const stocks =
+            await this.stockCrawlerService.getStocksByFavoriteStocks();
+
+        const aggregatedStocks =
+            await this.stockCrawlerService.aggregateExistsStockInvestor(stocks);
+
+        const filteredStocks = aggregatedStocks.filter(
+            (aggregatedStock) => aggregatedStock.isExists,
+        );
+
+        await this.queueService.addRequestStockInvestorJobs(
+            filteredStocks.map(({ stock }) => stock),
+            todayYmd,
         );
     }
 
@@ -197,11 +109,6 @@ export class StockCrawlerSchedule implements OnModuleInit {
     @PreventConcurrentExecution()
     async handleUpdateAccountStockGroupStockPrices() {
         try {
-            const marketDivCode = getMarketDivCodeByDate();
-            if (isNil(marketDivCode)) {
-                return;
-            }
-
             const stocks =
                 await this.stockCrawlerService.getStocksForUpdateAccountStockGroupStockPrices();
 
@@ -210,39 +117,17 @@ export class StockCrawlerSchedule implements OnModuleInit {
                 (stock: Stock) => stock.isNextTrade,
             );
 
-            const queueName =
-                StockCrawlerFlowType.UpdateAccountStockGroupStockPrices;
             for (const [isNextTrade, stocks] of Object.entries(
                 groupedStocks,
             ) as [YN, Stock[]][]) {
-                chunk(stocks, 30).map((stocks) => {
-                    const stockCodes = stocks.map((stock) => stock.shortCode);
-
-                    return this.updateAccountStockGroupStockPricesFlow.add(
-                        {
-                            name: queueName,
-                            queueName,
-                            children: [
-                                this.requestApiHelper.generateRequestApiForIntstockMultiPrice(
-                                    isNextTrade === YN.Y
-                                        ? MarketDivCode.통합
-                                        : MarketDivCode.KRX,
-                                    stockCodes,
-                                ),
-                            ],
-                        },
-                        {
-                            queuesOptions: {
-                                [queueName]: {
-                                    defaultJobOptions: getDefaultJobOptions(),
-                                },
-                                [KoreaInvestmentRequestApiType.Additional]: {
-                                    defaultJobOptions: getDefaultJobOptions(),
-                                },
-                            },
-                        },
-                    );
-                });
+                await Promise.all(
+                    chunk(stocks, 30).map((stocks) =>
+                        this.queueService.addUpdateAccountStockGroupStockPriceJobs(
+                            stocks,
+                            isNextTrade,
+                        ),
+                    ),
+                );
             }
         } catch (error) {
             this.logger.error(error);

@@ -1,11 +1,6 @@
-import { StockDailyInvestor, StockHourForeignerInvestor } from './entities';
+import { StockInvestor } from './stock-investor.entity';
 
-export type StockDailyInvestorDto = Omit<
-    StockDailyInvestor,
-    'id' | 'createdAt' | 'updatedAt'
->;
-
-export type StockHourForeignerInvestorDto = Omit<
-    StockHourForeignerInvestor,
+export type StockInvestorDto = Omit<
+    StockInvestor,
     'id' | 'createdAt' | 'updatedAt'
 >;
