@@ -266,9 +266,8 @@ export class AccountProcessor {
         stockInfoList: StockInfo[],
     ) {
         const keywords = stockInfoList.map(({ stockName }) => stockName);
-        const addedKeywords = await this.keywordService.getKeywords({
-            type: keywordType,
-        });
+        const addedKeywords =
+            await this.keywordService.getKeywords(keywordType);
 
         // 키워드 동기화
         await this.syncKeywordsByType(
