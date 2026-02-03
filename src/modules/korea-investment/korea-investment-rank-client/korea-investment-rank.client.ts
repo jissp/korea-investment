@@ -2,9 +2,6 @@ import { Injectable } from '@nestjs/common';
 import {
     BaseMultiResponse,
     BaseResponse,
-} from '@modules/korea-investment/common';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import {
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockQuotationVolumeRankParam,
     DomesticStockRankingFluctuationOutput,
@@ -12,7 +9,8 @@ import {
     DomesticStockRankingHtsTopViewOutput,
     DomesticStockRankingShortSaleOutput,
     DomesticStockRankingShortSaleParam,
-} from './korea-investment-rank-client.types';
+} from '@modules/korea-investment/common';
+import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 
 interface RankRequestConfig {
     tradeId: string;

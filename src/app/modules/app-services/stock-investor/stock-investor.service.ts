@@ -3,12 +3,12 @@ import { toDateYmdByDate } from '@common/utils';
 import { MarketDivCode } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { YN } from '@app/common/types';
+import { StockInvestorTransformer } from '@app/common/korea-investment';
 import {
     StockInvestor,
     StockInvestorService as StockInvestorRepositoryService,
 } from '@app/modules/repositories/stock-investor';
 import { StockService } from '@app/modules/repositories/stock';
-import { StockInvestorTransformer } from '@app/modules/crawlers/stock-crawler/transformers';
 
 @Injectable()
 export class StockInvestorService {

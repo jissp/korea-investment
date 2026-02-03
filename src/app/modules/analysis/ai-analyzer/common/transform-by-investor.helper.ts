@@ -1,7 +1,7 @@
 import { sortBy } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
-import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/common';
 
 const MAX_STOCK_INVESTOR_ITEMS = 7;
 const HOUR_GB_MAP: Record<string, string> = {

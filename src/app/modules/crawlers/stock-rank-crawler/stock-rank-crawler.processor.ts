@@ -2,12 +2,12 @@ import { keyBy } from 'lodash';
 import { FlowProducer, Job } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
-import { MarketDivCode } from '@modules/korea-investment/common';
-import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
 import {
+    DomesticStockQuotationsIntstockMultPriceOutput,
     DomesticStockQuotationVolumeRankOutput,
     DomesticStockRankingHtsTopViewOutput,
-} from '@modules/korea-investment/korea-investment-rank-client';
+    MarketDivCode,
+} from '@modules/korea-investment/common';
 import { ExchangeType } from '@app/common/types';
 import {
     MostViewedStockTransformer,

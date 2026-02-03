@@ -1,9 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
-import { DomesticInvestorTradeByStockDailyOutput2 } from '@app/modules/korea-investment-request-api/common';
+import { DomesticInvestorTradeByStockDailyOutput2 } from '@modules/korea-investment/common';
 import { StockInvestorDto } from '@app/modules/repositories/stock-investor';
-import { Injectable } from '@nestjs/common';
 
 interface TransformParams {
     stockCode: string;

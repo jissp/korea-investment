@@ -3,6 +3,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { OnQueueProcessor } from '@modules/queue';
 import {
+    KoreaInvestmentDomesticInquireIndexDailyPriceOutput,
+    KoreaInvestmentDomesticInquireIndexDailyPriceOutput2,
+    KoreaInvestmentDomesticInquireIndexDailyPriceParam,
+    OverseasQuotationInquireDailyChartPriceOutput,
+    OverseasQuotationInquireDailyChartPriceOutput2,
+    OverseasQuotationInquireDailyChartPriceParam,
+} from '@modules/korea-investment/common';
+import {
     DomesticDailyIndexTransformer,
     DomesticIndexTransformer,
     OverseasDailyGovernmentBondTransformer,
@@ -16,14 +24,6 @@ import {
     KoreaInvestmentRequestApiHelper,
 } from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
-import {
-    KoreaInvestmentDomesticInquireIndexDailyPriceOutput,
-    KoreaInvestmentDomesticInquireIndexDailyPriceOutput2,
-    KoreaInvestmentDomesticInquireIndexDailyPriceParam,
-    OverseasQuotationInquireDailyChartPriceOutput,
-    OverseasQuotationInquireDailyChartPriceOutput2,
-    OverseasQuotationInquireDailyChartPriceParam,
-} from './korea-investment-index-crawler.interface';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerProcessor {

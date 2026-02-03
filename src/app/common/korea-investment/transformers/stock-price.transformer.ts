@@ -1,5 +1,5 @@
 import { Pipe } from '@common/types';
-import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/common';
 import { StockPriceDto } from '@app/controllers/stocks/dto/responses/get-stock-prices.response';
 
 export class StockPriceTransformer implements Pipe<

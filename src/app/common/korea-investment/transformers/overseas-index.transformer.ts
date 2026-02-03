@@ -2,8 +2,8 @@ import { Pipe } from '@common/types';
 import { toDateYmdByDate } from '@common/utils';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
+import { OverseasQuotationInquireDailyChartPriceOutput } from '@modules/korea-investment/common';
 import { MarketIndexDto } from '@app/modules/repositories/market-index';
-import { OverseasQuotationInquireDailyChartPriceOutput } from '../../../modules/crawlers/korea-investment-crawler/korea-investment-index-crawler/korea-investment-index-crawler.interface';
 
 type TransformerType = {
     code: string;

@@ -3,12 +3,9 @@ import { toDateTimeByDate, toDateYmdByDate } from '@common/utils';
 import {
     BaseMultiResponse,
     BaseResponse,
-    ForeignInstitutionTotalOutput,
-    ForeignInstitutionTotalParam,
-    MarketDivCode,
-} from '@modules/korea-investment/common';
-import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
-import {
+    DomesticInvestorTradeByStockDailyOutput1,
+    DomesticInvestorTradeByStockDailyOutput2,
+    DomesticInvestorTradeByStockDailyParam,
     DomesticStockInquireDailyIndexChartPriceOutput1,
     DomesticStockInquireDailyIndexChartPriceOutput2,
     DomesticStockInquireDailyIndexChartPriceParam,
@@ -43,12 +40,11 @@ import {
     DomesticStockSearchInfoParam,
     DomesticStockSearchStockInfoOutput,
     DomesticStockSearchStockInfoParam,
-} from './korea-investment-quotation-client.types';
-import {
-    DomesticInvestorTradeByStockDailyOutput1,
-    DomesticInvestorTradeByStockDailyOutput2,
-    DomesticInvestorTradeByStockDailyParam,
-} from '@app/modules/korea-investment-request-api/common';
+    ForeignInstitutionTotalOutput,
+    ForeignInstitutionTotalParam,
+    MarketDivCode,
+} from '@modules/korea-investment/common';
+import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
 
 interface QuotationRequestConfig {
     tradeId: string;

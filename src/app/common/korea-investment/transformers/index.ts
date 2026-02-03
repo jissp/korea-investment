@@ -11,5 +11,6 @@ export * from './overseas-daily-index.transformer';
 export * from './overseas-government-bond.transformer';
 export * from './overseas-index.transformer';
 export * from './stock-daily-price.transformer';
+export * from './stock-investor.transformer';
 export * from './stock-price.transformer';
 export * from './trading-volume-rank.transformer';

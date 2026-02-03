@@ -5,6 +5,10 @@ import { PreventConcurrentExecution } from '@common/decorators';
 import { toDateYmdByDate } from '@common/utils';
 import { getDefaultJobOptions } from '@modules/queue';
 import {
+    KoreaInvestmentDomesticInquireIndexDailyPriceParam,
+    OverseasQuotationInquireDailyChartPriceParam,
+} from '@modules/korea-investment/common';
+import {
     DOMESTIC_INDEX_CODES,
     OVERSEAS_GOVERNMENT_BOND_CODES,
     OVERSEAS_INDEX_CODES,
@@ -14,10 +18,6 @@ import {
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentIndexCrawlerFlowType } from './korea-investment-index-crawler.types';
-import {
-    KoreaInvestmentDomesticInquireIndexDailyPriceParam,
-    OverseasQuotationInquireDailyChartPriceParam,
-} from './korea-investment-index-crawler.interface';
 
 @Injectable()
 export class KoreaInvestmentIndexCrawlerSchedule implements OnModuleInit {

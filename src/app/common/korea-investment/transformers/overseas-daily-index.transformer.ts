@@ -1,8 +1,8 @@
 import { Pipe } from '@common/types';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
+import { OverseasQuotationInquireDailyChartPriceOutput2 } from '@modules/korea-investment/common';
 import { MarketIndexDto } from '@app/modules/repositories/market-index';
-import { OverseasQuotationInquireDailyChartPriceOutput2 } from '../../../modules/crawlers/korea-investment-crawler/korea-investment-index-crawler/korea-investment-index-crawler.interface';
 
 type TransformerType = {
     code: string;

@@ -1,29 +1,27 @@
 import { Job } from 'bullmq';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable } from '@nestjs/common';
-import { MarketDivCode } from '@modules/korea-investment/common';
 import {
+    DomesticInvestorTradeByStockDailyParam,
+    DomesticProgramTradeTodayParam,
+    DomesticSearchStockInfoParam,
     DomesticStockInvestorTrendEstimateParam,
     DomesticStockQuotationsInquireInvestorParam,
     DomesticStockQuotationsIntstockMultPriceParam,
     DomesticStockQuotationsNewsTitleParam,
-} from '@modules/korea-investment/korea-investment-quotation-client';
-import { DomesticStockQuotationVolumeRankParam } from '@modules/korea-investment/korea-investment-rank-client';
+    DomesticStockQuotationVolumeRankParam,
+    KoreaInvestmentAccountParam,
+    KoreaInvestmentAccountStockParam,
+    KoreaInvestmentInterestGroupListParam,
+    KoreaInvestmentInterestStockListByGroupParam,
+    MarketDivCode,
+} from '@modules/korea-investment/common';
 import {
     KoreaInvestmentCallApiMultiResult,
     KoreaInvestmentCallApiParam,
     KoreaInvestmentCallApiResult,
     KoreaInvestmentRequestApiType,
 } from './korea-investment-request-api.type';
-import {
-    DomesticInvestorTradeByStockDailyParam,
-    DomesticProgramTradeTodayParam,
-    DomesticSearchStockInfoParam,
-    KoreaInvestmentAccountParam,
-    KoreaInvestmentAccountStockParam,
-    KoreaInvestmentInterestGroupListParam,
-    KoreaInvestmentInterestStockListByGroupParam,
-} from './korea-investment-request-api.interface';
 
 @Injectable()
 export class KoreaInvestmentRequestApiHelper {

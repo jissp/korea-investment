@@ -1,4 +1,4 @@
-import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/common';
 
 export enum NewsCrawlerProvider {
     StrategyMap = 'StrategyMap',

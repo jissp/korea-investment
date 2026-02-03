@@ -3,7 +3,7 @@ import { Pipe } from '@common/types';
 import {
     DomesticStockInvestorTrendEstimateOutput2,
     DomesticStockQuotationsInquireInvestorOutput,
-} from '@modules/korea-investment/korea-investment-quotation-client';
+} from '@modules/korea-investment/common';
 import { TransformByInvestorHelper } from '@app/modules/analysis/ai-analyzer/common';
 
 type PromptArgs = {

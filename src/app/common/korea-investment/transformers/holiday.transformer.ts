@@ -1,8 +1,8 @@
 import { Pipe } from '@common/types';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { YN } from '@app/common/types';
+import { DomesticHolidayInquiryOutput } from '@modules/korea-investment/common';
 import { KoreaInvestmentCalendarDto } from '@app/modules/repositories/korea-investment-calendar';
-import { DomesticHolidayInquiryOutput } from '@app/modules/crawlers/korea-investment-crawler/korea-investment-calender-crawler';
 
 export class HolidayTransformer implements Pipe<
     DomesticHolidayInquiryOutput,

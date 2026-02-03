@@ -1,5 +1,5 @@
 import { Pipe } from '@common/types';
-import { DomesticStockQuotationVolumeRankOutput } from '@modules/korea-investment/korea-investment-rank-client';
+import { DomesticStockQuotationVolumeRankOutput } from '@modules/korea-investment/common';
 import { TradingVolumeRankDto } from '@app/modules/repositories/trading-volume-rank';
 
 export class TradingVolumeRankTransformer implements Pipe<

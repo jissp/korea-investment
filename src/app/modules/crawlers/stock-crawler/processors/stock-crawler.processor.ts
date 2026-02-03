@@ -2,27 +2,26 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import {
-    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
-    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
-} from '@modules/korea-investment/korea-investment-quotation-client';
-import {
     DomesticInvestorTradeByStockDailyOutput1,
     DomesticInvestorTradeByStockDailyOutput2,
     DomesticInvestorTradeByStockDailyParam,
-    KoreaInvestmentRequestApiHelper,
-} from '@app/modules/korea-investment-request-api/common';
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput,
+    DomesticStockQuotationsInquireDailyItemChartPriceOutput2,
+} from '@modules/korea-investment/common';
+import { StockInvestorTransformer } from '@app/common/korea-investment';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { StockInvestorService } from '@app/modules/repositories/stock-investor';
 import { StockCrawlerFlowType } from '../stock-crawler.types';
-import { StockInvestorTransformer } from '../transformers';
 
 @Injectable()
 export class StockCrawlerProcessor {
     private readonly logger = new Logger(StockCrawlerProcessor.name);
 
+    private readonly stockInvestorTransformer = new StockInvestorTransformer();
+
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly stockInvestorService: StockInvestorService,
-        private readonly stockInvestorTransformer: StockInvestorTransformer,
     ) {}
 
     @OnQueueProcessor(StockCrawlerFlowType.RequestStockInvestor)

@@ -3,6 +3,7 @@ import { getMarketDivCodeByIsNextTrade } from '@common/domains';
 import { toDateYmdByDate } from '@common/utils';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { MarketType } from '@app/common/types';
+import { StockInvestorTransformer } from '@app/common/korea-investment';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import {
     FavoriteStock,
@@ -13,7 +14,6 @@ import {
     StockInvestorService,
 } from '@app/modules/repositories/stock-investor';
 import { ThemeService, ThemeStock } from '@app/modules/repositories/theme';
-import { StockInvestorTransformer } from '@app/modules/crawlers/stock-crawler';
 import { StockExhaustionTraceData } from './exhaustion-trace-analyzer-helper.types';
 
 const FieldMap = {

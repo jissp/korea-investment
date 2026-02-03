@@ -1,7 +1,7 @@
 import { Pipe } from '@common/types';
-import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/common';
 import { MostViewedStockDto } from '@app/modules/repositories/most-viewed-stock';
-import { HtsTopView } from '../../../modules/crawlers/stock-rank-crawler/stock-rank-crawler.types';
+import { HtsTopView } from '@app/modules/crawlers/stock-rank-crawler';
 
 interface MostViewedStockTransformerParams {
     stock: HtsTopView;

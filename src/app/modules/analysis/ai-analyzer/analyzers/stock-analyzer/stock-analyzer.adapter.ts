@@ -9,12 +9,12 @@ import {
     NaverApiNewsItem,
     NaverAppName,
 } from '@modules/naver/naver-api';
-import { MarketDivCode } from '@modules/korea-investment/common';
 import {
     DomesticStockInvestorTrendEstimateOutput2,
     DomesticStockQuotationsInquireInvestorOutput,
-    KoreaInvestmentQuotationClient,
-} from '@modules/korea-investment/korea-investment-quotation-client';
+    MarketDivCode,
+} from '@modules/korea-investment/common';
+import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { YN } from '@app/common/types';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import { NewsService, StockNews } from '@app/modules/repositories/news';

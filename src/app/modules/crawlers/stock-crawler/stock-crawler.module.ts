@@ -7,7 +7,6 @@ import { AccountStockGroupModule } from '@app/modules/repositories/account-stock
 import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { StockInvestorModule } from '@app/modules/repositories/stock-investor';
 import { StockCrawlerFlowType } from './stock-crawler.types';
-import { StockInvestorTransformer } from './transformers';
 import {
     AccountStockPriceProcessor,
     StockCrawlerProcessor,
@@ -48,7 +47,6 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         StockCrawlerSchedule,
         StockCrawlerProcessor,
         AccountStockPriceProcessor,
-        StockInvestorTransformer,
         StockCrawlerService,
         StockCrawlerQueueService,
     ],

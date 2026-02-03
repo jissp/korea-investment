@@ -2,10 +2,10 @@ import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { GeminiCliModel, GeminiCliService } from '@modules/gemini-cli';
-import { DomesticStockInvestorTrendEstimateOutput2 } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockInvestorTrendEstimateOutput2 } from '@modules/korea-investment/common';
 import { TransformByInvestorHelper } from '@app/modules/analysis/ai-analyzer/common';
+import { StockAnalyzerFlowType } from './stock-analyzer.types';
 import { StockAnalysisData } from './stock-analyzer.adapter';
-import { StockAnalyzerFlowType } from '@app/modules/analysis/ai-analyzer/analyzers/stock-analyzer/stock-analyzer.types';
 
 @Processor(StockAnalyzerFlowType.Request)
 export class StockAnalyzerProcessor extends WorkerHost {

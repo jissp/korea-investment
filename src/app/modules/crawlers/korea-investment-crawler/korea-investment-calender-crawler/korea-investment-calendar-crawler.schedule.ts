@@ -4,12 +4,12 @@ import { Cron } from '@nestjs/schedule';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { toDateYmdByDate } from '@common/utils';
 import { getDefaultJobOptions } from '@modules/queue';
+import { DomesticHolidayInquiryParam } from '@modules/korea-investment/common';
 import {
     KoreaInvestmentRequestApiHelper,
     KoreaInvestmentRequestApiType,
 } from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentCalendarService } from '@app/modules/repositories/korea-investment-calendar';
-import { DomesticHolidayInquiryParam } from './korea-investment-calendar-crawler.interface';
 import { KoreaInvestmentCalendarCrawlerFlowType } from './korea-investment-calendar-crawler.types';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Pipe } from '@common/types';
 import { isDelistedStockByName } from '@app/common/domains';
-import { KoreaInvestmentAccountStockOutput } from '@app/modules/korea-investment-request-api/common';
+import { KoreaInvestmentAccountStockOutput } from '@modules/korea-investment/common';
 import { AccountStockDto } from '@app/modules/repositories/account';
 
 interface KoreaInvestmentAccountStockTransformerParams {

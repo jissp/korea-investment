@@ -1,14 +1,14 @@
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
+import {
+    DomesticHolidayInquiryOutput,
+    DomesticHolidayInquiryParam,
+} from '@modules/korea-investment/common';
 import { HolidayTransformer } from '@app/common/korea-investment';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { KoreaInvestmentCalendarService } from '@app/modules/repositories/korea-investment-calendar';
 import { KoreaInvestmentCalendarCrawlerFlowType } from './korea-investment-calendar-crawler.types';
-import {
-    DomesticHolidayInquiryOutput,
-    DomesticHolidayInquiryParam,
-} from './korea-investment-calendar-crawler.interface';
 
 @Injectable()
 export class KoreaInvestmentCalendarCrawlerProcessor {

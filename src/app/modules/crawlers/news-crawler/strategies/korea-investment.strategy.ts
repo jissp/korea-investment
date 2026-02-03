@@ -5,14 +5,14 @@ import {
     toDateByKoreaInvestmentTime,
     toDateByKoreaInvestmentYmd,
 } from '@common/utils';
-import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/korea-investment-quotation-client';
+import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/common';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,
 } from '../news-crawler.types';
 import { BaseStrategy } from './base-strategy';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 
 @Injectable()
 export class KoreaInvestmentStrategy extends BaseStrategy<
