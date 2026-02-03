@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+# 필수 사항
+- Never switch to Plan mode unless I explicitly request it. Always prioritize Act mode for direct implementation.
+
+---
+
 ## 개요
 
 **Korea Investment**: 한국투자증권 API와 Google Gemini를 활용한 실시간 주식 분석 및 정보 제공 시스템
@@ -66,11 +73,70 @@ npm run domestic-idx-migration       # 지수 마이그레이션
 npm run theme-migration              # 테마 마이그레이션
 ```
 
-### 빌드
+### 빌드 및 린팅
 
 ```bash
+# 빌드
 npm run build
+
+# 린팅 (ESLint 체크)
+npm run lint
+
+# 린팅 자동 수정
+npm run lint:fix
+
+# 테스트 커버리지 리포트
+npm run test:cov
 ```
+
+---
+
+## 환경 설정
+
+### 필수 환경 변수
+
+`.env` 파일에 다음 항목들이 필요합니다:
+
+**Database (MySQL)**
+```
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=korea_investment
+```
+
+**Redis**
+```
+REDIS_HOST=localhost
+REDIS_PORT=6379
+```
+
+**외부 API**
+```
+# 한국투자증권 API
+KI_API_KEY=your_key
+KI_SECRET_KEY=your_secret
+
+# Naver API (3개 앱 키 로테이션)
+NAVER_APP_SEARCH1_ID=
+NAVER_APP_SEARCH1_SECRET=
+NAVER_APP_SEARCH2_ID=
+NAVER_APP_SEARCH2_SECRET=
+NAVER_APP_SEARCH3_ID=
+NAVER_APP_SEARCH3_SECRET=
+
+# Google Gemini
+GOOGLE_API_KEY=your_key
+```
+
+**기본 설정**
+```
+PORT=3100
+NODE_ENV=development
+```
+
+자세한 설정은 `src/app/configuration.ts`에서 확인하세요.
 
 ---
 
@@ -496,6 +562,25 @@ const mockService = {
 - 책임: 데이터 입력 → 프롬프트 문자열
 - 재사용성 고려
 
+### 6. 새 모듈 추가 시
+
+- `src/app/modules/` 에 모듈 디렉토리 생성
+- `app.module.ts`에 import 등록
+- `@Module()` 데코레이터에 providers, imports, exports 명시
+
+### 7. 에러 처리
+
+- Global Exception Filter (`src/common/filters/`) 사용
+- 표준 에러 응답 포맷 준수:
+  ```json
+  {
+    "statusCode": 400,
+    "message": "에러 메시지",
+    "error": "오류 타입"
+  }
+  ```
+- HTTP Guard를 이용한 인증 에러 처리
+
 ---
 
 ## 트러블슈팅
@@ -539,6 +624,32 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 
 ---
 
+## 모듈 구조 가이드
+
+### `src/app/modules/` vs `src/modules/`
+
+**`src/app/modules/`** - 비즈니스 로직
+- `ai-analyzer/`: AI 분석 관련
+- `korea-investment-collector/`: 한국투자증권 실시간 수집
+- `repositories/`: 데이터 접근 계층
+- `crawlers/`: 스케줄 크롤러
+
+**`src/modules/`** - 기반 기술 / 외부 통합
+- `korea-investment/`: 한국투자증권 API 클라이언트
+- `gemini-cli/`: Google Gemini CLI 래퍼
+- `naver/`: Naver API 클라이언트
+- `queue/`: BullMQ 큐 관리
+- `redis/`: Redis 서비스
+
+### 모듈 등록 순서
+
+1. **기반 모듈** (`src/modules/**`) → 다른 모듈에서 의존
+2. **저장소 모듈** (`RepositoryModule`) → 서비스에서 사용
+3. **비즈니스 모듈** (`src/app/modules/**`) → 최상위 비즈니스 로직
+4. **게이트웨이/컨트롤러** → 모든 서비스 준비 후 마지막
+
+---
+
 ## 성능 최적화 포인트
 
 1. **BullMQ concurrency**: Gemini 호출은 3 (병렬 처리)
@@ -557,5 +668,27 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 - 한국투자증권 API 문서 (내부)
 - Google Gemini API 문서
 
-# 필수 사항
-- Never switch to Plan mode unless I explicitly request it. Always prioritize Act mode for direct implementation.
+---
+
+## 자주 마주치는 상황
+
+### Queue 작업이 처리되지 않음
+
+1. **Redis 연결 확인**: `redis-cli PING` → PONG 반환 확인
+2. **Queue Job 이름 체크**: `@OnQueueProcessor(JobName)` 데코레이터 정확한지 확인
+3. **Job 데이터 직렬화 가능 확인**: 순환 참조, Symbol 없는지 확인
+4. **로그 확인**: `NestJS debug` 또는 `BullMQ explorer` 로그
+
+### Gemini CLI 응답이 JSON이 아님
+
+- Gemini 모델 가용성 확인: `gemini models list`
+- `--output-format json` 플래그 포함 확인
+- 프롬프트가 valid JSON을 반환하도록 설계되었는지 확인
+- 에러 로깅에서 stderr 내용 확인
+
+### 한국투자증권 WebSocket 자주 끊김
+
+- 토큰 만료 체크: 유효 기간 갱신 로직 확인
+- 네트워크 연결 상태 모니터링
+- 재연결 로직 구현 확인: `KoreaInvestmentCollectorProcessor`
+- 구독 메시지 형식 재확인 (H0UNCNT0 vs H0STCNT0)
