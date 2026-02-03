@@ -25,7 +25,6 @@ const RepositoryModules = [
 
 const flowTypes = [
     StockCrawlerFlowType.RequestStockInvestor,
-    StockCrawlerFlowType.RequestDailyItemChartPrice,
     StockCrawlerFlowType.UpdateAccountStockGroupStockPrices,
 ];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);

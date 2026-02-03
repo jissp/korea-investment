@@ -28,13 +28,6 @@ interface SubscribeStockMapItem {
 
 @Injectable()
 export class KoreaInvestmentCollectorProcessor implements OnModuleDestroy {
-    /*
-     * 국내주식 실시간체결가(통합): H0UNCNT0
-     * 국내주식 실시간호가(통합): H0UNASP0
-     * 국내주식 실시간프로그램매매(통합): H0UNPGM0
-     */
-    private realTimeTradeIds = ['H0UNCNT0', 'H0UNPGM0'];
-
     private readonly logger = new Logger(
         KoreaInvestmentCollectorProcessor.name,
     );
@@ -103,6 +96,11 @@ export class KoreaInvestmentCollectorProcessor implements OnModuleDestroy {
             const approvalKey = await this.helperService.getWebSocketToken();
 
             if (subscribeType === SubscribeType.Subscribe) {
+                /*
+                 * 국내주식 실시간체결가(통합): H0UNCNT0
+                 * 국내주식 실시간호가(통합): H0UNASP0
+                 * 국내주식 실시간프로그램매매(통합): H0UNPGM0
+                 */
                 const tradeStreamType = stock.isNextTrade
                     ? 'H0UNCNT0'
                     : 'H0STCNT0';

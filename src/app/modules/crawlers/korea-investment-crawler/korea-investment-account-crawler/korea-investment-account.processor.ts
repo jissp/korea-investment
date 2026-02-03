@@ -39,12 +39,12 @@ import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
 import {
     KoreaInvestmentAccountCrawlerEventType,
     KoreaInvestmentAccountCrawlerType,
-} from '../korea-investment-account-crawler.types';
+} from './korea-investment-account-crawler.types';
 
 type StockInfo = { stockName: string; stockCode: string };
 
 @Injectable()
-export class AccountProcessor {
+export class KoreaInvestmentAccountProcessor {
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly accountService: AccountService,

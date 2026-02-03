@@ -9,6 +9,9 @@ import { StockCrawlerFlowType } from '../stock-crawler.types';
 
 @Injectable()
 export class AccountStockPriceProcessor {
+    private readonly accountStockGroupStockTransformer =
+        new AccountStockGroupStockTransformer();
+
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly accountStockGroupStockService: AccountStockGroupStockService,
@@ -26,9 +29,8 @@ export class AccountStockPriceProcessor {
             ({ response }) => response.output,
         );
 
-        const transformer = new AccountStockGroupStockTransformer();
         const transformedDtoList = multiPriceOutputs.map((output) =>
-            transformer.transform(output),
+            this.accountStockGroupStockTransformer.transform(output),
         );
 
         await this.accountStockGroupStockService.update(transformedDtoList);
