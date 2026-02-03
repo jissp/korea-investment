@@ -1,12 +1,22 @@
-import { StockPlusAsset, StockPlusNews } from '@modules/stock-plus';
+import { Job } from 'bullmq';
+import { Injectable, Logger } from '@nestjs/common';
+import {
+    StockPlusAsset,
+    StockPlusClient,
+    StockPlusNews,
+} from '@modules/stock-plus';
 import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+import {
+    NewsStrategy,
+    RequestCrawlingNewsJobPayload,
+} from '../news-crawler.types';
+import { BaseStrategy } from './base-strategy';
 
-export interface StockPlusNewsTransformResult {
-    stockCodes: string[];
-    news: NewsDto;
-}
-
-export class StockPlusNewsTransformer {
+@Injectable()
+export class StockPlusStrategy extends BaseStrategy<
+    NewsStrategy.StockPlus,
+    StockPlusNews
+> {
     private readonly koreaStockPatternRegExp = /^A[0-9]{6}$/;
 
     private readonly stockCodeNormalizersByMarket: Record<
@@ -17,20 +27,36 @@ export class StockPlusNewsTransformer {
         KOREA: this.toNormalizeStockCodeByKoreaStockCode.bind(this),
     };
 
-    public transform(
-        stockPlusNews: StockPlusNews,
-    ): StockPlusNewsTransformResult {
+    private readonly logger = new Logger(StockPlusStrategy.name);
+
+    constructor(private readonly stockPlusClient: StockPlusClient) {
+        super();
+    }
+
+    protected async fetch(
+        job: Job<RequestCrawlingNewsJobPayload<NewsStrategy.StockPlus>>,
+    ): Promise<StockPlusNews[]> {
+        try {
+            const response = await this.stockPlusClient.getLatestNews(20);
+
+            return response.data.breakingNews;
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
+    }
+
+    protected transform(value: StockPlusNews): NewsDto {
         return {
-            stockCodes: stockPlusNews.assets
-                .map((asset) => this.mapAssetCodeToStockCode(asset))
-                .filter(Boolean) as string[],
-            news: {
-                articleId: stockPlusNews.id.toString(),
-                category: NewsCategory.StockPlus,
-                title: stockPlusNews.title,
-                description: stockPlusNews.summaries[0],
-                publishedAt: new Date(stockPlusNews.publishedAt),
-            },
+            // TODO: Stock code 매핑 구현 필요
+            // stockCodes: value.assets
+            //     .map((asset) => this.mapAssetCodeToStockCode(asset))
+            //     .filter(Boolean) as string[],
+            articleId: value.id.toString(),
+            category: NewsCategory.StockPlus,
+            title: value.title,
+            description: value.summaries[0],
+            publishedAt: new Date(value.publishedAt),
         };
     }
 

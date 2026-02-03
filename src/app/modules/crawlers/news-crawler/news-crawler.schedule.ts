@@ -1,21 +1,16 @@
-import { chunk } from 'lodash';
-import { FlowProducer, Queue } from 'bullmq';
+import { FlowProducer } from 'bullmq';
+import { FlowJob } from 'bullmq/dist/esm/interfaces';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { toDateYmdByDate, uniqueValues } from '@common/utils';
+import { toDateYmdByDate } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
+import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
 import {
-    KoreaInvestmentRequestApiHelper,
-    KoreaInvestmentRequestApiType,
-} from '@app/modules/korea-investment-request-api/common';
-import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
-import {
-    CrawlingNaverNewsJobPayload,
     NewsCrawlerQueueType,
+    NewsStrategy,
+    RequestCrawlingNewsJobPayload,
 } from './news-crawler.types';
-
-const DEFAULT_CHUNK_SIZE = 5;
 
 @Injectable()
 export class NewsCrawlerSchedule implements OnModuleInit {
@@ -23,148 +18,85 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
-        private readonly keywordService: KeywordService,
-        @Inject(NewsCrawlerQueueType.RequestDomesticNewsTitle)
-        private readonly requestDomesticNewsTitleFlow: FlowProducer,
-        @Inject(NewsCrawlerQueueType.CrawlingNaverNews)
-        private readonly crawlingNaverNewsQueue: Queue<CrawlingNaverNewsJobPayload>,
-        @Inject(NewsCrawlerQueueType.CrawlingNaverNewsForStockCode)
-        private readonly crawlingNaverNewsForStockCode: Queue<CrawlingNaverNewsJobPayload>,
-        @Inject(NewsCrawlerQueueType.CrawlingStockPlusNews)
-        private readonly stockPlusNewsQueue: Queue,
+        @Inject(NewsCrawlerQueueType.RequestCrawlingNews)
+        private readonly requestCrawlingNews: FlowProducer,
     ) {}
 
     onModuleInit() {
-        this.handleCrawlingKoreaInvestmentNewsByStockCode();
-        this.requestNaverNewsCrawlingForKeyword();
-        this.requestNaverNewsCrawlingForStockCode();
-        this.handleCrawlingStockPlusNews();
-    }
-
-    @Cron('*/8 * * * * *')
-    @PreventConcurrentExecution()
-    async handleCrawlingKoreaInvestmentNewsByStockCode() {
-        try {
-            const startDate = toDateYmdByDate();
-
-            const queueName = NewsCrawlerQueueType.RequestDomesticNewsTitle;
-
-            await this.requestDomesticNewsTitleFlow.add(
-                {
-                    name: queueName,
-                    queueName,
-                    children: [
-                        this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle(
-                            {
-                                FID_INPUT_DATE_1: `00${startDate}`,
-                                FID_NEWS_OFER_ENTP_CODE: '',
-                                FID_COND_MRKT_CLS_CODE: '',
-                                FID_INPUT_ISCD: '',
-                                FID_TITL_CNTT: '',
-                                FID_INPUT_HOUR_1: '',
-                                FID_RANK_SORT_CLS_CODE: '',
-                                FID_INPUT_SRNO: '',
-                            },
-                        ),
-                    ],
-                    opts: {
-                        jobId: queueName,
-                    },
-                },
-                {
-                    queuesOptions: {
-                        [queueName]: {
-                            defaultJobOptions: getDefaultJobOptions(),
-                        },
-                        [KoreaInvestmentRequestApiType.Additional]: {
-                            defaultJobOptions: getDefaultJobOptions(),
-                        },
-                    },
-                },
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
+        this.handleCrawlingNews();
+        this.handleCrawlingNewsForKoreaInvestment();
     }
 
     @Cron('*/1 * * * *')
     @PreventConcurrentExecution()
-    async requestNaverNewsCrawlingForKeyword() {
-        try {
-            const keywords = await this.keywordService.getKeywords({
-                type: KeywordType.Manual,
-            });
-            const keywordName = uniqueValues(keywords.map(({ name }) => name));
+    async handleCrawlingNews() {
+        const queueName = NewsCrawlerQueueType.RequestCrawlingNews;
+        const jobPayloads = Object.values(NewsStrategy).map((strategy) =>
+            this.generateJobPayload(strategy),
+        );
 
-            const filteredKeywords = keywordName.filter(
-                (keyword) => !(keyword.includes('(') && keyword.includes(')')),
-            );
+        const queuesOptions = {
+            [queueName]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+        };
 
-            await Promise.all(
-                chunk(filteredKeywords, DEFAULT_CHUNK_SIZE).map(
-                    async (keywords) => {
-                        await this.crawlingNaverNewsQueue.add(
-                            NewsCrawlerQueueType.CrawlingNaverNews,
-                            {
-                                keywords,
-                            },
-                        );
-                    },
-                ),
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
+        await Promise.allSettled(
+            jobPayloads.map((jobPayload) =>
+                this.requestCrawlingNews.add(jobPayload, {
+                    queuesOptions,
+                }),
+            ),
+        );
     }
 
-    @Cron('*/1 * * * *')
+    @Cron('*/30 * * * * *')
     @PreventConcurrentExecution()
-    async requestNaverNewsCrawlingForStockCode() {
-        try {
-            const keywords = await this.keywordService.getKeywords({
-                type: [KeywordType.StockGroup, KeywordType.Possess],
-            });
-            const keywordName = uniqueValues(keywords.map(({ name }) => name));
+    async handleCrawlingNewsForKoreaInvestment() {
+        const queueName = NewsCrawlerQueueType.RequestCrawlingNews;
+        const jobPayload = this.generateJobPayload(
+            NewsStrategy.KoreaInvestment,
+        );
 
-            const filteredKeywords = keywordName.filter(
-                (keyword) => !(keyword.includes('(') && keyword.includes(')')),
-            );
+        const startDate = toDateYmdByDate();
 
-            const uniqueKeywords = Array.from(new Set(filteredKeywords));
-            // await this.crawlingNaverNewsForStockCode.add(
-            //     NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
-            //     {
-            //         keywords: uniqueKeywords,
-            //     },
-            // );
+        jobPayload.children = [
+            this.koreaInvestmentRequestApiHelper.generateDomesticNewsTitle({
+                FID_INPUT_DATE_1: `00${startDate}`,
+                FID_NEWS_OFER_ENTP_CODE: '',
+                FID_COND_MRKT_CLS_CODE: '',
+                FID_INPUT_ISCD: '',
+                FID_TITL_CNTT: '',
+                FID_INPUT_HOUR_1: '',
+                FID_RANK_SORT_CLS_CODE: '',
+                FID_INPUT_SRNO: '',
+            }),
+        ];
 
-            await Promise.all(
-                chunk(uniqueKeywords, 5).map((keywords) =>
-                    this.crawlingNaverNewsForStockCode.add(
-                        NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
-                        {
-                            keywords,
-                        },
-                        getDefaultJobOptions(),
-                    ),
-                ),
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
+        const queuesOptions = {
+            [queueName]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+        };
+
+        await this.requestCrawlingNews.add(jobPayload, {
+            queuesOptions,
+        });
     }
 
-    @Cron('*/1 * * * *')
-    @PreventConcurrentExecution()
-    async handleCrawlingStockPlusNews() {
-        try {
-            await this.stockPlusNewsQueue.add(
-                NewsCrawlerQueueType.CrawlingStockPlusNews,
-                {},
-                getDefaultJobOptions(),
-            );
-        } catch (error) {
-            this.logger.error(error);
-        }
+    /**
+     * @private
+     * @param strategy
+     */
+    private generateJobPayload<T extends NewsStrategy>(strategy: T): FlowJob {
+        const queueName = NewsCrawlerQueueType.RequestCrawlingNews;
+
+        return {
+            queueName,
+            name: queueName,
+            data: {
+                strategy,
+            } as RequestCrawlingNewsJobPayload<T>,
+        };
     }
 }

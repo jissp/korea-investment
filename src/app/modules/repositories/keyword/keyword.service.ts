@@ -27,7 +27,7 @@ export class KeywordService {
     /**
      * 모든 키워드를 조회합니다.
      */
-    public async getKeywords({ type }: { type?: KeywordType | KeywordType[] }) {
+    public async getKeywords(type?: KeywordType | KeywordType[]) {
         return this.keywordRepository.findBy({
             type:
                 type !== undefined

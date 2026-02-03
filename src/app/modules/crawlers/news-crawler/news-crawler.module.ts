@@ -6,33 +6,28 @@ import { KoreaInvestmentAdditionalRequestApiModule } from '@app/modules/korea-in
 import { NewsModule } from '@app/modules/repositories/news';
 import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { KeywordModule } from '@app/modules/repositories/keyword';
-import { NewsCrawlerQueueType } from './news-crawler.types';
 import {
-    KoreaInvestmentNewsProcessor,
-    NaverNewsProcessor,
-    StockPlusNewsProcessor,
-} from './processors';
+    NewsCrawlerProvider,
+    NewsCrawlerQueueType,
+    NewsStrategy,
+} from './news-crawler.types';
+import { NewsCrawlerFactory } from './news-crawler.factory';
 import { NewsCrawlerSchedule } from './news-crawler.schedule';
+import { NewsCrawlerProcessor } from './news-crawler.processor';
+import {
+    BaseStrategy,
+    KoreaInvestmentStrategy,
+    NaverStrategy,
+    StockPlusStrategy,
+} from './strategies';
 
-const flowTypes = [NewsCrawlerQueueType.RequestDomesticNewsTitle];
+const flowTypes = [NewsCrawlerQueueType.RequestCrawlingNews];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
-
-const queueTypes = [
-    NewsCrawlerQueueType.CrawlingNaverNews,
-    NewsCrawlerQueueType.CrawlingNaverNewsForStockCode,
-    NewsCrawlerQueueType.CrawlingStockPlusNews,
-];
-const queueProviders = QueueModule.getQueueProviders(queueTypes);
-const processors = [
-    KoreaInvestmentNewsProcessor,
-    NaverNewsProcessor,
-    StockPlusNewsProcessor,
-];
+const strategies = [KoreaInvestmentStrategy, NaverStrategy, StockPlusStrategy];
 
 @Module({
     imports: [
         QueueModule.forFeature({
-            queueTypes,
             flowTypes,
             jobOptions: {
                 removeOnComplete: {
@@ -51,9 +46,30 @@ const processors = [
         KeywordModule,
     ],
     providers: [
-        ...queueProviders,
         ...flowProviders,
-        ...processors,
+        ...strategies,
+        {
+            provide: NewsCrawlerProvider.StrategyMap,
+            inject: [KoreaInvestmentStrategy, NaverStrategy, StockPlusStrategy],
+            useFactory: (
+                koreaInvestmentStrategy: KoreaInvestmentStrategy,
+                naverStrategy: NaverStrategy,
+                stockPlusStrategy: StockPlusStrategy,
+            ) => {
+                const map = new Map<
+                    NewsStrategy,
+                    BaseStrategy<NewsStrategy, any>
+                >();
+
+                map.set(NewsStrategy.KoreaInvestment, koreaInvestmentStrategy);
+                map.set(NewsStrategy.Naver, naverStrategy);
+                map.set(NewsStrategy.StockPlus, stockPlusStrategy);
+
+                return map;
+            },
+        },
+        NewsCrawlerFactory,
+        NewsCrawlerProcessor,
         NewsCrawlerSchedule,
     ],
 })
