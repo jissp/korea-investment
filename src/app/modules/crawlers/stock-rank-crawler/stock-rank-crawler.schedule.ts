@@ -27,7 +27,7 @@ export class StockRankCrawlerSchedule implements OnModuleInit {
         this.handleCrawlingKoreaInvestmentVolumeRank();
     }
 
-    @Cron('*/30 * * * * *')
+    @Cron('*/1 * * * *')
     async handleRequestPopulatedHtsTopView() {
         try {
             const queueName = StockRankCrawlerFlowType.RequestHtsTopViews;
@@ -55,7 +55,7 @@ export class StockRankCrawlerSchedule implements OnModuleInit {
         }
     }
 
-    @Cron('*/30 * * * * *')
+    @Cron('*/1 * * * *')
     async handleCrawlingKoreaInvestmentVolumeRank() {
         try {
             const queueName = StockRankCrawlerFlowType.RequestVolumeRanks;

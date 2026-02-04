@@ -10,3 +10,7 @@ export interface HtsTopView {
     stockCode: string;
     exchangeType: ExchangeType;
 }
+
+export interface RequestPopulatedHtsTopViewJobData {
+    htsTopViews: HtsTopView[];
+}

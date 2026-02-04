@@ -5,6 +5,7 @@ import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
 import {
     DomesticStockQuotationsIntstockMultPriceOutput,
     DomesticStockQuotationVolumeRankOutput,
+    DomesticStockQuotationVolumeRankParam,
     DomesticStockRankingHtsTopViewOutput,
     MarketDivCode,
 } from '@modules/korea-investment/common';
@@ -21,18 +22,18 @@ import { MostViewedStockService } from '@app/modules/repositories/most-viewed-st
 import { TradingVolumeRankService } from '@app/modules/repositories/trading-volume-rank';
 import {
     HtsTopView,
+    RequestPopulatedHtsTopViewJobData,
     StockRankCrawlerFlowType,
 } from './stock-rank-crawler.types';
-
-interface RequestPopulatedHtsTopViewJobData {
-    htsTopViews: HtsTopView[];
-}
 
 @Injectable()
 export class StockRankCrawlerProcessor {
     private readonly logger: Logger = new Logger(
         StockRankCrawlerProcessor.name,
     );
+
+    private mostViewedStockTransformer = new MostViewedStockTransformer();
+    private tradingVolumeRankTransformer = new TradingVolumeRankTransformer();
 
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
@@ -43,11 +44,11 @@ export class StockRankCrawlerProcessor {
     ) {}
 
     @OnQueueProcessor(StockRankCrawlerFlowType.RequestHtsTopViews)
-    async processRequestHtsTopViewList(job: Job) {
+    async processRequestHtsTopViews(job: Job) {
         try {
             const childrenResponses =
                 await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
-                    any,
+                    DomesticStockQuotationVolumeRankParam,
                     DomesticStockRankingHtsTopViewOutput[],
                     unknown
                 >(job);
@@ -99,34 +100,39 @@ export class StockRankCrawlerProcessor {
     }
 
     @OnQueueProcessor(StockRankCrawlerFlowType.RequestPopulatedHtsTopView)
-    async process(job: Job<RequestPopulatedHtsTopViewJobData>) {
-        const { htsTopViews } = job.data;
+    async processRequestPopulatedHtsTopView(
+        job: Job<RequestPopulatedHtsTopViewJobData>,
+    ) {
+        try {
+            const { htsTopViews } = job.data;
 
-        const childrenResponses =
-            await this.koreaInvestmentRequestApiHelper.getChildResponses<
-                any,
-                DomesticStockQuotationsIntstockMultPriceOutput[]
-            >(job);
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                    unknown,
+                    DomesticStockQuotationsIntstockMultPriceOutput[]
+                >(job);
 
-        const multiPriceOutputs = childrenResponses.flatMap(
-            ({ response }) => response.output,
-        );
+            const multiPriceOutputs = childrenResponses.flatMap(
+                ({ response }) => response.output,
+            );
 
-        const multiPriceOutputMap = keyBy(
-            multiPriceOutputs,
-            (output) => output.inter_shrn_iscd,
-        );
+            const multiPriceOutputMap = keyBy(
+                multiPriceOutputs,
+                (output) => output.inter_shrn_iscd,
+            );
 
-        const transformer = new MostViewedStockTransformer();
-
-        const mostViewedStockDtoList = htsTopViews.map((htsTopView) => {
-            return transformer.transform({
-                stock: htsTopView,
-                output: multiPriceOutputMap[htsTopView.stockCode],
+            const mostViewedStockDtoList = htsTopViews.map((htsTopView) => {
+                return this.mostViewedStockTransformer.transform({
+                    stock: htsTopView,
+                    output: multiPriceOutputMap[htsTopView.stockCode],
+                });
             });
-        });
 
-        await this.mostViewedStockService.upsert(mostViewedStockDtoList);
+            await this.mostViewedStockService.upsert(mostViewedStockDtoList);
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
     }
 
     @OnQueueProcessor(StockRankCrawlerFlowType.RequestVolumeRanks)
@@ -134,16 +140,15 @@ export class StockRankCrawlerProcessor {
         try {
             const childrenResponses =
                 await this.koreaInvestmentRequestApiHelper.getChildResponses<
-                    any,
+                    unknown,
                     DomesticStockQuotationVolumeRankOutput[]
                 >(job);
             const childrenResults = childrenResponses.flatMap(
                 ({ response }) => response.output,
             );
 
-            const transformer = new TradingVolumeRankTransformer();
             const tradingVolumeRankDtoList = childrenResults.map((output) =>
-                transformer.transform(output),
+                this.tradingVolumeRankTransformer.transform(output),
             );
 
             await this.tradingVolumeRankService.upsert(
