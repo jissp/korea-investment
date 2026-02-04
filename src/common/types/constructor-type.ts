@@ -1,0 +1,3 @@
+export type ConstructorType<T> = T extends new (...args: infer P) => infer R
+    ? new (...args: P) => R
+    : new (...args: any[]) => T;

@@ -1,5 +1,11 @@
 import { In, Repository } from 'typeorm';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Nullable } from '@common/types';
 import { KeywordGroupDto } from './keyword.types';
@@ -37,7 +43,7 @@ export class KeywordGroupService {
      */
     public async createKeywordGroup(keywordGroup: KeywordGroupDto) {
         if (await this.existsKeywordGroupByName(keywordGroup.name)) {
-            throw new Error('이미 존재하는 키워드 그룹입니다.');
+            throw new ConflictException('이미 존재하는 키워드 그룹입니다.');
         }
 
         const entity = this.keywordGroupRepository.create(keywordGroup);
@@ -51,7 +57,7 @@ export class KeywordGroupService {
     public async deleteKeywordGroup(id: number) {
         const keywordGroup = await this.getKeywordGroup(id);
         if (!keywordGroup) {
-            throw new Error('존재하지 않는 키워드 그룹입니다.');
+            throw new NotFoundException('존재하지 않는 키워드 그룹입니다.');
         }
 
         return this.deleteGroupWithKeywords(keywordGroup);
@@ -63,7 +69,7 @@ export class KeywordGroupService {
     public async deleteKeywordGroupByName(name: string) {
         const keywordGroup = await this.getKeywordGroupByName(name);
         if (!keywordGroup) {
-            throw new Error('존재하지 않는 키워드 그룹입니다.');
+            throw new NotFoundException('존재하지 않는 키워드 그룹입니다.');
         }
 
         return this.deleteGroupWithKeywords(keywordGroup);
@@ -92,7 +98,9 @@ export class KeywordGroupService {
         } catch (error) {
             this.logger.error(error);
 
-            throw new Error('키워드 그룹 삭제 중 오류가 발생했습니다.');
+            throw new InternalServerErrorException(
+                '키워드 그룹 삭제 중 오류가 발생했습니다.',
+            );
         }
     }
 

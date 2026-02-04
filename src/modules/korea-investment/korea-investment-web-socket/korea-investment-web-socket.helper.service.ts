@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { KoreaInvestmentConfigService } from '@modules/korea-investment/korea-investment-config';
 import { KoreaInvestmentHelperService } from '@modules/korea-investment/korea-investment-helper';
@@ -30,7 +30,9 @@ export class KoreaInvestmentWebSocketHelperService {
      */
     public getPipe(tradeId: string): Pipe<string[], any> {
         if (!this.pipeMap.has(tradeId)) {
-            throw new Error(`No pipe found for tradeId: ${tradeId}`);
+            throw new BadRequestException(
+                `No pipe found for tradeId: ${tradeId}`,
+            );
         }
 
         return this.pipeMap.get(tradeId)!;

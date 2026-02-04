@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { NaverConfig } from '@modules/naver/common';
 import { NaverApiProvider, NaverAppName } from './naver-api.types';
 import { NaverApiClient } from './naver-api.client';
@@ -28,7 +28,7 @@ export class NaverApiClientFactory {
      */
     private getNaverAppConfig(appName: NaverAppName) {
         if (!this.config.app[appName]) {
-            throw new Error('Invalid Naver App Name: ' + appName);
+            throw new BadRequestException('Invalid Naver App Name: ' + appName);
         }
 
         return {

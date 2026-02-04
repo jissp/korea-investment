@@ -1,7 +1,11 @@
 import * as ws from 'ws';
 import { Subscription } from 'rxjs';
 import { Queue } from 'bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+    Inject,
+    Injectable,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { sleep } from '@common/utils';
 import { isConnected } from '@common/domains';
@@ -85,7 +89,7 @@ export class KoreaInvestmentCollectorSocket {
                 throw error;
             }
 
-            throw new Error('Unknown error occurred');
+            throw new InternalServerErrorException('Unknown error occurred');
         }
     }
 

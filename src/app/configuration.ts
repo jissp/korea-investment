@@ -1,3 +1,5 @@
+import { NotFoundException } from '@nestjs/common';
+
 export interface IConfiguration {
     database: {
         host: string;
@@ -148,7 +150,9 @@ export default (): IConfiguration => ({
 
 function getEnv(key: string): string {
     if (!process.env[key]) {
-        throw new Error(`Missing required environment variable: ${key}`);
+        throw new NotFoundException(
+            `Missing required environment variable: ${key}`,
+        );
     }
 
     return process.env[key];

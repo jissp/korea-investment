@@ -3,6 +3,7 @@ import {
     MiddlewareConsumer,
     Module,
     NestModule,
+    NotFoundException,
     RequestMethod,
 } from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
@@ -57,7 +58,9 @@ import { KoreaInvestmentBeGateway } from './gateways';
                 const config =
                     configService.get<IConfiguration['database']>('database');
                 if (!config) {
-                    throw new Error('Database configuration is missing');
+                    throw new NotFoundException(
+                        'Database configuration is missing',
+                    );
                 }
 
                 return {
@@ -120,15 +123,17 @@ import { KoreaInvestmentBeGateway } from './gateways';
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
+        const paths = [
+            'v1/stocks/:stockCode',
+            'v1/stocks/:stockCode/*',
+            'v1/favorite-stocks/:stockCode',
+        ];
+
         consumer.apply(StockLoaderMiddleware).forRoutes(
-            {
-                path: 'v1/stocks/:stockCode*',
-                method: RequestMethod.GET,
-            },
-            {
-                path: 'v1/stocks/:stockCode*',
-                method: RequestMethod.POST,
-            },
+            ...paths.map((path) => ({
+                path,
+                method: RequestMethod.ALL,
+            })),
         );
     }
 }

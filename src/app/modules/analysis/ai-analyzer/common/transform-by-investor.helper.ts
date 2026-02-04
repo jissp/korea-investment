@@ -1,5 +1,9 @@
 import { sortBy } from 'lodash';
-import { Injectable } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/common';
 
@@ -53,7 +57,7 @@ export class TransformByInvestorHelper {
         investorOutputs: DomesticStockQuotationsInquireInvestorOutput[],
     ) {
         if (investorOutputs.length === 0) {
-            throw new Error('검색된 투자자 동향 정보가 없습니다.');
+            throw new NotFoundException('검색된 투자자 동향 정보가 없습니다.');
         }
 
         const sortedInvestorOutputs = sortBy(investorOutputs, (item) =>
@@ -70,7 +74,7 @@ export class TransformByInvestorHelper {
     hourGbToTime(hourGb: string): string {
         const time = HOUR_GB_MAP[hourGb];
         if (!time) {
-            throw new Error(`Invalid hourGb: ${hourGb}`);
+            throw new BadRequestException(`Invalid hourGb: ${hourGb}`);
         }
         return time;
     }

@@ -3,7 +3,11 @@ import { chunk } from 'lodash';
 import { Repository } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { NestFactory } from '@nestjs/core';
-import { INestApplicationContext, Module } from '@nestjs/common';
+import {
+    INestApplicationContext,
+    Module,
+    NotFoundException,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
     getRepositoryToken,
@@ -44,7 +48,9 @@ const nxtKosdaqCodes: StockCode[] = NxtKosdaqCodeJson as unknown as StockCode[];
                 const config =
                     configService.get<IConfiguration['database']>('database');
                 if (!config) {
-                    throw new Error('Database configuration is missing');
+                    throw new NotFoundException(
+                        'Database configuration is missing',
+                    );
                 }
 
                 return {

@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 const dateRegex = /(\d{4})(\d{2})(\d{2})/;
 const timeRegex = /(\d{2})(\d{2})(\d{2})/;
 
@@ -41,7 +43,7 @@ export function toDateTimeByDate(options?: {
 export function toDateByKoreaInvestmentYmd(date: string): string {
     const dateMatch = date.match(dateRegex);
     if (!dateMatch) {
-        throw new Error('Invalid KoreaInvestment date format');
+        throw new BadRequestException('Invalid KoreaInvestment date format');
     }
 
     const [, year, month, day] = dateMatch;
@@ -56,7 +58,7 @@ export function toDateByKoreaInvestmentYmd(date: string): string {
 export function toDateByKoreaInvestmentTime(time: string): string {
     const timeMatch = time.match(timeRegex);
     if (!timeMatch) {
-        throw new Error('Invalid KoreaInvestment time format');
+        throw new BadRequestException('Invalid KoreaInvestment time format');
     }
 
     const [, hour, minute, second] = timeMatch;

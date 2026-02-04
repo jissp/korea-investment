@@ -1,5 +1,5 @@
 import { sortBy, uniqBy } from 'lodash';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
 import { News } from '@app/modules/repositories/news';
@@ -149,7 +149,7 @@ export class NewsPromptTransformer implements Pipe<PromptArgs, string> {
      */
     private extractNewsItems(newsItems: NormalizedNews[]) {
         if (newsItems.length === 0) {
-            throw new Error('검색된 뉴스 정보가 없습니다.');
+            throw new NotFoundException('검색된 뉴스 정보가 없습니다.');
         }
 
         const sortedNewsItems = sortBy(newsItems, (newsItem) =>

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Module } from '@nestjs/common';
+import { Module, NotFoundException } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StockPlusConfigs } from './stock-plus.types';
 import { StockPlusClient } from './stock-plus.client';
@@ -14,7 +14,7 @@ import { StockPlusClient } from './stock-plus.client';
                 const configs =
                     configService.get<StockPlusConfigs>('stockPlus');
                 if (!configs) {
-                    throw new Error('stockPlus configs not found');
+                    throw new NotFoundException('stockPlus configs not found');
                 }
 
                 return axios.create({

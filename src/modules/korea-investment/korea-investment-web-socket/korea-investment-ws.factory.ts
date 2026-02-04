@@ -1,6 +1,10 @@
 import * as ws from 'ws';
 import { Subject } from 'rxjs';
-import { Injectable, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+} from '@nestjs/common';
 import { isConnected } from '@common/domains';
 import {
     BasePingPongMessage,
@@ -128,7 +132,9 @@ export class KoreaInvestmentWsFactory {
             return Buffer.concat(message).toString('utf-8');
         }
 
-        throw new Error(`Unsupported message type: ${typeof message}`);
+        throw new InternalServerErrorException(
+            `Unsupported message type: ${typeof message}`,
+        );
     }
 
     /**

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ReportType } from '@app/modules/repositories/ai-analysis-report';
 import { BaseAnalysisAdapter } from '@app/modules/analysis/ai-analyzer/common';
 import { AiAnalyzerProvider } from '@app/modules/analysis/ai-analyzer/ai-analyzer.types';
@@ -17,7 +17,9 @@ export class AiAnalyzerAdapterFactory {
     create(reportType: ReportType): BaseAnalysisAdapter<any> {
         const adapter = this.adapterMap.get(reportType);
         if (!adapter) {
-            throw new Error(`Unsupported report type: ${reportType}`);
+            throw new BadRequestException(
+                `Unsupported report type: ${reportType}`,
+            );
         }
 
         return adapter;

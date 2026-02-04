@@ -1,6 +1,6 @@
 import { Job } from 'bullmq';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
     DomesticInvestorTradeByStockDailyParam,
     DomesticProgramTradeTodayParam,
@@ -308,7 +308,7 @@ export class KoreaInvestmentRequestApiHelper {
         iscdList: string[],
     ) {
         if (iscdList.length > this.MULTI_PRICE_MAX_STOCK_CODES) {
-            throw new Error(
+            throw new BadRequestException(
                 `Stock code list exceeds maximum limit (${this.MULTI_PRICE_MAX_STOCK_CODES})`,
             );
         }

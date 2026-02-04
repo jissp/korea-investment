@@ -191,6 +191,7 @@ export class StockController {
     @ApiOkResponse({
         type: GetStockScoresResponse,
     })
+    @UseGuards(ExistingStockGuard)
     @Get(':stockCode/scores')
     public async getStockScores(
         @Param('stockCode') stockCode: string,
@@ -219,6 +220,7 @@ export class StockController {
     @ApiOkResponse({
         type: GetStockResponse,
     })
+    @UseGuards(ExistingStockGuard)
     @Get(':stockCode')
     public async getStock(
         @Param('stockCode') stockCode: string,

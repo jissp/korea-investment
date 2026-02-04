@@ -1,5 +1,10 @@
 import { Axios, AxiosRequestConfig } from 'axios';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+    BadRequestException,
+    Inject,
+    Injectable,
+    Logger,
+} from '@nestjs/common';
 import { getRedisKey, RedisService } from '@modules/redis';
 import { KoreaInvestmentBaseHeader } from '@modules/korea-investment/common';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
@@ -93,7 +98,7 @@ export class KoreaInvestmentHelperService {
             await this.oAuthClient.getToken(this.config.credential);
         if (!access_token) {
             this.logger.error('토큰 발급 실패');
-            throw new Error('토큰 발급 실패');
+            throw new BadRequestException('토큰 발급 실패');
         }
         const expireSeconds = this.calculateTokenExpireSeconds(
             access_token_token_expired,

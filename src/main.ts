@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setSwaggerConfigs } from '@common/swagger';
+import { HttpDefaultException } from '@app/common/exceptions';
 import { AppModule } from '@app/app.module';
 
 async function bootstrap() {
@@ -24,6 +25,8 @@ async function bootstrap() {
             transform: true,
         }),
     );
+
+    app.useGlobalFilters(new HttpDefaultException());
 
     await app.listen(appPort);
 

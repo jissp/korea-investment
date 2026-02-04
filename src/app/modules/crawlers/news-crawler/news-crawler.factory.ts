@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
     NewsCrawlerProvider,
     NewsStrategy,
@@ -23,7 +23,7 @@ export class NewsCrawlerFactory {
         const { strategy } = job.data;
 
         if (!this.strategyMap.has(strategy)) {
-            throw new Error(`Unknown strategy: ${strategy}`);
+            throw new BadRequestException(`Unknown strategy: ${strategy}`);
         }
 
         return this.strategyMap.get(strategy)!;

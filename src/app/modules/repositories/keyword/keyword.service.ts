@@ -1,5 +1,5 @@
 import { In, IsNull, Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { isNil } from '@nestjs/common/utils/shared.utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Nullable } from '@common/types';
@@ -99,7 +99,7 @@ export class KeywordService {
             name: groupName,
         });
         if (!keywordGroup) {
-            throw new Error('Keyword group not found');
+            throw new NotFoundException('Keyword group not found');
         }
 
         return this.keywordRepository.findBy({

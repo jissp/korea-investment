@@ -1,4 +1,9 @@
-import { DynamicModule, Module, Provider } from '@nestjs/common';
+import {
+    DynamicModule,
+    Module,
+    NotFoundException,
+    Provider,
+} from '@nestjs/common';
 import { FactoryProvider } from '@nestjs/common/interfaces/modules/provider.interface';
 import { ModuleMetadata } from '@nestjs/common/interfaces/modules/module-metadata.interface';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -39,7 +44,9 @@ export class SlackModule {
                     inject: [SlackProvider.Config],
                     useFactory: (config?: IConfiguration['slack']) => {
                         if (!config) {
-                            throw new Error('Slack configuration is missing');
+                            throw new NotFoundException(
+                                'Slack configuration is missing',
+                            );
                         }
 
                         return new App({
@@ -64,7 +71,9 @@ export class SlackModule {
                     inject: [SlackProvider.Config],
                     useFactory: (config?: IConfiguration['slack']) => {
                         if (!config) {
-                            throw new Error('Slack configuration is missing');
+                            throw new NotFoundException(
+                                'Slack configuration is missing',
+                            );
                         }
 
                         return new App({

@@ -1,5 +1,9 @@
 import { chunk } from 'lodash';
-import { Injectable, PipeTransform } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    PipeTransform,
+} from '@nestjs/common';
 import { Nullable } from '@common/types';
 import { TransformResult } from './korea-investment-web-socket.types';
 
@@ -29,7 +33,9 @@ export class KoreaInvestmentWebSocketPipe implements PipeTransform<
     private parse(message: string): TransformResult {
         const dataContent = this.splitFields(message);
         if (!dataContent) {
-            throw new Error(`Invalid message format: ${message}`);
+            throw new InternalServerErrorException(
+                `Invalid message format: ${message}`,
+            );
         }
 
         return {

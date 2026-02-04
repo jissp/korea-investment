@@ -6,6 +6,7 @@ import {
     Logger,
     Param,
     Post,
+    UseGuards,
 } from '@nestjs/common';
 import {
     ApiBody,
@@ -15,6 +16,7 @@ import {
     ApiParam,
 } from '@nestjs/swagger';
 import { assertStockCode, getStockName } from '@common/domains';
+import { ExistingStockGuard } from '@app/common/guards';
 import {
     FavoriteStockService,
     FavoriteType,
@@ -58,6 +60,7 @@ export class FavoriteStockController {
         description: '종목 코드',
     })
     @ApiNoContentResponse()
+    @UseGuards(ExistingStockGuard)
     @Delete(':stockCode')
     public async deleteFavoriteStockCode(
         @Param('stockCode') stockCode: string,
