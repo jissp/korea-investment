@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnQueueProcessor } from '@modules/queue';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/common';
 import { AccountStockGroupStockTransformer } from '@app/common/korea-investment';
@@ -9,6 +9,8 @@ import { StockCrawlerFlowType } from '../stock-crawler.types';
 
 @Injectable()
 export class AccountStockPriceProcessor {
+    private readonly logger = new Logger(AccountStockPriceProcessor.name);
+
     private readonly accountStockGroupStockTransformer =
         new AccountStockGroupStockTransformer();
 
@@ -19,20 +21,25 @@ export class AccountStockPriceProcessor {
 
     @OnQueueProcessor(StockCrawlerFlowType.UpdateAccountStockGroupStockPrices)
     async processUpdateAccountStockGroupStockPrices(job: Job) {
-        const childrenResponses =
-            await this.koreaInvestmentRequestApiHelper.getChildResponses<
-                any,
-                DomesticStockQuotationsIntstockMultPriceOutput[]
-            >(job);
+        try {
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildResponses<
+                    any,
+                    DomesticStockQuotationsIntstockMultPriceOutput[]
+                >(job);
 
-        const multiPriceOutputs = childrenResponses.flatMap(
-            ({ response }) => response.output,
-        );
+            const multiPriceOutputs = childrenResponses.flatMap(
+                ({ response }) => response.output,
+            );
 
-        const transformedDtoList = multiPriceOutputs.map((output) =>
-            this.accountStockGroupStockTransformer.transform(output),
-        );
+            const transformedDtoList = multiPriceOutputs.map((output) =>
+                this.accountStockGroupStockTransformer.transform(output),
+            );
 
-        await this.accountStockGroupStockService.update(transformedDtoList);
+            await this.accountStockGroupStockService.update(transformedDtoList);
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
     }
 }

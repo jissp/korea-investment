@@ -42,7 +42,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
         });
 
         const latestBusinessDay =
-            await this.stockCrawlerService.assertKoreaInvestmentHoliday(
+            await this.stockCrawlerService.assertKoreaInvestmentBusinessDay(
                 todayYmd,
             );
         if (latestBusinessDay.isOpen === YN.N) {
@@ -52,13 +52,20 @@ export class StockCrawlerSchedule implements OnModuleInit {
         const stocks =
             await this.stockCrawlerService.getStocksByFavoriteStocks();
 
-        const filteredStocks = stocks.filter((stock) => {
+        const filterStocksByMarketDivCode = (
+            stocks: Stock[],
+            marketDivCode: MarketDivCode,
+        ): Stock[] => {
             if (marketDivCode === MarketDivCode.NXT) {
-                return stock.isNextTrade === YN.Y;
+                return stocks.filter((stock) => stock.isNextTrade === YN.Y);
             }
+            return stocks;
+        };
 
-            return true;
-        });
+        const filteredStocks = filterStocksByMarketDivCode(
+            stocks,
+            marketDivCode,
+        );
 
         await this.queueService.addRequestStockInvestorJobs(
             filteredStocks,
@@ -82,7 +89,7 @@ export class StockCrawlerSchedule implements OnModuleInit {
         });
 
         const latestBusinessDay =
-            await this.stockCrawlerService.assertKoreaInvestmentHoliday(
+            await this.stockCrawlerService.assertKoreaInvestmentBusinessDay(
                 todayYmd,
             );
         if (latestBusinessDay.isOpen === YN.N) {

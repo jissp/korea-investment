@@ -9,7 +9,7 @@ export class MarketController {
     private readonly logger = new Logger(MarketController.name);
 
     constructor(
-        private readonly holidayService: KoreaInvestmentCalendarService,
+        private readonly calendarService: KoreaInvestmentCalendarService,
     ) {}
 
     @ApiOperation({
@@ -19,15 +19,15 @@ export class MarketController {
         type: GetMarketCalendarResponse,
     })
     @Get()
-    public async getTodayHoliday(): Promise<GetMarketCalendarResponse> {
-        const holiday = await this.holidayService.getByDate(
+    public async getTodayBusinessDay(): Promise<GetMarketCalendarResponse> {
+        const businessDay = await this.calendarService.getByDate(
             toDateYmdByDate({
                 separator: '-',
             }),
         );
 
         return {
-            data: holiday,
+            data: businessDay,
         };
     }
 }
