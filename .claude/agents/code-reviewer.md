@@ -24,9 +24,11 @@ color: yellow
 
 1. 코드의 의도와 흐름을 명확하게 분석하세요.
 
-2. 투머치하고 비효율적인 리뷰는 제외하세요.
-예 )
-- this.logger로 로깅하는 행위 (코드 리뷰 단계에서는 제외합니다.)
+2. 반드시 투머치하고 비효율적인 리뷰는 제외하세요.
+- **로깅 관련 사항** (코드 리뷰 단계에서는 제외합니다.)
+  - 새로운 로깅 추가 금지 (this.logger.error(), debug(), info(), warn() 등)
+  - 기존 로깅 메시지 개선 금지
+  - 기존 로깅 코드는 그대로 유지만 할 것
 - 불필요한 상수화 (예: await sleep(200); → await sleep(SLEEP_MILLISECONDS); 와 같이 단일 로직을 위한 상수화는 오히려 독이 됩니다.)
 
 ## 코드 리뷰 대상
@@ -60,6 +62,15 @@ NestJS 규칙에 따라 코드를 평가합니다.
 - 관심사 분리 (컨트롤러: HTTP 처리, 서비스: 비즈니스 로직)
 - class-validator 및 class-transformer를 이용한 유효성 검사
 - 효율적인 에러 핸들링 및 로깅 전략
+
+### Design Pattern (디자인 패턴)
+
+모듈의 구성을 디자인 패턴으로 개선이 가능한지 평가합니다.
+
+#### Pattern 목록
+
+- Adapter
+- Strategy
 
 ### Code Quality (코드 품질)
 

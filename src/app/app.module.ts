@@ -1,5 +1,10 @@
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { Module } from '@nestjs/common';
+import {
+    MiddlewareConsumer,
+    Module,
+    NestModule,
+    RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -11,6 +16,7 @@ import { GeminiCliModule } from '@modules/gemini-cli';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { SlackModule } from '@modules/slack';
+import { StockLoaderMiddleware } from '@app/common/middlewares';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { AnalyzerModule } from '@app/modules/analysis/analyzer';
@@ -112,4 +118,17 @@ import { KoreaInvestmentBeGateway } from './gateways';
     ],
     providers: [KoreaInvestmentBeGateway],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(StockLoaderMiddleware).forRoutes(
+            {
+                path: 'v1/stocks/:stockCode*',
+                method: RequestMethod.GET,
+            },
+            {
+                path: 'v1/stocks/:stockCode*',
+                method: RequestMethod.POST,
+            },
+        );
+    }
+}

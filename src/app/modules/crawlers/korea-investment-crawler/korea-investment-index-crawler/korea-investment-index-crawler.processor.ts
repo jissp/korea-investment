@@ -133,12 +133,10 @@ export class KoreaInvestmentIndexCrawlerProcessor {
                     });
                 });
 
-                await Promise.all(
-                    [todayMarketIndex, ...dailyMarketIndices].map(
-                        (marketIndex) =>
-                            this.marketIndexService.upsert(marketIndex),
-                    ),
-                );
+                await this.marketIndexService.upsert([
+                    todayMarketIndex,
+                    ...dailyMarketIndices,
+                ]);
             }
         } catch (error) {
             this.logger.error(error);

@@ -9,7 +9,6 @@ import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { KeywordModule } from '@app/modules/repositories/keyword';
 import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
 import { KoreaInvestmentAccountProcessor } from './korea-investment-account.processor';
-import { KoreaInvestmentAccountCrawlerListener } from './korea-investment-account-crawler.listener';
 import { KoreaInvestmentAccountCrawlerSchedule } from './korea-investment-account-crawler.schedule';
 
 const flowTypes = [
@@ -35,7 +34,6 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
     ],
     providers: [
         ...flowProviders,
-        KoreaInvestmentAccountCrawlerListener,
         KoreaInvestmentAccountProcessor,
         KoreaInvestmentAccountCrawlerSchedule,
     ],

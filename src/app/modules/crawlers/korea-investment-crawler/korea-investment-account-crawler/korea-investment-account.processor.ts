@@ -1,8 +1,7 @@
 import { difference } from 'lodash';
-import { Job } from 'bullmq';
-import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { OnQueueProcessor } from '@modules/queue';
+import { FlowProducer, Job } from 'bullmq';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { getDefaultJobOptions, OnQueueProcessor } from '@modules/queue';
 import {
     KoreaInvestmentAccountOutput2,
     KoreaInvestmentAccountParam,
@@ -20,7 +19,11 @@ import {
     AccountStockTransformer,
     AccountTransformer,
 } from '@app/common/korea-investment';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
+import {
+    KoreaInvestmentCallApiMultiResult,
+    KoreaInvestmentRequestApiHelper,
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api/common';
 import {
     AccountService,
     AccountStockService,
@@ -36,15 +39,14 @@ import {
     FavoriteType,
 } from '@app/modules/repositories/favorite-stock';
 import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
-import {
-    KoreaInvestmentAccountCrawlerEventType,
-    KoreaInvestmentAccountCrawlerType,
-} from './korea-investment-account-crawler.types';
+import { KoreaInvestmentAccountCrawlerType } from './korea-investment-account-crawler.types';
 
 type StockInfo = { stockName: string; stockCode: string };
 
 @Injectable()
 export class KoreaInvestmentAccountProcessor {
+    private readonly logger = new Logger(KoreaInvestmentAccountProcessor.name);
+
     constructor(
         private readonly koreaInvestmentRequestApiHelper: KoreaInvestmentRequestApiHelper,
         private readonly accountService: AccountService,
@@ -53,7 +55,8 @@ export class KoreaInvestmentAccountProcessor {
         private readonly accountStockGroupStockService: AccountStockGroupStockService,
         private readonly favoriteStockService: FavoriteStockService,
         private readonly keywordService: KeywordService,
-        private readonly eventEmitter: EventEmitter2,
+        @Inject(KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup)
+        private readonly requestAccountStocksByGroupFlow: FlowProducer,
     ) {}
 
     /**
@@ -146,31 +149,33 @@ export class KoreaInvestmentAccountProcessor {
         KoreaInvestmentAccountCrawlerType.RequestAccountStockGroups,
     )
     async processRequestAccountStockGroups(job: Job) {
-        const { userId } = job.data;
-        const childrenResponses =
-            await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
-                KoreaInvestmentInterestGroupListParam,
-                unknown,
-                KoreaInvestmentInterestGroupListOutput[]
-            >(job);
+        try {
+            const { userId } = job.data;
+            const childrenResponses =
+                await this.koreaInvestmentRequestApiHelper.getChildMultiResponses<
+                    KoreaInvestmentInterestGroupListParam,
+                    unknown,
+                    KoreaInvestmentInterestGroupListOutput[]
+                >(job);
 
-        const transformer = new AccountStockGroupTransformer();
-        const accountStockGroupDto = childrenResponses.flatMap(({ response }) =>
-            response.output2.map((output) => transformer.transform(output)),
-        );
+            const transformer = new AccountStockGroupTransformer();
+            const accountStockGroupDto = childrenResponses.flatMap(
+                ({ response }) =>
+                    response.output2.map((output) =>
+                        transformer.transform(output),
+                    ),
+            );
 
-        await this.accountStockGroupService.truncate();
-        await this.accountStockGroupService.upsert(accountStockGroupDto);
+            await this.accountStockGroupService.truncate();
+            await this.accountStockGroupService.upsert(accountStockGroupDto);
 
-        for (const {
-            response: { output2 },
-        } of childrenResponses) {
-            output2.forEach((output) => {
-                this.eventEmitter.emit(
-                    KoreaInvestmentAccountCrawlerEventType.UpdatedStockGroup,
-                    { userId, output },
-                );
-            });
+            //
+            await this.addRequestAccountStocksByGroupFlow(
+                userId,
+                childrenResponses,
+            );
+        } catch (error) {
+            this.logger.error(error);
         }
     }
 
@@ -323,6 +328,61 @@ export class KoreaInvestmentAccountProcessor {
                     type: keywordType,
                     name: keyword,
                     keywordGroupId: null,
+                }),
+            ),
+        );
+    }
+
+    /**
+     * @param userId
+     * @param childrenResponses
+     * @private
+     */
+    private async addRequestAccountStocksByGroupFlow(
+        userId: string,
+        childrenResponses: KoreaInvestmentCallApiMultiResult<
+            KoreaInvestmentInterestGroupListParam,
+            unknown,
+            KoreaInvestmentInterestGroupListOutput[]
+        >[],
+    ) {
+        const queueName =
+            KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup;
+        const jobFlows = childrenResponses.flatMap(({ response }) =>
+            response.output2.map((output) => ({
+                name: queueName,
+                queueName,
+                data: { userId },
+                children: [
+                    this.koreaInvestmentRequestApiHelper.generateInterestStockListByGroup(
+                        {
+                            TYPE: '1',
+                            USER_ID: userId,
+                            INTER_GRP_CODE: output.inter_grp_code,
+                            INTER_GRP_NAME: '',
+                            DATA_RANK: '',
+                            HTS_KOR_ISNM: '',
+                            CNTG_CLS_CODE: '',
+                            FID_ETC_CLS_CODE: '4',
+                        },
+                    ),
+                ],
+            })),
+        );
+
+        const queuesOptions = {
+            [KoreaInvestmentAccountCrawlerType.RequestAccountStocksByGroup]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+            [KoreaInvestmentRequestApiType.Main]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+        };
+
+        await Promise.all(
+            jobFlows.map((jobFlow) =>
+                this.requestAccountStocksByGroupFlow.add(jobFlow, {
+                    queuesOptions,
                 }),
             ),
         );

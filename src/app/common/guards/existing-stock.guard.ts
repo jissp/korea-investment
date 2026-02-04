@@ -4,22 +4,13 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { StockService } from '@app/modules/repositories/stock';
 
 @Injectable()
 export class ExistingStockGuard implements CanActivate {
-    constructor(private readonly stockService: StockService) {}
-
-    public async canActivate(context: ExecutionContext): Promise<boolean> {
+    public canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
-        const stockCode = request.params.stockCode;
-        if (!stockCode) {
-            return true;
-        }
-
-        const exists = await this.stockService.existsStock(stockCode);
-        if (!exists) {
-            throw new NotFoundException(`Stock not found: ${stockCode}`);
+        if (!request.stock) {
+            throw new NotFoundException('Stock not found');
         }
 
         return true;
