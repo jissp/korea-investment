@@ -97,6 +97,9 @@ export class NewsCrawlerSchedule implements OnModuleInit {
             data: {
                 strategy,
             } as RequestCrawlingNewsJobPayload<T>,
+            opts: {
+                jobId: strategy,
+            },
         };
     }
 }

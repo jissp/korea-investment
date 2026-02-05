@@ -136,10 +136,11 @@ export class StockInvestorScoreCalculator implements BaseCalculator<InitResults>
     }
 
     private interpretScore(score: number) {
-        if (score >= 8.0) return '🔥 심격: 강력 매집 및 급등 징후';
-        if (score >= 5.5) return '⚠️ 주의: 세력 개입 및 가격 관리 중';
-        if (score >= 3.0) return '✅ 보통: 일반적인 수급 흐름';
+        if (score <= 2.0)
+            return '🔥 매수 신호: 기관·외인 순매수로 강한 수급 개선';
+        if (score <= 4.5) return '✅ 긍정: 안정적인 기관·외인 수급 흐름';
+        if (score <= 7.0) return '⚠️ 주의: 혼재된 수급, 개별 동향 확인 필요';
 
-        return '💤 낮음: 세력 이탈 또는 관심 부족';
+        return '💤 약한 신호: 개인 중심의 약세 수급';
     }
 }

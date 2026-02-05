@@ -124,8 +124,8 @@ import { KoreaInvestmentBeGateway } from './gateways';
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         const paths = [
+            'v1/stocks/:stockCode/(.*)',
             'v1/stocks/:stockCode',
-            'v1/stocks/:stockCode/*',
             'v1/favorite-stocks/:stockCode',
         ];
 

@@ -51,17 +51,15 @@ export class KoreaInvestmentCollectorProcessor implements OnModuleDestroy {
             const approvalKey = await this.helperService.getWebSocketToken();
 
             const stockCodes = Object.keys(this.subscribeStockMap);
-            for (const stockCode of stockCodes) {
-                const messages = this.buildSubscribeMessages(
+            const subscribeMessages = stockCodes.flatMap((stockCode) =>
+                this.buildSubscribeMessages(
                     approvalKey,
                     SubscribeType.Unsubscribe,
                     stockCode,
-                );
+                ),
+            );
 
-                // 패킷 전송
-                await this.sendSubscribeMessages(messages);
-                this.logger.debug(`Unsubscribed ${stockCode}`);
-            }
+            await this.sendSubscribeMessages(subscribeMessages);
 
             await this.collectorSocket.disconnect();
         } finally {
@@ -94,8 +92,9 @@ export class KoreaInvestmentCollectorProcessor implements OnModuleDestroy {
             this.logger.debug(`SubscribeStock, ${subscribeType}, ${stockCode}`);
 
             const approvalKey = await this.helperService.getWebSocketToken();
+            const isSubscribe = subscribeType === SubscribeType.Subscribe;
 
-            if (subscribeType === SubscribeType.Subscribe) {
+            if (isSubscribe) {
                 /*
                  * 국내주식 실시간체결가(통합): H0UNCNT0
                  * 국내주식 실시간호가(통합): H0UNASP0
@@ -118,7 +117,7 @@ export class KoreaInvestmentCollectorProcessor implements OnModuleDestroy {
             );
             await this.sendSubscribeMessages(messages);
 
-            if (subscribeType === SubscribeType.Unsubscribe) {
+            if (!isSubscribe) {
                 this.subscribeStockMap.delete(stockCode);
             }
 
