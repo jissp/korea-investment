@@ -1,10 +1,6 @@
 import { ChildProcess, spawn } from 'node:child_process';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import {
-    GeminiCliOptions,
-    GeminiCliProvider,
-    GeminiCliResult,
-} from './gemini-cli.types';
+import { GeminiCliOptions, GeminiCliProvider } from './gemini-cli.types';
 import { GeminiCliProcessManagerService } from './gemini-cli-process-manager.service';
 
 @Injectable()
@@ -25,7 +21,7 @@ export class GeminiCliService {
     public requestSyncPrompt(
         prompt: string,
         options?: GeminiCliOptions,
-    ): Promise<GeminiCliResult> {
+    ): Promise<string> {
         return new Promise((resolve, reject) => {
             try {
                 const model = options?.model ?? this.config.model;
@@ -51,7 +47,7 @@ export class GeminiCliService {
     }
 
     private spawnGeminiProcess(model: string): ChildProcess {
-        return spawn('gemini', ['--model', model, '--output-format', 'json'], {
+        return spawn('gemini', ['--model', model], {
             env: this.getCleanEnvironment(),
             shell: true,
         });
@@ -64,7 +60,7 @@ export class GeminiCliService {
 
     private setupProcessStreams(
         geminiProcess: ChildProcess,
-        resolve: (value: GeminiCliResult) => void,
+        resolve: (value: string) => void,
         reject: (reason?: any) => void,
     ): void {
         let outputData: string = '';
@@ -91,7 +87,7 @@ export class GeminiCliService {
     private handleProcessClose(
         geminiProcess: ChildProcess,
         outputData: string,
-        resolve: (value: GeminiCliResult) => void,
+        resolve: (value: string) => void,
         reject: (reason?: any) => void,
     ): void {
         if (!outputData) {
@@ -101,8 +97,8 @@ export class GeminiCliService {
         }
 
         try {
-            const dataObject = JSON.parse(outputData);
-            resolve(dataObject);
+            // const dataObject = JSON.parse(outputData);
+            resolve(outputData);
             this.logger.log('Gemini CLI process closed');
             this.geminiCliProcessManagerService.deleteProcess(geminiProcess);
         } catch (error) {
