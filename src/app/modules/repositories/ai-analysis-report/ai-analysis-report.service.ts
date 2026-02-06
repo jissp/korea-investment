@@ -24,7 +24,7 @@ export class AiAnalysisReportService {
      * @param reportType
      * @param reportTarget
      */
-    public async deleteReport(reportType: ReportType, reportTarget: string) {
+    public async clearReport(reportType: ReportType, reportTarget: string) {
         return this.aiAnalysisReportRepository.delete({
             reportType,
             reportTarget,

@@ -8,8 +8,9 @@ import { KoreaInvestmentCollectorEventType } from './korea-investment-collector.
 
 @Injectable()
 export class KoreaInvestmentCollectorListener {
+    private readonly logger = new Logger(KoreaInvestmentCollectorListener.name);
+
     constructor(
-        private readonly logger: Logger,
         private readonly helperService: KoreaInvestmentWebSocketHelperService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
