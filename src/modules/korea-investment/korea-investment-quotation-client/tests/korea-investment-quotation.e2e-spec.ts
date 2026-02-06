@@ -40,8 +40,8 @@ describe('KoreaInvestmentQuotation e2e 테스트', () => {
             });
 
             const news = await quotationClient.getInvestorTradeByStockDaily({
-                FID_INPUT_ISCD: '001440',
-                FID_INPUT_DATE_1: '2026-02-02',
+                FID_INPUT_ISCD: '005930',
+                FID_INPUT_DATE_1: '20260205',
                 FID_COND_MRKT_DIV_CODE: MarketDivCode.통합,
             });
 
