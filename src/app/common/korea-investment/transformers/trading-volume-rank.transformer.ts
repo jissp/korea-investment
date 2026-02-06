@@ -2,20 +2,22 @@ import { Pipe } from '@common/types';
 import { DomesticStockQuotationVolumeRankOutput } from '@modules/korea-investment/common';
 import { TradingVolumeRankDto } from '@app/modules/repositories/trading-volume-rank';
 
+interface TransformerArgs {
+    output: DomesticStockQuotationVolumeRankOutput;
+}
+
 export class TradingVolumeRankTransformer implements Pipe<
-    DomesticStockQuotationVolumeRankOutput,
+    TransformerArgs,
     TradingVolumeRankDto
 > {
-    transform(
-        value: DomesticStockQuotationVolumeRankOutput,
-    ): TradingVolumeRankDto {
+    transform({ output }: TransformerArgs): TradingVolumeRankDto {
         return {
-            stockCode: value.mksc_shrn_iscd,
-            stockName: value.hts_kor_isnm,
-            price: Number(value.stck_prpr),
-            changePrice: Number(value.prdy_vrss),
-            changePriceRate: Number(value.prdy_ctrt),
-            tradingVolume: Number(value.avrg_vol),
+            stockCode: output.mksc_shrn_iscd,
+            stockName: output.hts_kor_isnm,
+            price: Number(output.stck_prpr),
+            changePrice: Number(output.prdy_vrss),
+            changePriceRate: Number(output.prdy_ctrt),
+            tradingVolume: Number(output.avrg_vol),
         };
     }
 }

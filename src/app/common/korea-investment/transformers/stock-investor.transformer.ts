@@ -1,18 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Pipe } from '@common/types';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { getStockName } from '@common/domains';
 import { MarketType } from '@app/common/types';
 import { DomesticInvestorTradeByStockDailyOutput2 } from '@modules/korea-investment/common';
 import { StockInvestorDto } from '@app/modules/repositories/stock-investor';
 
-interface TransformParams {
+interface TransformerArgs {
     stockCode: string;
     output: DomesticInvestorTradeByStockDailyOutput2;
 }
 
-@Injectable()
-export class StockInvestorTransformer {
-    transform({ stockCode, output }: TransformParams): StockInvestorDto {
+export class StockInvestorTransformer implements Pipe<
+    TransformerArgs,
+    StockInvestorDto
+> {
+    transform({ stockCode, output }: TransformerArgs): StockInvestorDto {
         return {
             marketType: MarketType.Domestic,
             date: toDateByKoreaInvestmentYmd(output.stck_bsop_date),

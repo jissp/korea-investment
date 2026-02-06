@@ -4,13 +4,15 @@ import { YN } from '@app/common/types';
 import { DomesticHolidayInquiryOutput } from '@modules/korea-investment/common';
 import { KoreaInvestmentCalendarDto } from '@app/modules/repositories/korea-investment-calendar';
 
+interface TransformerArgs {
+    output: DomesticHolidayInquiryOutput;
+}
+
 export class HolidayTransformer implements Pipe<
-    DomesticHolidayInquiryOutput,
+    TransformerArgs,
     KoreaInvestmentCalendarDto
 > {
-    transform(
-        output: DomesticHolidayInquiryOutput,
-    ): KoreaInvestmentCalendarDto {
+    transform({ output }: TransformerArgs): KoreaInvestmentCalendarDto {
         return {
             date: toDateByKoreaInvestmentYmd(output.bass_dt),
             dayCode: output.wday_dvsn_cd,

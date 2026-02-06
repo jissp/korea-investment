@@ -1,25 +1,25 @@
 import { Pipe } from '@common/types';
-import { getStockName } from '@common/domains';
-import { MarketType } from '@app/common/types';
 import { OverseasQuotationInquireDailyChartPriceOutput2 } from '@modules/korea-investment/common';
+import { MarketType } from '@app/common/types';
+import { getMarketNameDomain } from '@app/common/domains';
 import { MarketIndexDto } from '@app/modules/repositories/market-index';
 
-type TransformerType = {
+interface TransformerArgs {
     code: string;
     date: string;
     output2: OverseasQuotationInquireDailyChartPriceOutput2;
-};
+}
 
 export class OverseasDailyIndexTransformer implements Pipe<
-    TransformerType,
+    TransformerArgs,
     MarketIndexDto
 > {
-    transform({ code, date, output2 }: TransformerType): MarketIndexDto {
+    transform({ code, date, output2 }: TransformerArgs): MarketIndexDto {
         return {
             marketType: MarketType.Overseas,
             date,
             code,
-            name: getStockName(code),
+            name: getMarketNameDomain(code),
             value: Number(output2.ovrs_nmix_prpr),
             changeValue: 0,
             changeValueRate: 0,

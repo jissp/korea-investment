@@ -3,19 +3,16 @@ import { isDelistedStockByName } from '@app/common/domains';
 import { KoreaInvestmentAccountStockOutput } from '@modules/korea-investment/common';
 import { AccountStockDto } from '@app/modules/repositories/account';
 
-interface KoreaInvestmentAccountStockTransformerParams {
+interface TransformerArgs {
     accountId: string;
     output: KoreaInvestmentAccountStockOutput;
 }
 
 export class AccountStockTransformer implements Pipe<
-    KoreaInvestmentAccountStockTransformerParams,
+    TransformerArgs,
     AccountStockDto
 > {
-    transform({
-        accountId,
-        output,
-    }: KoreaInvestmentAccountStockTransformerParams): AccountStockDto {
+    transform({ accountId, output }: TransformerArgs): AccountStockDto {
         return {
             accountId,
             stockName: output.prdt_name,

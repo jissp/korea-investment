@@ -2,27 +2,23 @@ import { Pipe } from '@common/types';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/common';
 import { UpdateAccountStockGroupStockDto } from '@app/modules/repositories/account-stock-group';
 
+interface TransformerArgs {
+    output: DomesticStockQuotationsIntstockMultPriceOutput;
+}
+
 export class AccountStockGroupStockTransformer implements Pipe<
-    DomesticStockQuotationsIntstockMultPriceOutput,
+    TransformerArgs,
     UpdateAccountStockGroupStockDto
 > {
-    transform({
-        inter_shrn_iscd,
-        inter2_prpr,
-        inter2_prdy_vrss,
-        prdy_ctrt,
-        inter2_hgpr,
-        inter2_lwpr,
-        acml_vol,
-    }: DomesticStockQuotationsIntstockMultPriceOutput): UpdateAccountStockGroupStockDto {
+    transform({ output }: TransformerArgs): UpdateAccountStockGroupStockDto {
         return {
-            stockCode: inter_shrn_iscd,
-            price: Number(inter2_prpr),
-            changePrice: Number(inter2_prdy_vrss),
-            changePriceRate: Number(prdy_ctrt),
-            lowPrice: Number(inter2_lwpr),
-            highPrice: Number(inter2_hgpr),
-            tradingVolume: Number(acml_vol),
+            stockCode: output.inter_shrn_iscd,
+            price: Number(output.inter2_prpr),
+            changePrice: Number(output.inter2_prdy_vrss),
+            changePriceRate: Number(output.prdy_ctrt),
+            lowPrice: Number(output.inter2_lwpr),
+            highPrice: Number(output.inter2_hgpr),
+            tradingVolume: Number(output.acml_vol),
         };
     }
 }

@@ -3,13 +3,15 @@ import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockInquireDailyPriceOutput } from '@modules/korea-investment/common';
 import { StockDailyPriceDto } from '@app/controllers/stocks/dto/responses/get-stock-daily-prices.response';
 
+interface TransformerArgs {
+    output: DomesticStockInquireDailyPriceOutput;
+}
+
 export class StockDailyPriceTransformer implements Pipe<
-    DomesticStockInquireDailyPriceOutput,
+    TransformerArgs,
     StockDailyPriceDto
 > {
-    transform(
-        output: DomesticStockInquireDailyPriceOutput,
-    ): StockDailyPriceDto {
+    transform({ output }: TransformerArgs): StockDailyPriceDto {
         return {
             date: toDateByKoreaInvestmentYmd(output.stck_bsop_date),
             startPrice: Number(output.stck_oprc),

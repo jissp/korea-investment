@@ -3,19 +3,16 @@ import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-i
 import { MostViewedStockDto } from '@app/modules/repositories/most-viewed-stock';
 import { HtsTopView } from '@app/modules/crawlers/stock-rank-crawler';
 
-interface MostViewedStockTransformerParams {
+interface TransformerArgs {
     stock: HtsTopView;
     output: DomesticStockQuotationsIntstockMultPriceOutput;
 }
 
 export class MostViewedStockTransformer implements Pipe<
-    MostViewedStockTransformerParams,
+    TransformerArgs,
     MostViewedStockDto
 > {
-    transform({
-        stock,
-        output,
-    }: MostViewedStockTransformerParams): MostViewedStockDto {
+    transform({ stock, output }: TransformerArgs): MostViewedStockDto {
         return {
             exchangeType: stock.exchangeType,
             stockCode: stock.stockCode,
