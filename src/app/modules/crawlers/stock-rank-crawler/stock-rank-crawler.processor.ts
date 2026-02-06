@@ -148,7 +148,9 @@ export class StockRankCrawlerProcessor {
             );
 
             const tradingVolumeRankDtoList = childrenResults.map((output) =>
-                this.tradingVolumeRankTransformer.transform(output),
+                this.tradingVolumeRankTransformer.transform({
+                    output,
+                }),
             );
 
             await this.tradingVolumeRankService.upsert(

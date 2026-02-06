@@ -36,7 +36,9 @@ export class KoreaInvestmentCalendarCrawlerProcessor {
             const transformer = new HolidayTransformer();
 
             const dtoList = outputs.map((output) =>
-                transformer.transform(output),
+                transformer.transform({
+                    output,
+                }),
             );
 
             for (const dto of dtoList) {

@@ -33,7 +33,9 @@ export class AccountStockPriceProcessor {
             );
 
             const transformedDtoList = multiPriceOutputs.map((output) =>
-                this.accountStockGroupStockTransformer.transform(output),
+                this.accountStockGroupStockTransformer.transform({
+                    output,
+                }),
             );
 
             await this.accountStockGroupStockService.update(transformedDtoList);

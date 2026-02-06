@@ -117,7 +117,7 @@ export class StockController {
 
         const transformer = new StockDailyPriceTransformer();
         const stockDailyPriceDtoList = response.output.map((output) =>
-            transformer.transform(output),
+            transformer.transform({ output }),
         );
 
         return {
@@ -171,9 +171,11 @@ export class StockController {
         );
 
         const transformer = new StockPriceTransformer();
-        const stockPriceDtoList = responses
-            .flat()
-            .map((output) => transformer.transform(output));
+        const stockPriceDtoList = responses.flat().map((output) =>
+            transformer.transform({
+                output,
+            }),
+        );
 
         return {
             data: stockPriceDtoList,

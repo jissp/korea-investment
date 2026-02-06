@@ -81,7 +81,9 @@ export class KoreaInvestmentAccountProcessor {
                         params.CANO,
                         params.ACNT_PRDT_CD,
                     ),
-                    accountInfo: transformer.transform(response.output2),
+                    accountInfo: transformer.transform({
+                        output: response.output2,
+                    }),
                 };
             },
         );
@@ -162,7 +164,9 @@ export class KoreaInvestmentAccountProcessor {
             const accountStockGroupDto = childrenResponses.flatMap(
                 ({ response }) =>
                     response.output2.map((output) =>
-                        transformer.transform(output),
+                        transformer.transform({
+                            output,
+                        }),
                     ),
             );
 
