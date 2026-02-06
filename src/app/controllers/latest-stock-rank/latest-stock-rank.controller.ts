@@ -36,8 +36,8 @@ export class LatestStockRankController {
     @ApiOkResponse({
         type: GetTradingVolumeRanksResponse,
     })
-    @Get('volume')
-    public async getKoreaInvestmentVolume(): Promise<GetTradingVolumeRanksResponse> {
+    @Get('volume-ranks')
+    public async getKoreaInvestmentVolumeRanks(): Promise<GetTradingVolumeRanksResponse> {
         const tradingVolumeRanks =
             await this.tradingVolumeRankService.getLatestTradingVolumeRanks(30);
 
