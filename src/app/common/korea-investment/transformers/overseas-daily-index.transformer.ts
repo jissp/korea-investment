@@ -1,7 +1,7 @@
 import { Pipe } from '@common/types';
 import { OverseasQuotationInquireDailyChartPriceOutput2 } from '@modules/korea-investment/common';
 import { MarketType } from '@app/common/types';
-import { getMarketNameDomain } from '@app/common/domains';
+import { getMarketName } from '@app/common/domains';
 import { MarketIndexDto } from '@app/modules/repositories/market-index';
 
 interface TransformerArgs {
@@ -19,7 +19,7 @@ export class OverseasDailyIndexTransformer implements Pipe<
             marketType: MarketType.Overseas,
             date,
             code,
-            name: getMarketNameDomain(code),
+            name: getMarketName(code),
             value: Number(output2.ovrs_nmix_prpr),
             changeValue: 0,
             changeValueRate: 0,

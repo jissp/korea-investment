@@ -1,7 +1,7 @@
 import { Pipe } from '@common/types';
 import { KoreaInvestmentDomesticInquireIndexDailyPriceOutput2 } from '@modules/korea-investment/common';
 import { MarketType } from '@app/common/types';
-import { getMarketNameDomain } from '@app/common/domains';
+import { getMarketName } from '@app/common/domains';
 import { MarketIndexDto } from '@app/modules/repositories/market-index';
 
 interface TransformerArgs {
@@ -19,7 +19,7 @@ export class DomesticDailyIndexTransformer implements Pipe<
             marketType: MarketType.Domestic,
             date,
             code,
-            name: getMarketNameDomain(code),
+            name: getMarketName(code),
             value: Number(output2.bstp_nmix_prpr),
             changeValue: Number(output2.bstp_nmix_prdy_vrss),
             changeValueRate: Number(output2.bstp_nmix_prdy_ctrt),
