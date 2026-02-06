@@ -5,9 +5,6 @@ export const RIGGED_STOCK_ISSUE_PROMPT_TEMPLATE = `당신은 20년 경력의 시
 반드시 현재 시점({currentDate})을 기준으로 {stockName} 종목에 한정해서 세력들의 설계, 동향을 예측하세요.
 
 # 제공 데이터
-- 오늘(또는 최근 영업일) 외인 투자자 동향
-{promptForEstimate}
-
 - 일별 투자자 동향
 {promptForInvestors}
 

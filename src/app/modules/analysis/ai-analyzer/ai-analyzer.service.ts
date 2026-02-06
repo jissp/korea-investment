@@ -1,5 +1,6 @@
 import { FlowProducer } from 'bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { normalizeError } from '@common/domains';
 import { getDefaultJobOptions } from '@modules/queue';
 import { ReportType } from '@app/modules/repositories/ai-analysis-report';
 import { ExhaustionTraceAnalyzerFactory } from '@app/modules/analysis/ai-analyzer/analyzers/exhaustion-trace-analyzer/exhaustion-trace-analyzer.factory';
@@ -51,7 +52,7 @@ export class AiAnalyzerService {
                 },
             );
         } catch (error) {
-            this.logger.error(error);
+            this.logger.error(normalizeError(error));
             throw error;
         }
     }

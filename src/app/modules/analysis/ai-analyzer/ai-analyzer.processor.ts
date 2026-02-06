@@ -1,7 +1,9 @@
 import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
+import { normalizeError } from '@common/domains';
 import { OnQueueProcessor } from '@modules/queue';
 import { GeminiCliService } from '@modules/gemini-cli';
+import { SlackService } from '@modules/slack';
 import { AiAnalysisReportService } from '@app/modules/repositories/ai-analysis-report';
 import {
     AiAnalyzerFlowType,
@@ -9,7 +11,6 @@ import {
     PromptToGeminiCliBody,
     RequestAnalysisBody,
 } from './ai-analyzer.types';
-import { SlackService } from '@modules/slack';
 
 @Injectable()
 export class AiAnalyzerProcessor {
@@ -28,7 +29,7 @@ export class AiAnalyzerProcessor {
             const childrenValues = await job.getChildrenValues<string>();
             const results = Object.values(childrenValues);
 
-            await this.aiAnalysisReportService.deleteReport(
+            await this.aiAnalysisReportService.clearReport(
                 reportType,
                 reportTarget,
             );
@@ -39,7 +40,7 @@ export class AiAnalyzerProcessor {
                 content: results[0],
             });
         } catch (error) {
-            this.logger.error(error);
+            this.logger.error(normalizeError(error));
             throw error;
         }
     }
@@ -51,22 +52,20 @@ export class AiAnalyzerProcessor {
         try {
             const { prompt, model } = job.data;
 
-            const result = await this.geminiCliService.requestSyncPrompt(
-                prompt,
-                {
-                    model,
-                },
-            );
-
             await this.slackService.send(prompt);
-            await this.slackService.send(result);
 
-            this.logger.debug('processed');
+            const result = await this.geminiCliService.requestPrompt(prompt, {
+                model,
+            });
+
+            await this.slackService.send(result);
 
             return result;
         } catch (error) {
             this.logger.error(error);
             throw error;
+        } finally {
+            this.logger.debug('processed');
         }
     }
 }

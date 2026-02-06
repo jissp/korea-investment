@@ -7,14 +7,17 @@ import { AiAnalyzerProvider } from '@app/modules/analysis/ai-analyzer/ai-analyze
 export class AiAnalyzerAdapterFactory {
     constructor(
         @Inject(AiAnalyzerProvider.AdapterMap)
-        private readonly adapterMap: Map<ReportType, BaseAnalysisAdapter<any>>,
+        private readonly adapterMap: Map<
+            ReportType,
+            BaseAnalysisAdapter<unknown>
+        >,
     ) {}
 
     /**
      * Report Type에 맞는 Adapter를 반환합니다.
      * @param reportType
      */
-    create(reportType: ReportType): BaseAnalysisAdapter<any> {
+    create(reportType: ReportType): BaseAnalysisAdapter<unknown> {
         const adapter = this.adapterMap.get(reportType);
         if (!adapter) {
             throw new BadRequestException(

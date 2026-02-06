@@ -65,7 +65,7 @@ const AnalyzerModules = [
                 stockAnalysisAdapter: StockAnalyzerAdapter,
                 marketAnalysisAdapter: MarketAnalyzerAdapter,
             ) => {
-                const map = new Map<ReportType, BaseAnalysisAdapter<any>>();
+                const map = new Map<ReportType, BaseAnalysisAdapter<unknown>>();
 
                 map.set(ReportType.Stock, stockAnalysisAdapter);
                 map.set(ReportType.Market, marketAnalysisAdapter);

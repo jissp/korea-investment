@@ -2,20 +2,15 @@ import { chunk } from 'lodash';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { uniqueValues } from '@common/utils';
-import { getStockName } from '@common/domains';
+import { getMarketDivCodeByIsNextTrade, getStockName } from '@common/domains';
 import { GeminiCliModel } from '@modules/gemini-cli';
 import {
     NaverApiClientFactory,
     NaverApiNewsItem,
     NaverAppName,
 } from '@modules/naver/naver-api';
-import {
-    DomesticStockInvestorTrendEstimateOutput2,
-    DomesticStockQuotationsInquireInvestorOutput,
-    MarketDivCode,
-} from '@modules/korea-investment/common';
+import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
-import { YN } from '@app/common/types';
 import { Stock, StockService } from '@app/modules/repositories/stock';
 import { NewsService, StockNews } from '@app/modules/repositories/news';
 import {
@@ -35,7 +30,6 @@ const DEFAULT_CHUNK_SIZE = 5;
 export interface StockAnalysisData {
     stock: Stock;
     stockInvestors: DomesticStockQuotationsInquireInvestorOutput[];
-    stockInvestorByEstimates: DomesticStockInvestorTrendEstimateOutput2[];
     keywords: string[];
     naverNewsItems: NaverApiNewsItem[];
     stockNews: StockNews[];
@@ -65,23 +59,18 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
             throw new NotFoundException(`Stock not found: ${stockCode}`);
         }
 
-        const marketDivCode =
-            stock.isNextTrade === YN.Y ? MarketDivCode.통합 : MarketDivCode.KRX;
-
-        const [stockInvestors, stockInvestorByEstimates, stockNews] =
-            await Promise.all([
-                this.koreaInvestmentQuotationClient.inquireInvestor({
-                    FID_INPUT_ISCD: stockCode,
-                    FID_COND_MRKT_DIV_CODE: marketDivCode,
-                }),
-                this.koreaInvestmentQuotationClient.inquireInvestorByEstimate({
-                    MKSC_SHRN_ISCD: stockCode,
-                }),
-                this.newsService.getStockNewsList({
-                    stockCode,
-                    limit: 30,
-                }),
-            ]);
+        const [stockInvestors, stockNews] = await Promise.all([
+            this.koreaInvestmentQuotationClient.inquireInvestor({
+                FID_INPUT_ISCD: stockCode,
+                FID_COND_MRKT_DIV_CODE: getMarketDivCodeByIsNextTrade(
+                    stock.isNextTrade,
+                ),
+            }),
+            this.newsService.getStockNewsList({
+                stockCode,
+                limit: 30,
+            }),
+        ]);
 
         const keywords = this.getKeywords(stockCode);
         const naverNewsItems = await this.getNaverNewsItems(keywords);
@@ -89,7 +78,6 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
         return {
             stock,
             stockInvestors,
-            stockInvestorByEstimates,
             keywords,
             naverNewsItems,
             stockNews,
@@ -131,14 +119,12 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
                 },
                 {
                     queueName: AiAnalyzerQueueType.PromptToGeminiCli,
-                    name: '종목의 세력 설계 분석',
+                    name: '종목의 수급 점수 분석',
                     data: {
                         prompt: this.riggedStockIssuePromptTransformer.transform(
                             {
                                 stockName: data.stock.name,
                                 stockInvestors: data.stockInvestors,
-                                stockInvestorByEstimates:
-                                    data.stockInvestorByEstimates,
                             },
                         ),
                         model: GeminiCliModel.Gemini3Flash,
@@ -170,26 +156,27 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
     private async getNaverNewsItems(
         keywords: string[],
     ): Promise<NaverApiNewsItem[]> {
+        const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
+
         const maxPage = keywords.length < 2 ? 1 : 2;
         const arr = Array.from({ length: maxPage }, (_, i) => i + 1);
 
-        const client = this.naverApiClientFactory.create(NaverAppName.SEARCH);
-
-        const keywordChunk = chunk(keywords, DEFAULT_CHUNK_SIZE);
-
-        const responses = await Promise.all(
-            keywordChunk.flatMap((keywords) =>
+        const newsItems: NaverApiNewsItem[] = [];
+        for (const keywordChunk of chunk(keywords, DEFAULT_CHUNK_SIZE)) {
+            const responses = await Promise.all(
                 arr.map((page) =>
                     client.getNews({
-                        query: keywords.join(' | '),
+                        query: keywordChunk.join(' | '),
                         start: page,
                         display: 100,
                         sort: 'date',
                     }),
                 ),
-            ),
-        );
+            );
 
-        return responses.flatMap((response) => response.items);
+            newsItems.push(...responses.flatMap((response) => response.items));
+        }
+
+        return newsItems;
     }
 }
