@@ -34,9 +34,10 @@ export class MarketIndexService {
 
     /**
      * 지정된 기간 동안의 국내 주가 정보를 조회합니다.
-     * @param days 조회할 기간 (일 단위, 기본값: 7일)
+     * @param marketType
+     * @param days
      */
-    public async getIndicesByDays(days: number = 7) {
+    public async getIndicesByDays(marketType: MarketType, days: number = 7) {
         try {
             const targetDate = new Date();
             targetDate.setDate(targetDate.getDate() - days);
@@ -46,7 +47,7 @@ export class MarketIndexService {
             });
 
             return this.marketIndexRepository.findBy({
-                marketType: MarketType.Domestic,
+                marketType,
                 date: MoreThanOrEqual(startDate),
             });
         } catch (error) {
@@ -128,7 +129,7 @@ export class MarketIndexService {
             .into(MarketIndex)
             .values(marketIndexDto)
             .orUpdate(
-                ['value', 'change_value', 'change_value_rate'],
+                ['name', 'value', 'change_value', 'change_value_rate'],
                 ['code', 'date'],
             )
             .updateEntity(false)
