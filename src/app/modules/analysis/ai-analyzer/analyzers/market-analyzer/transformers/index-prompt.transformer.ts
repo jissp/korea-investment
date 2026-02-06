@@ -2,22 +2,16 @@ import { groupBy, keyBy } from 'lodash';
 import { Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { DOMESTIC_INDEX_CODES, OVERSEAS_INDEX_CODES } from '@app/common/types';
+import { formatTemplate } from '@app/common/domains';
 import { MarketIndex } from '@app/modules/repositories/market-index';
 
-type PromptArgs = {
+type TransformerArgs = {
     marketIndices: MarketIndex[];
 };
 
-const PROMPT = (marketIndicesPrompt: string) => {
-    const currentDate = new Date();
+const PROMPT_TEMPLATE = `당신은 거시경제 지표와 미세한 뉴스 텍스트 사이의 상관관계를 분석하여 알파(Alpha) 수익을 찾아내는 전문 퀀트 분석가이자 시장 전략가입니다.
 
-    return `
-당신은 거시경제 지표와 미세한 뉴스 텍스트 사이의 상관관계를 분석하여 알파(Alpha) 수익을 찾아내는 전문 퀀트 분석가이자 시장 전략가입니다.
-
-제공한 시장 지수를 분석하고, 현재 시점(${currentDate.toISOString()})을 기준으로 국내외 금융 시장의 최신 핵심 동인(Driver)을 분석하십시오.
-
-# 제공 데이터
-${marketIndicesPrompt}
+아래 지침 사항을 반드시 순서대로 처리하면서 주요 지수들의 정보를 확인하세요.
 
 # 분석 지침
 
@@ -31,8 +25,9 @@ ${marketIndicesPrompt}
 2. 데이터 신뢰도 검증: 반드시 실제 존재하는 최신 데이터인지 재확인하고, 출처가 불분명한 루머는 제외하십시오.
 
 3. 확인한 데이터들을 그대로 응답하세요.
-`;
-};
+
+# 제공 데이터
+{marketIndicesPrompt}`;
 
 const indexMap = keyBy(
     [...DOMESTIC_INDEX_CODES, ...OVERSEAS_INDEX_CODES],
@@ -40,15 +35,19 @@ const indexMap = keyBy(
 );
 
 @Injectable()
-export class IndexPromptTransformer implements Pipe<PromptArgs, string> {
+export class IndexPromptTransformer implements Pipe<TransformerArgs, string> {
     /**
      * @param marketIndices
      */
-    transform({ marketIndices }: PromptArgs): string {
+    transform({ marketIndices }: TransformerArgs): string {
+        const currentDate = new Date();
         const marketIndicesPrompt =
             this.transformPromptByMarketIndices(marketIndices);
 
-        return PROMPT(marketIndicesPrompt);
+        return formatTemplate(PROMPT_TEMPLATE, {
+            currentDate: currentDate.toISOString(),
+            marketIndicesPrompt,
+        });
     }
 
     transformPromptByMarketIndices(marketIndices: MarketIndex[]): string {

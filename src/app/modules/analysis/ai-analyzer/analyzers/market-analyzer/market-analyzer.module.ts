@@ -5,10 +5,14 @@ import { MarketIndexModule } from '@app/modules/repositories/market-index';
 import { StockModule } from '@app/modules/repositories/stock';
 import { NewsModule } from '@app/modules/repositories/news';
 import { NewsPromptTransformer } from '@app/modules/analysis/ai-analyzer/common';
+import {
+    GlobalIndexTransformer,
+    GlobalMacroTransformer,
+    IndexPromptTransformer,
+} from './transformers';
 import { MarketAnalyzerFlowType } from './market-analyzer.types';
 import { MarketAnalyzerAdapter } from './market-analyzer.adapter';
 import { MarketAnalyzerProcessor } from './market-analyzer.processor';
-import { IndexPromptTransformer } from './index-prompt.transformer';
 
 const flowTypes = [MarketAnalyzerFlowType.Request];
 const flowProviders = QueueModule.getFlowProviders(flowTypes);
@@ -24,6 +28,8 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         NewsModule,
     ],
     providers: [
+        GlobalMacroTransformer,
+        GlobalIndexTransformer,
         NewsPromptTransformer,
         IndexPromptTransformer,
         MarketAnalyzerProcessor,

@@ -45,7 +45,7 @@ export class AiAnalyzerProcessor {
     }
 
     @OnQueueProcessor(AiAnalyzerQueueType.PromptToGeminiCli, {
-        concurrency: 3,
+        concurrency: 2,
     })
     async processPromptToGeminiCli(job: Job<PromptToGeminiCliBody>) {
         try {
@@ -59,12 +59,11 @@ export class AiAnalyzerProcessor {
             );
 
             await this.slackService.send(prompt);
-            await this.slackService.send(result.response);
+            await this.slackService.send(result);
 
-            this.logger.debug(result);
             this.logger.debug('processed');
 
-            return result.response;
+            return result;
         } catch (error) {
             this.logger.error(error);
             throw error;

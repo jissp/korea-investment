@@ -6,7 +6,7 @@ import {
 } from '@modules/korea-investment/common';
 import { TransformByInvestorHelper } from '@app/modules/analysis/ai-analyzer/common';
 
-type PromptArgs = {
+type TransformerArgs = {
     stockName: string;
     stockInvestors: DomesticStockQuotationsInquireInvestorOutput[];
     stockInvestorByEstimates: DomesticStockInvestorTrendEstimateOutput2[];
@@ -40,7 +40,10 @@ ${todayInvestorByEstimatePrompt}
 };
 
 @Injectable()
-export class InvestorPromptTransformer implements Pipe<PromptArgs, string> {
+export class InvestorPromptTransformer implements Pipe<
+    TransformerArgs,
+    string
+> {
     constructor(
         private readonly transformByInvestorHelper: TransformByInvestorHelper,
     ) {}
@@ -52,7 +55,7 @@ export class InvestorPromptTransformer implements Pipe<PromptArgs, string> {
         stockName,
         stockInvestors,
         stockInvestorByEstimates,
-    }: PromptArgs): string {
+    }: TransformerArgs): string {
         const stockInvestorPrompt =
             this.transformByInvestorHelper.transformByInvestor(stockInvestors);
         const todayInvestorByEstimatePrompt = this.transformByEstimate(

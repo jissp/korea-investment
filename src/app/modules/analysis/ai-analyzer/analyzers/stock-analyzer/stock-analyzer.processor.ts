@@ -3,83 +3,25 @@ import { Logger } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { GeminiCliModel, GeminiCliService } from '@modules/gemini-cli';
 import { DomesticStockInvestorTrendEstimateOutput2 } from '@modules/korea-investment/common';
+import { formatTemplate } from '@app/common/domains';
 import { TransformByInvestorHelper } from '@app/modules/analysis/ai-analyzer/common';
 import { StockAnalyzerFlowType } from './stock-analyzer.types';
 import { StockAnalysisData } from './stock-analyzer.adapter';
 
-@Processor(StockAnalyzerFlowType.Request)
-export class StockAnalyzerProcessor extends WorkerHost {
-    private readonly logger = new Logger(StockAnalyzerProcessor.name);
-
-    constructor(
-        private readonly geminiCliService: GeminiCliService,
-        private readonly transformByInvestorHelper: TransformByInvestorHelper,
-    ) {
-        super();
-    }
-
-    async process(job: Job<StockAnalysisData>) {
-        try {
-            this.logger.log('processing');
-            const { stockInvestors, stockInvestorByEstimates } = job.data;
-            const childrenValues = await job.getChildrenValues();
-            const results = Object.values(childrenValues);
-
-            const mergedResultPrompts = results.join('\n\n');
-
-            const promptForInvestors =
-                this.transformByInvestorHelper.transformByInvestor(
-                    stockInvestors,
-                );
-            const promptForEstimate = this.transformByEstimate(
-                stockInvestorByEstimates,
-            );
-
-            const requestPrompt = this.getPrompt({
-                promptForInvestors,
-                promptForEstimate,
-                mergedResultPrompts,
-            });
-
-            const { response } = await this.geminiCliService.requestSyncPrompt(
-                requestPrompt,
-                {
-                    model: GeminiCliModel.Gemini3Pro,
-                },
-            );
-
-            this.logger.log('processed');
-            return response;
-        } catch (error) {
-            this.logger.error(error);
-            throw error;
-        }
-    }
-
-    public getPrompt({
-        promptForInvestors,
-        promptForEstimate,
-        mergedResultPrompts,
-    }: {
-        promptForInvestors: string;
-        promptForEstimate: string;
-        mergedResultPrompts: string;
-    }) {
-        return `
-당신은 제공된 데이터를 바탕으로 시장의 이면을 읽어내는 전문 주식 분석가이자 퀀트 투자자입니다.
+const PROMPT_TEMPLATE = `당신은 제공된 데이터를 바탕으로 시장의 이면을 읽어내는 전문 주식 분석가이자 퀀트 투자자입니다.
 
 # 분석 지침
 
 1. 제공 데이터
 - 오늘(또는 최근 영업일) 외인 투자자 동향
-${promptForEstimate}
+{promptForEstimate}
 
 - 일별 투자자 동향
-${promptForInvestors}
+{promptForInvestors}
 
 - 관련 리포트
 \`\`\`
-${mergedResultPrompts}
+{mergedResultPrompts}
 \`\`\`
 
 2. 투자자 동향과 관련 이슈들의 상관관계를 연결하세요.
@@ -95,7 +37,7 @@ ${mergedResultPrompts}
 - 영업일 장 오픈 시간일 때: 현재 상황, 오후장 전망을 분석
 - 영업일 장 마감 시간 이후일 때: 다음장 오픈 시간을 기준으로 분석(다음날이 영업일인 경우 다음날을, 다음날이 공휴일/연휴일인 경우 공휴일/연휴일이 끝난 이후 영업일 기준 시간으로 분석)
 
-6. 응답은 [응답 형식](#응답_형식)에 따라 반드시 코드 블록(\`\`\`)을 제외하고, 일반인이 알아들을 수 있는 용어로 핵심만 간결하게 개조식으로 응답하세요. 
+6. 응답은 [응답 형식](#응답_형식)에 따라 반드시 코드 블록(\`\`\`)을 제외하고, 일반인이 알아들을 수 있는 용어로 핵심만 간결하게 개조식으로 응답하세요.
 
 # 응답 형식
 
@@ -129,6 +71,63 @@ ${mergedResultPrompts}
 [시장/종목의 이슈를 개조식으로 나열하고, 어떠한 이슈인지 간략한 설명과 어떠한 영향을 끼치는지를 설명]
 \`\`\`
 `;
+
+@Processor(StockAnalyzerFlowType.Request)
+export class StockAnalyzerProcessor extends WorkerHost {
+    private readonly logger = new Logger(StockAnalyzerProcessor.name);
+
+    constructor(
+        private readonly geminiCliService: GeminiCliService,
+        private readonly transformByInvestorHelper: TransformByInvestorHelper,
+    ) {
+        super();
+    }
+
+    async process(job: Job<StockAnalysisData>) {
+        try {
+            this.logger.log('processing');
+            const { stockInvestors, stockInvestorByEstimates } = job.data;
+            const results = await this.getChildrenValues(job);
+
+            const mergedResultPrompts = results.join('\n\n');
+
+            const promptForInvestors =
+                this.transformByInvestorHelper.transformByInvestor(
+                    stockInvestors,
+                );
+            const promptForEstimate = this.transformByEstimate(
+                stockInvestorByEstimates,
+            );
+
+            const requestPrompt = formatTemplate(PROMPT_TEMPLATE, {
+                promptForInvestors,
+                promptForEstimate,
+                mergedResultPrompts,
+            });
+
+            const result = await this.geminiCliService.requestSyncPrompt(
+                requestPrompt,
+                {
+                    model: GeminiCliModel.Gemini3Pro,
+                },
+            );
+
+            this.logger.log('processed');
+            return result;
+        } catch (error) {
+            this.logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
+     * @param job
+     * @private
+     */
+    private async getChildrenValues(job: Job) {
+        const childrenValues = await job.getChildrenValues<string>();
+
+        return Object.values(childrenValues);
     }
 
     /**

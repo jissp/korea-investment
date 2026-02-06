@@ -12,18 +12,27 @@ export class ExhaustionTraceAnalyzerProcessor extends WorkerHost {
     }
 
     async process(job: Job) {
+        this.logger.debug('processing');
+
         try {
-            this.logger.debug('processing');
-            const childrenValues = await job.getChildrenValues<string>();
-            const results = Object.values(childrenValues);
+            const results = await this.getChildrenValues(job);
 
-            const mergedResultPrompts = results.join('\n\n');
-
-            this.logger.debug('processed');
-            return mergedResultPrompts;
+            return results.join('\n\n');
         } catch (error) {
             this.logger.error(error);
             throw error;
+        } finally {
+            this.logger.debug('processed');
         }
+    }
+
+    /**
+     * @param job
+     * @private
+     */
+    private async getChildrenValues(job: Job) {
+        const childrenValues = await job.getChildrenValues<string>();
+
+        return Object.values(childrenValues);
     }
 }

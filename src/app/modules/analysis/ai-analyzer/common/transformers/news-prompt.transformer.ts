@@ -6,7 +6,7 @@ import { News } from '@app/modules/repositories/news';
 
 const MAX_NEWS_ITEMS = 100;
 
-type PromptArgs = {
+type TransformerArgs = {
     naverNewsItems?: NaverApiNewsItem[];
     news: News[];
 };
@@ -73,11 +73,11 @@ ${transformedNewsPrompt}
 };
 
 @Injectable()
-export class NewsPromptTransformer implements Pipe<PromptArgs, string> {
+export class NewsPromptTransformer implements Pipe<TransformerArgs, string> {
     /**
      * @param value
      */
-    transform({ naverNewsItems, news }: PromptArgs): string {
+    transform({ naverNewsItems, news }: TransformerArgs): string {
         const normalizedNewsItems = [
             ...news.map((news) => this.normalizeNewsByNews(news)),
             ...(naverNewsItems ?? []).map((news) =>
