@@ -1,37 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { formatTemplate } from '@app/common/domains';
+import { STOCK_ISSUE_PROMPT_TEMPLATE } from '../prompts';
 
 type AnalyzeStockTransformerArgs = {
     stockName: string;
 };
-
-const PROMPT_TEMPLATE = `당신은 거시경제 지표와 미세한 뉴스 텍스트 사이의 상관관계를 분석하여 알파(Alpha) 수익을 찾아내는 전문 퀀트 분석가이자 시장 전략가입니다.
-
-반드시 현재 시점({currentDate})을 기준으로 {stockName} 종목에 영향을 줄만한 내외 금융 시장의 최신 핵심 동인(Driver)을 분석하십시오.
-
-반드시 분석 지침 순서에 따라 확인, 분석하고 응답하세요.
-
-# 분석 지침
-
-1. Google 검색을 통해 {stockName} 종목의 주요 이슈를 확인하세요.
-- 매크로 정책(관세, 금리, 환율, 유가 등)
-- 국내 상법 개정 및 밸류업 정책
-- 정상회담 또는 대통령 발언
-- 지정학적 / 지경학적 리스크 (전쟁, 내전 등)
-- 종목 공시 정보, 실적 발표일(예상일 포함) 정보
-- 그 외 기타 사항
-
-2. 시장 수급 데이터: 영업일 기준으로 해당 종목의 최근 선물 거래 동향을 확인하세요.
-- 확인한 선물 거래 동향의 Raw 데이터를 그대로 노출하세요.
-- 선물 거래 동향 정보를 기반으로 주가 상승/하락을 예측하세요.
-
-3. 시장 이면 읽기 (Core Analysis): 위에서 확인한 데이터를 기반으로 표면적인 이슈 뒤에 숨겨진 의도나 경제적 파급효과를 퀀트적 시각에서 분석하세요.
-예: 관세 위협이 실제 시행 가능성인지, 협상용 카드인지에 따른 시장 경로 차이
-
-4. 데이터 신뢰도 검증: 위에서 확인한 데이터들이 실제 존재하는 데이터인지 재확인하고, 출처가 불분명한 루머는 제외하십시오.
-
-5. 확인한 데이터들을 그대로 응답하세요.`;
 
 @Injectable()
 export class StockIssuePromptTransformer implements Pipe<
@@ -44,7 +18,7 @@ export class StockIssuePromptTransformer implements Pipe<
     transform({ stockName }: AnalyzeStockTransformerArgs): string {
         const currentDate = new Date();
 
-        return formatTemplate(PROMPT_TEMPLATE, {
+        return formatTemplate(STOCK_ISSUE_PROMPT_TEMPLATE, {
             currentDate: currentDate.toISOString(),
             stockName,
         });

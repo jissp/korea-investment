@@ -1,3 +1,4 @@
+export * from './prompts';
 export * from './transformers';
 export * from './market-analyzer.types';
 export * from './market-analyzer.adapter';
