@@ -17,6 +17,7 @@ import { GeminiCliModule } from '@modules/gemini-cli';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea-investment-rank-client';
 import { SlackModule } from '@modules/slack';
+import { McpServerModule } from '@modules/mcp-server';
 import { StockLoaderMiddleware } from '@app/common/middlewares';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
@@ -97,6 +98,12 @@ import { KoreaInvestmentBeGateway } from './gateways';
         KoreaInvestmentQuotationClientModule,
         KoreaInvestmentRankClientModule,
         SlackModule.forRoot(),
+        McpServerModule.forRoot({
+            name: 'Korea Investment MCP Server',
+            version: '1.0.0',
+            description:
+                'MCP server for Korea Investment analysis platform with Stock tools and Resources',
+        }),
         CrawlerModule,
         AiAnalyzerModule,
         AppServiceModule,

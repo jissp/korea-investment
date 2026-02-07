@@ -22,12 +22,22 @@ export class StockService {
     }
 
     /**
-     * 종목 목록을 조회합니다.
+     * 종목 코드로 종목을 조회합니다.
      * @param stockCode
      */
     public async getStock(stockCode: string) {
         return this.stockRepository.findOneBy({
             shortCode: stockCode,
+        });
+    }
+
+    /**
+     * 종목 이름으로 종목을 조회합니다.
+     * @param stockName
+     */
+    public async getStockByStockName(stockName: string) {
+        return this.stockRepository.findOneBy({
+            name: stockName,
         });
     }
 
