@@ -84,9 +84,6 @@ npm run lint
 
 # 린팅 자동 수정
 npm run lint:fix
-
-# 테스트 커버리지 리포트
-npm run test:cov
 ```
 
 ---
@@ -95,9 +92,9 @@ npm run test:cov
 
 ### 필수 환경 변수
 
-`.env` 파일에 다음 항목들이 필요합니다:
+`.env` 파일 위치: `src/app/env/.env`
 
-**Database (MySQL)**
+**Database (MySQL)** - 필수
 ```
 MYSQL_HOST=localhost
 MYSQL_PORT=3306
@@ -106,13 +103,13 @@ MYSQL_PASSWORD=
 MYSQL_DATABASE=korea_investment
 ```
 
-**Redis**
+**Redis** - 필수
 ```
 REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
 
-**외부 API**
+**외부 API** - 필수
 ```
 # 한국투자증권 API
 KI_API_KEY=your_key
@@ -130,10 +127,10 @@ NAVER_APP_SEARCH3_SECRET=
 GOOGLE_API_KEY=your_key
 ```
 
-**기본 설정**
+**기본 설정** - 선택
 ```
-PORT=3100
-NODE_ENV=development
+PORT=3100                  # 기본값: 3100
+NODE_ENV=development       # 기본값: development
 ```
 
 자세한 설정은 `src/app/configuration.ts`에서 확인하세요.
@@ -644,19 +641,28 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 ### 모듈 등록 순서
 
 1. **기반 모듈** (`src/modules/**`) → 다른 모듈에서 의존
+   - `QueueModule`, `RedisModule`, `KoreaInvestmentModule`, `GeminiCliModule`, `NaverModule`
 2. **저장소 모듈** (`RepositoryModule`) → 서비스에서 사용
 3. **비즈니스 모듈** (`src/app/modules/**`) → 최상위 비즈니스 로직
+   - `AnalysisModule`, `KoreaInvestmentCollectorModule`, `CrawlersModule`, 기타 비즈니스 로직
 4. **게이트웨이/컨트롤러** → 모든 서비스 준비 후 마지막
+
+> **QueueExplorer 자동 감지**: `@OnQueueProcessor()` 데코레이터가 붙은 메서드는 자동으로 감지되며, 명시적 등록이 불필요합니다. BullMQ 큐 매니저가 런타임에 감지합니다.
 
 ---
 
 ## 성능 최적화 포인트
 
 1. **BullMQ concurrency**: Gemini 호출은 3 (병렬 처리)
-2. **Redis TTL**: 캐시 만료 시간 조정
+2. **Redis TTL**: 캐시 만료 시간 조정 (기본값: 60초)
 3. **DB 인덱스**: StockCode (shortCode), StockNews (stock_id)
-4. **API Rate Limiting**: 한국투자증권 API 요청 조절
+   - 종목 검색, 뉴스 조회 성능 개선
+4. **API Rate Limiting**: 한국투자증권 API 요청 조절 (`KoreaInvestmentRequestApiModule` 통해 처리)
 5. **WebSocket 브로드캐스트**: 클라이언트 수 모니터링
+6. **DB 쿼리 최적화**:
+   - `find()` 대신 `find({ select: ['id', 'code', 'name'] })` 사용으로 필요 컬럼만 로드
+   - N+1 쿼리 방지: `leftJoinAndSelect` 또는 eager 로딩 활용
+   - 타임존 설정: UTC (Z) 사용으로 일관성 유지
 
 ---
 
@@ -676,8 +682,10 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 
 1. **Redis 연결 확인**: `redis-cli PING` → PONG 반환 확인
 2. **Queue Job 이름 체크**: `@OnQueueProcessor(JobName)` 데코레이터 정확한지 확인
+   - Job 이름이 FlowProducer에 등록된 이름과 정확히 일치해야 함
 3. **Job 데이터 직렬화 가능 확인**: 순환 참조, Symbol 없는지 확인
 4. **로그 확인**: `NestJS debug` 또는 `BullMQ explorer` 로그
+5. **비동기 처리 확인**: `@OnQueueProcessor()` 메서드 반드시 `async` 함수여야 함
 
 ### Gemini CLI 응답이 JSON이 아님
 
