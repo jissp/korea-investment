@@ -1,14 +1,14 @@
 import { Cluster } from 'ioredis';
 import { DefaultJobOptions, Queue } from 'bullmq';
-import { DiscoveryModule } from '@nestjs/core';
 import { DynamicModule, Provider } from '@nestjs/common';
 import {
     BullModule,
     getFlowProducerToken,
     getQueueToken,
 } from '@nestjs/bullmq';
+import { MetadataScannerModule } from '@modules/metadata-scanner';
 import { RedisConnection } from '@modules/redis';
-import { getDefaultJobOptions } from './domains/get-default-job-options';
+import { getDefaultJobOptions } from './domains';
 import { QueueProvider } from './queue.types';
 import { QueueExplorer } from './queue.explorer';
 
@@ -17,7 +17,7 @@ export class QueueModule {
         return {
             module: QueueModule,
             imports: [
-                DiscoveryModule,
+                MetadataScannerModule,
                 BullModule.forRootAsync({
                     inject: [RedisConnection],
                     useFactory: (redis: Cluster) => {
