@@ -48,7 +48,9 @@ export class AnalysisController {
             '리포트 대상(예: 유형이 종목일 경우 종목코드, 최신 뉴스 분석인 경우 reportType 그대로 입력)',
         example: '005930',
     })
-    @ApiNoContentResponse()
+    @ApiNoContentResponse({
+        description: '비동기 요청 수락됨. 결과는 이벤트 기반 처리됨.',
+    })
     @Post('reports/:reportType/:reportTarget')
     public async requestAIAnalysis(
         @Param('reportType') reportType: ReportType,

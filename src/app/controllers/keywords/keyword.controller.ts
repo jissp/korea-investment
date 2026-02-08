@@ -87,7 +87,7 @@ export class KeywordController {
     @ApiParam({
         name: 'groupId',
         type: Number,
-        description: '키워드 그룹 이름',
+        description: '키워드 그룹 ID',
     })
     @ApiOkResponse({
         type: GetKeywordsResponse,

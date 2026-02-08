@@ -10,7 +10,7 @@ export class AnalyzerService {
     ) {}
 
     /**
-     * 세력의 설거지 위험도 점수 계산 (일일 기반)
+     * 종목의 수급 점수 계산 (일일 기반)
      */
     async getExhaustionTraceScore(stock: Stock): Promise<CalculateResult> {
         const initResults =

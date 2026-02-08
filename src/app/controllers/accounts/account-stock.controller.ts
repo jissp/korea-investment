@@ -1,10 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import {
-    AccountService,
-    AccountStockService,
-} from '@app/modules/repositories/account';
-import {
     AccountStockGroupService,
     AccountStockGroupStockService,
 } from '@app/modules/repositories/account-stock-group';
@@ -13,8 +9,6 @@ import { GetAccountStockGroupsResponse, GetAccountStocksResponse } from './dto';
 @Controller('v1/accounts')
 export class AccountStockController {
     constructor(
-        private readonly accountService: AccountService,
-        private readonly accountStockService: AccountStockService,
         private readonly accountStockGroupService: AccountStockGroupService,
         private readonly accountStockGroupStockService: AccountStockGroupStockService,
     ) {}
@@ -52,7 +46,7 @@ export class AccountStockController {
     }
 
     @ApiOperation({
-        summary: '계좌 - 주식 정보 조회',
+        summary: '계좌 - 관심 그룹 종목 조회',
         description: '계좌의 관심 그룹에 등록된 종목 정보를 조회합니다.',
     })
     @ApiParam({

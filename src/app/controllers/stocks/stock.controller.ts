@@ -81,7 +81,7 @@ export class StockController {
     }
 
     @ApiOperation({
-        summary: '여러 종목 가격 조회',
+        summary: '종목의 일별/주별/월별 시세 조회',
     })
     @ApiParam({
         name: 'stockCode',
