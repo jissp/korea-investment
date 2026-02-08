@@ -1,5 +1,5 @@
-import { JsonRpcRequest } from '@modules/mcp-server/mcp-server.service';
+import { JsonRpcCallRequest } from './mcp-server.types';
 
 export interface BaseExecutor<T = unknown> {
-    execute: (request: JsonRpcRequest) => Promise<T>;
+    execute: (request: JsonRpcCallRequest) => Promise<T>;
 }

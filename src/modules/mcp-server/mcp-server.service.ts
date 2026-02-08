@@ -1,136 +1,179 @@
 import { Injectable } from '@nestjs/common';
+import {
+    JsonRpcCallRequest,
+    JsonRpcErrorResult,
+    JsonRpcRequest,
+    JsonRpcResult,
+} from './mcp-server.types';
 import { McpMetadataRegistryService } from './mcp-metadata-registry.service';
+import { Nullable } from '@common/types';
 
-export interface JsonRpcRequest<T = unknown> {
-    jsonrpc: '2.0';
-    id?: number | string;
-    method: string;
-    params: {
-        name: string;
-        arguments: T;
-    };
-}
+type HandlerResult<T = unknown> = Nullable<{
+    result: JsonRpcResult<T> | JsonRpcErrorResult;
+}>;
 
 @Injectable()
 export class McpServerService {
+    private readonly methodHandlers = new Map<
+        string,
+        (message: JsonRpcRequest) => Promise<HandlerResult>
+    >([
+        ['initialize', this.initialize.bind(this)],
+        ['tools/list', this.toolsList.bind(this)],
+        ['tools/call', this.toolCall.bind(this)],
+        ['resources/list', this.resourceList.bind(this)],
+        ['resources/read', this.resourceRead.bind(this)],
+    ]);
+
     constructor(private readonly registry: McpMetadataRegistryService) {}
 
-    public async handleMessage(message: JsonRpcRequest): Promise<any> {
+    public async handleMessage(
+        message: JsonRpcRequest,
+    ): Promise<HandlerResult> {
         const { method, id } = message;
 
         try {
-            const suppliedMethods = [
-                'initialize',
-                'tools/list',
-                'tools/call',
-                'resources/list',
-            ];
-
-            if (!suppliedMethods.includes(method)) {
+            const methodHandler = this.methodHandlers.get(method);
+            if (!methodHandler) {
                 return null;
             }
 
-            if (method === 'initialize') {
-                return this.initialize(message);
-            }
-
-            if (method === 'tools/list') {
-                return this.toolsList(message);
-            }
-
-            if (method === 'tools/call') {
-                return this.toolCall(message);
-            }
-
-            if (method === 'resources/list') {
-                return this.resourceList(message);
-            }
+            return methodHandler(message);
         } catch (error) {
             return {
-                jsonrpc: '2.0',
-                id,
-                error: {
-                    code: -32603,
-                    message: error.message,
+                result: {
+                    jsonrpc: '2.0',
+                    id,
+                    error: {
+                        code: -32603,
+                        message: error.message,
+                    },
                 },
             };
         }
     }
 
+    /**
+     * @param id
+     * @private
+     */
     private initialize({ id }: JsonRpcRequest) {
-        const sessionId = crypto.randomUUID();
-
-        return {
-            sessionId,
-            result: {
-                jsonrpc: '2.0',
-                id,
-                result: {
-                    protocolVersion: '2024-11-05',
-                    capabilities: {
-                        // tools: { listChanged: true },
-                        resources: { subscribe: true, listChanged: true },
-                    },
-                    serverInfo: {
-                        name: 'nestjs-mcp-server',
-                        version: '1.0.0',
-                    },
-                },
+        return this.wrapResult(id, {
+            protocolVersion: '2024-11-05',
+            capabilities: {
+                tools: { listChanged: true },
+                resources: { subscribe: true, listChanged: true },
             },
-        };
+            serverInfo: {
+                name: 'nestjs-mcp-server',
+                version: '1.0.0',
+            },
+        });
     }
 
-    private toolsList({ id }: JsonRpcRequest) {
-        return {
-            result: {
-                jsonrpc: '2.0',
-                id,
-                result: {
-                    tools: this.registry.getTools().map((t) => ({
-                        name: t.name,
-                        description: t.description,
-                        inputSchema: t.inputSchema || { type: 'object' },
-                    })),
-                },
-            },
-        };
+    /**
+     * @param id
+     * @private
+     */
+    private toolsList({ id }: JsonRpcRequest): HandlerResult {
+        return this.wrapResult(id, {
+            tools: this.registry.getTools().map((t) => ({
+                name: t.name,
+                description: t.description,
+                inputSchema: t.inputSchema || { type: 'object' },
+            })),
+        });
     }
 
-    private async toolCall(message: JsonRpcRequest) {
-        const { id, method, params } = message;
+    /**
+     * @param message
+     * @private
+     */
+    private async toolCall(
+        message: JsonRpcCallRequest,
+    ): Promise<HandlerResult> {
+        const { id, params } = message;
         const executor = this.registry.getToolExecutor(params.name);
         if (!executor) {
-            throw new Error(`Tool not found: ${method}`);
+            throw new Error(`Tool not found: ${params.name}`);
         }
 
         // Executor의 execute 메서드 호출
         const executionResult = await executor.execute(message);
 
-        return {
-            result: {
-                jsonrpc: '2.0',
-                id,
-                result: {
-                    content: [
-                        {
-                            type: 'text',
-                            text: JSON.stringify(executionResult),
-                        },
-                    ],
-                    isError: false,
+        return this.wrapResult(id, {
+            content: [
+                {
+                    type: 'text',
+                    text: JSON.stringify(executionResult),
                 },
-            },
-        };
+            ],
+            isError: false,
+        });
     }
 
-    private resourceList({ id }: JsonRpcRequest) {
+    /**
+     * @param id
+     * @private
+     */
+    private resourceList({ id }: JsonRpcRequest): HandlerResult {
+        return this.wrapResult(id, {
+            resources: this.registry.getResources(),
+        });
+    }
+
+    /**
+     * @param message
+     * @private
+     */
+    private async resourceRead(
+        message: JsonRpcRequest,
+    ): Promise<HandlerResult> {
+        const { id, params } = message;
+        const uri = params.uri;
+        const matchResult = this.registry.getResourceHandler(uri);
+
+        if (!matchResult) {
+            throw new Error(`Resource not found: ${uri}`);
+        }
+
+        const { handler, params: uriParams } = matchResult;
+
+        // 리소스 URI에서 추출한 파라미터를 Executor가 이해할 수 있는 arguments 형식으로 변환
+        const transformedRequest = {
+            ...message,
+            params: {
+                arguments: uriParams,
+            },
+        };
+
+        const executionResult = await (handler as any)(transformedRequest);
+
+        return this.wrapResult(id, {
+            contents: [
+                {
+                    uri,
+                    mimeType: 'application/json',
+                    text: JSON.stringify(executionResult),
+                },
+            ],
+        });
+    }
+
+    /**
+     * @param id
+     * @param result
+     * @private
+     */
+    private wrapResult<T = unknown>(
+        id: JsonRpcRequest['id'],
+        result: T,
+    ): HandlerResult<T> {
         return {
             result: {
                 jsonrpc: '2.0',
                 id,
-                result: {
-                    resources: this.registry.getResources(),
-                },
+                result,
             },
         };
     }

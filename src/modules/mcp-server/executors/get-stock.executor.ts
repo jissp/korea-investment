@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { StockService } from '@app/modules/repositories/stock';
 import { McpResource, McpTool } from '../decorators';
 import { BaseExecutor } from '../base.executor';
-import { JsonRpcRequest } from '../mcp-server.service';
+import { JsonRpcCallRequest } from '../mcp-server.types';
 
 export interface GetStockExecutorParams {
     stockCode: string;
@@ -14,7 +14,7 @@ export class GetStockExecutor implements BaseExecutor {
 
     @McpTool({
         name: 'get-stock',
-        description: 'Get stock information by stock code',
+        description: '종목 코드를 기반으로 종목의 정보를 조회합니다.',
         inputSchema: {
             type: 'object',
             properties: {
@@ -27,12 +27,12 @@ export class GetStockExecutor implements BaseExecutor {
         },
     })
     @McpResource({
-        uri: 'stock:///{stockCode}',
-        name: 'Stock Information',
-        description: 'Get stock information resource',
+        uri: 'stock:///code/{stockCode}',
+        name: 'get-stock',
+        description: '종목 코드를 기반으로 종목의 정보를 조회합니다.',
         mimeType: 'application/json',
     })
-    execute(request: JsonRpcRequest<GetStockExecutorParams>) {
+    execute(request: JsonRpcCallRequest<GetStockExecutorParams>) {
         const {
             arguments: { stockCode },
         } = request.params;

@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { DiscoveryService, Reflector } from '@nestjs/core';
+import { MetadataScannerService } from '@modules/metadata-scanner';
 import {
     MCP_RESOURCE_METADATA,
     MCP_TOOL_METADATA,
@@ -19,68 +19,38 @@ export class McpMetadataRegistryService implements OnModuleInit {
         { handler: Function; metadata: McpResourceOptions }
     >();
 
-    constructor(
-        private readonly discovery: DiscoveryService,
-        private readonly reflector: Reflector,
-    ) {}
+    constructor(private readonly metadataScanner: MetadataScannerService) {}
 
     onModuleInit() {
-        this.scanMetadata();
+        this.scanTools();
+        this.scanResources();
     }
 
-    private scanMetadata() {
-        const wrappers = this.discovery.getProviders();
-        wrappers.forEach((wrapper) => {
-            const { instance } = wrapper;
-            if (!instance || typeof instance !== 'object') return;
+    private scanTools() {
+        const metadataList = this.metadataScanner.scan({
+            metadataKey: MCP_TOOL_METADATA,
+        });
 
-            const prototype = Object.getPrototypeOf(instance);
-            const methodNames = Object.getOwnPropertyNames(prototype).filter(
-                (methodName) => {
-                    const descriptor = Object.getOwnPropertyDescriptor(
-                        prototype,
-                        methodName,
-                    );
-                    return (
-                        descriptor &&
-                        typeof descriptor.value === 'function' &&
-                        methodName !== 'constructor'
-                    );
-                },
-            );
-
-            methodNames.forEach((methodName) => {
-                this.processMethod(instance, methodName);
+        metadataList.forEach(({ metadata, instance }) => {
+            const toolMeta = metadata as McpToolOptions;
+            this.tools.set(toolMeta.name, {
+                executor: instance,
+                metadata,
             });
         });
     }
 
-    private processMethod(instance: any, methodName: string) {
-        const methodHandler = instance[methodName].bind(instance);
+    private scanResources() {
+        const metadataList = this.metadataScanner.scan({
+            metadataKey: MCP_RESOURCE_METADATA,
+        });
 
-        // Scan Tools
-        const toolMeta = this.reflector.get<McpToolOptions>(
-            MCP_TOOL_METADATA,
-            instance[methodName],
-        );
-        if (toolMeta) {
-            this.tools.set(toolMeta.name, {
-                executor: instance,
-                metadata: toolMeta,
+        metadataList.forEach(({ metadata, instance, methodName }) => {
+            this.resources.set(metadata.uri, {
+                handler: instance[methodName].bind(instance),
+                metadata,
             });
-        }
-
-        // Scan Resources
-        const resourceMeta = this.reflector.get<McpResourceOptions>(
-            MCP_RESOURCE_METADATA,
-            instance[methodName],
-        );
-        if (resourceMeta) {
-            this.resources.set(resourceMeta.uri, {
-                handler: methodHandler,
-                metadata: resourceMeta,
-            });
-        }
+        });
     }
 
     getTools() {
@@ -96,7 +66,38 @@ export class McpMetadataRegistryService implements OnModuleInit {
     }
 
     getResourceHandler(uri: string) {
-        // 실제 구현에서는 URI 템플릿 매칭 로직이 필요할 수 있습니다.
-        return this.resources.get(uri)?.handler;
+        for (const [template, resource] of this.resources.entries()) {
+            const match = this.matchUri(template, uri);
+            if (match) {
+                return {
+                    handler: resource.handler,
+                    params: match,
+                };
+            }
+        }
+        return null;
+    }
+
+    private matchUri(
+        template: string,
+        uri: string,
+    ): Record<string, string> | null {
+        const paramNames: string[] = [];
+        const regexSource = template.replace(/{([^}]+)}/g, (_, paramName) => {
+            paramNames.push(paramName);
+            return '([^/]+)';
+        });
+
+        const regex = new RegExp(`^${regexSource}$`);
+        const match = uri.match(regex);
+
+        if (!match) return null;
+
+        const params: Record<string, string> = {};
+        paramNames.forEach((name, index) => {
+            params[name] = decodeURIComponent(match[index + 1]);
+        });
+
+        return params;
     }
 }

@@ -1,5 +1,5 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { DiscoveryModule } from '@nestjs/core';
+import { MetadataScannerModule } from '@modules/metadata-scanner';
 import { StockModule } from '@app/modules/repositories/stock';
 import { GetStockByStockNameExecutor, GetStockExecutor } from './executors';
 import { McpServerConfig, McpServerProvider } from './mcp-server.types';
@@ -15,7 +15,7 @@ export class McpServerModule {
     static forRoot(config?: McpServerConfig): DynamicModule {
         return {
             module: McpServerModule,
-            imports: [DiscoveryModule, StockModule, ...repositories],
+            imports: [MetadataScannerModule, StockModule, ...repositories],
             controllers: [McpServerController],
             providers: [
                 {
