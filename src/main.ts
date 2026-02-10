@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { setSwaggerConfigs } from '@common/swagger';
@@ -23,6 +24,13 @@ async function bootstrap() {
     app.useGlobalPipes(
         new ValidationPipe({
             transform: true,
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            forbidUnknownValues: true,
+            skipMissingProperties: false,
+            skipUndefinedProperties: false,
+            skipNullProperties: false,
+            errorHttpStatusCode: 400,
         }),
     );
 

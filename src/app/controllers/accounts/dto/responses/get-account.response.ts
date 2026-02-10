@@ -22,10 +22,9 @@ class GetAccountData {
     accountStocks: AccountStock[];
 }
 
-export class GetAccountsResponse {
+export class GetAccountResponse {
     @ApiProperty({
         type: GetAccountData,
-        isArray: true,
     })
-    data: GetAccountData[];
+    data: GetAccountData;
 }

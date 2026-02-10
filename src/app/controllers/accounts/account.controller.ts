@@ -1,48 +1,41 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { AuthGuard, CurrentAccount } from '@app/modules/auth';
 import {
-    AccountService,
+    Account,
     AccountStockService,
 } from '@app/modules/repositories/account';
-import { GetAccountsResponse } from './dto';
+import { GetAccountResponse } from './dto';
 
 @Controller('v1/accounts')
 export class AccountController {
-    constructor(
-        private readonly accountService: AccountService,
-        private readonly accountStockService: AccountStockService,
-    ) {}
+    constructor(private readonly accountStockService: AccountStockService) {}
 
     @ApiOperation({
         summary: '계좌 정보 조회',
         description: '계좌 정보를 조회합니다.',
     })
     @ApiOkResponse({
-        type: GetAccountsResponse,
+        type: GetAccountResponse,
     })
+    @UseGuards(AuthGuard)
     @Get()
-    public async getAccounts(): Promise<GetAccountsResponse> {
-        const accounts = await this.accountService.getAccounts();
+    public async getAccounts(
+        @CurrentAccount() account: Account,
+    ): Promise<GetAccountResponse> {
+        const { accountId } = account;
 
-        const results = await Promise.all(
-            accounts.map(async (account) => {
-                const { accountId } = account;
-
-                const accountStocks =
-                    await this.accountStockService.getAccountStocks(accountId);
-
-                return {
-                    accountNumber: accountId,
-                    accountInfo: account,
-                    accountStocks: accountStocks.filter(
-                        (stock) => Number(stock.quantity) > 0,
-                    ),
-                };
-            }),
-        );
+        const accountStocks =
+            await this.accountStockService.getAccountStocks(accountId);
 
         return {
-            data: results.flat(),
+            data: {
+                accountNumber: accountId,
+                accountInfo: account,
+                accountStocks: accountStocks.filter(
+                    (stock) => Number(stock.quantity) > 0,
+                ),
+            },
         };
     }
 }

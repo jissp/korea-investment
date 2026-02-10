@@ -1,6 +1,10 @@
 import { NotFoundException } from '@nestjs/common';
 
 export interface IConfiguration {
+    jwt: {
+        secret: string;
+        expiresIn: string;
+    };
     database: {
         host: string;
         database: string;
@@ -75,6 +79,10 @@ export interface IConfiguration {
 }
 
 export default (): IConfiguration => ({
+    jwt: {
+        secret: getEnv('JWT_SECRET'),
+        expiresIn: getEnv('JWT_EXPIRES_IN'),
+    },
     database: {
         host: getEnv('DATABASE_HOST'),
         database: getEnv('DATABASE_DATABASE'),

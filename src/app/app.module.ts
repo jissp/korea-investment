@@ -19,6 +19,7 @@ import { KoreaInvestmentRankClientModule } from '@modules/korea-investment/korea
 import { SlackModule } from '@modules/slack';
 import { McpServerModule } from '@modules/mcp-server';
 import { StockLoaderMiddleware } from '@app/common/middlewares';
+import { AuthModule } from '@app/modules/auth';
 import { KoreaInvestmentRequestApiModule } from '@app/modules/korea-investment-request-api';
 import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-collector';
 import { AnalyzerModule } from '@app/modules/analysis/analyzer';
@@ -92,6 +93,7 @@ import { KoreaInvestmentBeGateway } from './gateways';
         EventEmitterModule.forRoot({
             wildcard: true,
         }),
+        AuthModule.forRoot(),
         ScheduleModule.forRoot(),
         GeminiCliModule,
         KoreaInvestmentCollectorModule.forRoot(),
