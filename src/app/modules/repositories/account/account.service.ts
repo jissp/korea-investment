@@ -14,7 +14,16 @@ export class AccountService {
     /**
      * 특정 계좌 정보를 조회합니다.
      */
-    public async getAccount(accountId: string) {
+    public async getAccount(id: number) {
+        return this.accountRepository.findOneBy({
+            id,
+        });
+    }
+
+    /**
+     * 특정 계좌 정보를 조회합니다.
+     */
+    public async getAccountByAccountId(accountId: string) {
         return this.accountRepository.findOneBy({
             accountId,
         });
