@@ -20,6 +20,7 @@ export class MostViewedStockTransformer implements Pipe<
             price: Number(output.inter2_prpr),
             changePrice: Number(output.inter2_prdy_vrss),
             changePriceRate: Number(output.prdy_ctrt),
+            tradingVolume: Number(output.acml_vol),
         };
     }
 }
