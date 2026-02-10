@@ -5,6 +5,7 @@ import { NaverApiModule } from '@modules/naver/naver-api';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { StockModule } from '@app/modules/repositories/stock';
 import { NewsModule } from '@app/modules/repositories/news';
+import { AccountModule } from '@app/modules/repositories/account';
 import {
     NewsPromptTransformer,
     TransformByInvestorHelper,
@@ -30,6 +31,7 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         KoreaInvestmentQuotationClientModule,
         StockModule,
         NewsModule,
+        AccountModule,
     ],
     providers: [
         TransformByInvestorHelper,

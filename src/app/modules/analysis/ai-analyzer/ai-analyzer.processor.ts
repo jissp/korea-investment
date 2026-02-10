@@ -11,6 +11,7 @@ import {
     PromptToGeminiCliBody,
     RequestAnalysisBody,
 } from './ai-analyzer.types';
+import { AiAnalyzerService } from './ai-analyzer.service';
 
 @Injectable()
 export class AiAnalyzerProcessor {
@@ -19,6 +20,7 @@ export class AiAnalyzerProcessor {
     constructor(
         private readonly geminiCliService: GeminiCliService,
         private readonly slackService: SlackService,
+        private readonly aiAnalyzerService: AiAnalyzerService,
         private readonly aiAnalysisReportService: AiAnalysisReportService,
     ) {}
 
@@ -37,7 +39,7 @@ export class AiAnalyzerProcessor {
                 reportType,
                 reportTarget,
                 title,
-                content: results[0],
+                content: this.aiAnalyzerService.removeCodeBlockWrap(results[0]),
             });
         } catch (error) {
             this.logger.error(normalizeError(error));

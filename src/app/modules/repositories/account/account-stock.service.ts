@@ -24,6 +24,22 @@ export class AccountStockService {
     }
 
     /**
+     * 모든 보유 종목을 조회합니다.
+     */
+    public async getAllAccountStocks() {
+        return this.accountStockRepository.find();
+    }
+
+    /**
+     * 특정 종목의 보유 수량을 조회합니다.
+     */
+    public async getAccountStock(stockCode: string) {
+        return this.accountStockRepository.findOneBy({
+            stockCode,
+        });
+    }
+
+    /**
      * 계좌의 자산 정보를 업데이트합니다.
      */
     public async upsert(accountStockDto: AccountStockDto | AccountStockDto[]) {
