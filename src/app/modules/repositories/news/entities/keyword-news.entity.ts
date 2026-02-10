@@ -40,7 +40,7 @@ export class KeywordNews {
     /**
      * 뉴스 출처
      */
-    @Column({ type: 'enum', enum: NewsCategory })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '뉴스 출처',
     })
@@ -49,7 +49,7 @@ export class KeywordNews {
     /**
      * 뉴스 제목
      */
-    @Column({ type: 'varchar', length: 500 })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '뉴스 제목',
     })
@@ -76,9 +76,9 @@ export class KeywordNews {
     })
     link?: string | null;
 
-    @Column({ type: 'datetime' })
-    @ApiProperty({ type: Date, description: '뉴스기사 작성일' })
-    publishedAt!: Date;
+    @Column({ type: 'datetime', nullable: true })
+    @ApiPropertyOptional({ type: Date, description: '뉴스기사 작성일' })
+    publishedAt?: Date | null;
 
     @CreateDateColumn({
         type: 'datetime',

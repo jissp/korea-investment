@@ -48,7 +48,13 @@ export class AccountStockGroupStock {
     /**
      * 현재가
      */
-    @Column({ type: 'decimal' })
+    @Column({
+        type: 'decimal',
+        precision: 12,
+        scale: 4,
+        unsigned: true,
+        default: 0,
+    })
     @ApiProperty({
         description: '현재가',
     })

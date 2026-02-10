@@ -39,7 +39,13 @@ export class TradingVolumeRank {
     /**
      * 현재가
      */
-    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @Column({
+        type: 'decimal',
+        precision: 12,
+        scale: 4,
+        unsigned: true,
+        default: 0,
+    })
     @ApiProperty({
         description: '현재가',
     })
@@ -48,7 +54,7 @@ export class TradingVolumeRank {
     /**
      * 전일 대비
      */
-    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '전일 대비',
     })
@@ -57,7 +63,7 @@ export class TradingVolumeRank {
     /**
      * 등락률
      */
-    @Column({ type: 'decimal', precision: 8, scale: 4 })
+    @Column({ type: 'decimal', precision: 8, scale: 4, default: 0 })
     @ApiProperty({
         description: '등락률',
     })
@@ -66,7 +72,7 @@ export class TradingVolumeRank {
     /**
      * 거래량
      */
-    @Column({ type: 'bigint', unsigned: true })
+    @Column({ type: 'bigint', unsigned: true, default: 0 })
     @ApiProperty({
         description: '거래량',
     })

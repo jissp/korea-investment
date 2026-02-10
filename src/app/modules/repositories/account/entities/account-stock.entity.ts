@@ -39,7 +39,7 @@ export class AccountStock {
     /**
      * 종목명
      */
-    @Column({ type: 'varchar', length: 32 })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '종목명',
     })
@@ -48,7 +48,7 @@ export class AccountStock {
     /**
      * 현재가
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '현재가',
     })
@@ -57,7 +57,7 @@ export class AccountStock {
     /**
      * 보유 수
      */
-    @Column({ type: 'integer' })
+    @Column({ type: 'integer', unsigned: true, default: 0 })
     @ApiProperty({
         description: '보유 수량',
     })
@@ -66,7 +66,7 @@ export class AccountStock {
     /**
      * 매입금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '매입금액',
     })
@@ -76,7 +76,7 @@ export class AccountStock {
      * 매입평균가격
      * 매입금액 / 보유수량
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '매입평균가격',
     })
@@ -85,7 +85,7 @@ export class AccountStock {
     /**
      * 평가 금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '평가 금액',
     })

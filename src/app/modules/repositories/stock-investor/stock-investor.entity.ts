@@ -58,7 +58,7 @@ export class StockInvestor {
     /**
      * 종가
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', unsigned: true, default: 0, nullable: true })
     @ApiProperty({
         description: '종가',
     })
@@ -67,7 +67,7 @@ export class StockInvestor {
     /**
      * 고가
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', unsigned: true, default: 0, nullable: true })
     @ApiProperty({
         description: '고가',
     })
@@ -76,7 +76,7 @@ export class StockInvestor {
     /**
      * 저가
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', unsigned: true, default: 0 })
     @ApiProperty({
         description: '저가',
     })
@@ -85,110 +85,110 @@ export class StockInvestor {
     /**
      * 누적 거래량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', unsigned: true, default: 0 })
     @ApiProperty({
         description: '누적 거래량',
     })
-    tradeVolume: number;
+    tradeVolume!: number;
 
     /**
      * 개인 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '개인 순매수 수량',
     })
-    person: number;
+    person!: number;
 
     /**
      * 외국인 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '외국인 순매수 수량',
     })
-    foreigner: number;
+    foreigner!: number;
 
     /**
      * 기관계 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '기관계 순매수 수량',
     })
-    organization: number;
+    organization!: number;
 
     /**
      * 증권 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '증권 순매수 수량',
     })
-    financialInvestment: number;
+    financialInvestment!: number;
 
     /**
      * 투자신탁 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '투자신탁 순매수 수량',
     })
-    investmentTrust: number;
+    investmentTrust!: number;
 
     /**
      * 사모 펀드 순매수 거래량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '사모 펀드 순매수 거래량',
     })
-    privateEquity: number;
+    privateEquity!: number;
 
     /**
      * 은행 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '은행 순매수 수량',
     })
-    bank: number;
+    bank!: number;
 
     /**
      * 보험 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '보험 순매수 수량',
     })
-    insurance: number;
+    insurance!: number;
 
     /**
      * 종금 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '종금 순매수 수량',
     })
-    merchantBank: number;
+    merchantBank!: number;
 
     /**
      * 기금 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '기금 순매수 수량',
     })
-    fund: number;
+    fund!: number;
 
     /**
      * 기타 순매수 수량
      */
-    @Column({ type: 'integer', default: 0 })
+    @Column({ type: 'bigint', default: 0 })
     @ApiProperty({
         description: '기타 순매수 수량',
     })
-    etc: number;
+    etc!: number;
 
     @CreateDateColumn({
         type: 'datetime',

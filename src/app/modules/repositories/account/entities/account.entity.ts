@@ -21,7 +21,7 @@ export class Account {
     /**
      * 계좌 번호
      */
-    @Column({ type: 'varchar', length: 32 })
+    @Column({ type: 'varchar', length: 100 })
     @ApiProperty({
         description: '계좌 번호',
     })
@@ -30,7 +30,7 @@ export class Account {
     /**
      * 매입금액합계 유가매입금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '매입금액합계 유가매입금액',
     })
@@ -39,7 +39,7 @@ export class Account {
     /**
      * 평가손익금액합계 평가손익금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '평가손익금액합계 평가손익금액',
     })
@@ -48,7 +48,7 @@ export class Account {
     /**
      * 총자산금액 총 자산금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '총자산금액 총 자산금액',
     })
@@ -57,7 +57,7 @@ export class Account {
     /**
      * 총예수금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '총예수금액',
     })
@@ -66,7 +66,7 @@ export class Account {
     /**
      * 순자산총금액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '순자산총금액',
     })
@@ -75,7 +75,7 @@ export class Account {
     /**
      * 외화평가총액
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '외화평가총액',
     })
@@ -84,7 +84,7 @@ export class Account {
     /**
      * 해외주식평가금액1
      */
-    @Column({ type: 'decimal' })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '해외주식평가금액1',
     })

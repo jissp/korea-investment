@@ -40,7 +40,7 @@ export class StockNews {
     /**
      * 뉴스 출처
      */
-    @Column({ type: 'enum', enum: NewsCategory })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '뉴스 출처',
     })

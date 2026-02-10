@@ -31,7 +31,7 @@ export class News {
     /**
      * 뉴스 출처
      */
-    @Column({ type: 'enum', enum: NewsCategory })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     @ApiProperty({
         description: '뉴스 출처',
     })

@@ -49,7 +49,13 @@ export class MostViewedStock {
     /**
      * 현재가
      */
-    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @Column({
+        type: 'decimal',
+        precision: 12,
+        scale: 4,
+        unsigned: true,
+        default: 0,
+    })
     @ApiProperty({
         description: '현재가',
     })
@@ -58,7 +64,7 @@ export class MostViewedStock {
     /**
      * 전일 대비
      */
-    @Column({ type: 'decimal', precision: 12, scale: 4 })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '전일 대비',
     })
@@ -67,11 +73,20 @@ export class MostViewedStock {
     /**
      * 등락률
      */
-    @Column({ type: 'decimal', precision: 8, scale: 4 })
+    @Column({ type: 'decimal', precision: 8, scale: 4, default: 0 })
     @ApiProperty({
         description: '등락률',
     })
     changePriceRate!: number;
+
+    /**
+     * 거래량
+     */
+    @Column({ type: 'bigint', unsigned: true, default: 0 })
+    @ApiProperty({
+        description: '거래량',
+    })
+    tradingVolume!: number;
 
     @CreateDateColumn({
         type: 'datetime',

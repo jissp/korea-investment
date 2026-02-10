@@ -49,25 +49,25 @@ export class MarketIndex {
     /**
      * 지수명
      */
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '지수명',
     })
     name!: string;
 
     /**
-     * 현재가
+     * 현재 지수
      */
-    @Column({ type: 'decimal', precision: 20, scale: 2 })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
-        description: '현재가',
+        description: '현재 지수',
     })
     value!: number;
 
     /**
      * 전일 대비
      */
-    @Column({ type: 'decimal', precision: 20, scale: 2 })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '전일 대비',
     })
@@ -76,7 +76,7 @@ export class MarketIndex {
     /**
      * 등락률
      */
-    @Column({ type: 'decimal', precision: 10, scale: 4 })
+    @Column({ type: 'decimal', precision: 12, scale: 4, default: 0 })
     @ApiProperty({
         description: '등락률',
     })

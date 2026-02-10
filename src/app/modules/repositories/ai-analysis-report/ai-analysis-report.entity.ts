@@ -41,7 +41,7 @@ export class AiAnalysisReport {
     /**
      * 리포트 제
      */
-    @Column({ type: 'varchar', length: 255, unique: true })
+    @Column({ type: 'varchar', length: 255 })
     @ApiProperty({
         description: '리포트 제목',
     })
