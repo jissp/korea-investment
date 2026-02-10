@@ -165,22 +165,95 @@ src/
 | **Market** | `/v1/markets` | 시장 지수 및 정보 |
 | **Other** | - | LatestStockRank, AccountStock, AccountStockGroup 등 |
 
-### 3.3 주요 모듈 상세 (Key Modules)
+---
 
-#### **Analysis Module (AI 분석)**
-*   **AiAnalyzerService:** 분석 요청의 진입점. Adapter Pattern을 사용하여 분석 유형(종목/시장/고갈)에 따라 로직을 분기합니다.
-*   **BullMQ Flow:** `RequestAnalysis`(부모) -> `PromptToGeminiCli`(자식, 병렬 처리) 구조로, Gemini CLI를 병렬로 호출하여 분석 속도를 최적화합니다.
+### 3.3 주요 모듈 상세 (Modules)
 
-#### **Korea Investment Collector Module (실시간 수집)**
-*   **WebSocket:** 한국투자증권 WebSocket과 연결하여 실시간 체결가(H0UNCNT0) 데이터를 수신합니다.
-*   **Event-Driven:** 수신된 데이터는 Pipe를 통해 변환된 후 `EventEmitter`를 통해 Gateway로 전달되어 클라이언트에게 브로드캐스트됩니다.
+#### APP Modules (`src/app/modules`)
 
-#### **Crawlers Module (배치 작업)**
-*   `StockCrawler`: 주가 및 투자자 정보 (매시간)
-*   `StockRankCrawler`: 거래량/조회수 상위 종목
-*   `NewsCrawler`: 뉴스 데이터 수집 (Strategy Pattern 적용)
-*   `KoreaInvestmentCalendarCrawler`: 휴장일 정보
+*   **Analysis Module (AI 분석)**
+    *   **역할:** 종목, 시장, 세력 고갈 분석 수행 및 Gemini AI 기반 리포트 생성.
+    *   **구조:** `AiAnalyzerService`가 진입점이며, **Adapter Pattern**을 사용하여 분석 유형(Stock, Market, Exhaustion)에 따라 로직을 분기합니다.
+    *   **최적화:** **BullMQ Flow**를 활용하여 `RequestAnalysis`(부모) -> `PromptToGeminiCli`(자식) 구조로 작업을 분해하고, Gemini CLI를 병렬(Concurrency: 2)로 호출하여 분석 속도를 극대화했습니다.
 
-#### **Korea Investment Request API Module (Rate Limiting)**
-*   API 호출 제한을 관리하기 위해 Main Queue(초당 2건)와 Additional Queue(초당 10건)를 분리하여 운영합니다.
-* 
+*   **Korea Investment Collector Module (실시간 수집)**
+    *   **역할:** 한국투자증권 WebSocket과 연결하여 실시간 체결가(H0UNCNT0) 데이터를 수신하고 클라이언트에 전송합니다.
+    *   **구조:** **Event-Driven Architecture**를 적용하여, 수신된 패킷을 `Pipe`로 변환 후 `EventEmitter`를 통해 Gateway로 전달, 클라이언트에게 브로드캐스트합니다.
+    *   **관리:** `KoreaInvestmentCollectorSocket`이 구독 요청과 연결 상태를 관리하며, 구독 작업은 Queue를 통해 비동기로 처리됩니다.
+
+*   **Crawlers Module (배치 데이터 수집)**
+    *   **역할:** 주가, 뉴스, 순위, 지수 데이터 등을 정기적으로 수집합니다.
+    *   **구조:** **Strategy Pattern**을 적용하여 뉴스 크롤링 소스(종목별, 키워드별)에 따른 전략을 캡슐화했습니다.
+    *   **기능:** `StockCrawler`(매시간 주가/투자자), `StockRankCrawler`(거래량/조회수 상위), `NewsCrawler`(Naver/증권사 뉴스) 등이 스케줄링되어 실행됩니다.
+
+*   **Korea Investment Request API Module (Rate Limiting)**
+    *   **역할:** 한국투자증권 API의 호출 제한(Rate Limit)을 중앙에서 제어합니다.
+    *   **전략:** **Dual Queue System**을 도입하여 실시간성이 중요한 요청은 `Main Queue`(초당 2건), 대량 수집이 필요한 요청은 `Additional Queue`(초당 10건)로 분리하여 운영합니다.
+
+*   **Repositories Module (데이터 접근)**
+    *   **역할:** 13개 도메인(Stock, Account, Market 등)에 대한 DB 접근을 담당합니다.
+    *   **특징:** **TypeORM**을 기반으로 하며, `SnakeNamingStrategy`를 적용하여 DB의 snake_case 컬럼을 코드의 camelCase 속성과 자동으로 매핑합니다.
+
+죄송합니다. 앞선 답변에서 `src/modules` (인프라 및 외부 연동 계층)의 내부 구성 요소들이 상세히 언급되지 않아 부족함을 느끼셨던 것 같습니다.
+
+문서에 명시된 `src/modules` 하위의 **5개 메인 모듈**과 그 안에 포함된 **세부 컴포넌트(Client, Service, Factory, Pipe 등)**를 빠짐없이 상세하게 나열해 드립니다.
+
+`README.md`의 **3.4 Infrastructure & External Modules (`src/modules`)** 항목을 아래 내용으로 대체하시면 됩니다.
+
+---
+
+#### Common Modules (`src/modules`)
+
+외부 API 연동 및 시스템 전반에서 공통으로 사용되는 인프라 모듈입니다.
+
+*   **Korea Investment Module (`src/modules/korea-investment`)**
+    *   한국투자증권 Open API 연동을 위한 핵심 모듈로, 3개의 내부 컴포넌트로 세분화되어 있습니다.
+    *   **Quotation Client (`korea-investment-quotation-client`):**
+        *   REST API 전용 클라이언트입니다.
+        *   주식 현재가(`inquirePrice`), 일별 시세(`inquireDailyPrice`), 투자자 동향(`inquireInvestor`), 업종 지수(`inquireIndexPrice`) 등 30여 개의 시세 조회 메서드를 제공합니다.
+    *   **WebSocket Factory (`korea-investment-web-socket`):**
+        *   실시간 데이터를 처리하는 반응형 소켓 클라이언트입니다.
+        *   **Factory & Observer Pattern:** RxJS Subject를 사용하여 메시지 스트림을 생성하고 관리합니다.
+        *   **Lifecycle 관리:** 연결(`CONNECT`), 구독(`SUBSCRIBE`), 자동 핑퐁(`PINGPONG`) 로직을 내장하고 있습니다.
+        *   **Pipes (데이터 변환기):** 수신된 바이너리 데이터를 가공하는 전용 파이프를 포함합니다.
+            *   `KoreaInvestmentWebSocketPipe`: 기본 메시지 파싱.
+            *   `TradeStreamPipe`: 주식 체결가(H0UNCNT0) 처리.
+            *   `H0unasp0Pipe`: 실시간 호가 처리.
+            *   `H0unpgm0Pipe`: 프로그램 매매 정보 처리.
+    *   **Helper Service (`korea-investment-helper`):**
+        *   인증 토큰(Access Token, WebSocket Key)의 생명주기를 관리합니다.
+        *   **Auto-Refresh:** Redis를 활용하여 토큰을 캐싱하고, 만료 시간(TTL)을 계산하여 만료 60초 전 자동으로 갱신합니다.
+
+*   **Gemini CLI Module (`src/modules/gemini-cli`)**
+    *   Google Gemini AI 모델을 CLI 환경에서 제어하는 모듈입니다.
+    *   **Gemini Cli Service:**
+        *   Node.js의 `spawn`을 사용해 `gemini` 프로세스를 실행하고, 표준 입출력(stdin/stdout)을 통해 프롬프트를 전송 및 응답을 수집합니다.
+    *   **Process Manager Service:**
+        *   생성된 AI 프로세스의 생명주기를 추적합니다.
+        *   메모리 누수를 방지하기 위해 모듈 종료(`onModuleDestroy`) 시 활성화된 모든 프로세스를 강제로 정리(Kill)합니다.
+
+*   **Naver Module (`src/modules/naver`)**
+    *   네이버 뉴스 검색 API 연동을 담당합니다.
+    *   **Api Client Factory:**
+        *   API 호출 한도(Rate Limit) 제한을 극복하기 위해 **Factory Pattern**을 적용했습니다.
+        *   3개의 애플리케이션 키(`SEARCH1`, `SEARCH2`, `SEARCH3`)를 순환(Rotation)하며 클라이언트를 생성합니다.
+    *   **Api Client:**
+        *   실제 HTTP 요청을 수행하며, 정확도순(`sim`) 또는 날짜순(`date`) 정렬 옵션을 통해 뉴스 데이터를 수집합니다.
+
+*   **Queue Module (`src/modules/queue`)**
+    *   BullMQ를 기반으로 한 비동기 작업 처리 인프라입니다.
+    *   **Dynamic Module:**
+        *   `queue.module.ts`를 통해 애플리케이션 전역에서 큐 설정을 동적으로 주입받습니다.
+    *   **Queue Explorer:**
+        *   메타데이터 스캐너를 사용하여 `@OnQueueProcessor` 데코레이터가 붙은 메서드를 자동으로 탐색하고 Worker로 등록합니다.
+    *   **Decorators:**
+        *   `@OnQueueProcessor`: 특정 큐의 작업을 처리할 메서드를 지정하는 커스텀 데코레이터를 제공합니다.
+
+*   **Redis Module (`src/modules/redis`)**
+    *   인메모리 데이터 저장소(Redis) 연결 및 유틸리티를 제공합니다.
+    *   **Redis Service:**
+        *   기본적인 `get`, `set` 외에 `getOrDefaultValue`(조회 실패 시 기본값 반환) 메서드를 제공합니다.
+        *   **Distributed Lock:** 다중 서버 환경에서 동시성 제어를 위한 `lock`, `unLock` 기능을 포함합니다.
+    *   **Cacheable Decorator:**
+        *   **AOP(Aspect Oriented Programming)** 기반의 캐싱 데코레이터입니다.
+        *   메서드 위에 선언하여 실행 결과를 Redis에 자동으로 캐싱(TTL 설정 가능)하고, 키 생성 전략을 커스터마이징 할 수 있습니다.
