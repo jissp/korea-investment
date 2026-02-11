@@ -22,7 +22,7 @@ export class News {
     /**
      * 뉴스 ID
      */
-    @Column({ type: 'varchar', length: 255, unique: true })
+    @Column({ type: 'varchar', length: 500, unique: true })
     @ApiProperty({
         description: '뉴스 ID',
     })
@@ -59,7 +59,7 @@ export class News {
     /**
      * 뉴스 링크
      */
-    @Column({ type: 'varchar', length: 500, nullable: true })
+    @Column({ type: 'varchar', length: 1000, nullable: true })
     @ApiPropertyOptional({
         description: '뉴스 링크',
         type: String,

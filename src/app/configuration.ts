@@ -35,6 +35,11 @@ export interface IConfiguration {
             host: string;
         };
     };
+    rss: {
+        google: {
+            business: string;
+        };
+    };
     redis: {
         mode?: 'cluster' | 'single';
         host: string;
@@ -111,6 +116,11 @@ export default (): IConfiguration => ({
     stockPlus: {
         api: {
             host: getEnv('STOCK_PLUS_HOST'),
+        },
+    },
+    rss: {
+        google: {
+            business: getEnv('GOOGLE_RSS_BUSINESS'),
         },
     },
     redis: {

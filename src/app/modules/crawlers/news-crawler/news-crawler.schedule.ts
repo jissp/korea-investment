@@ -5,7 +5,10 @@ import { Cron } from '@nestjs/schedule';
 import { toDateYmdByDate } from '@common/utils';
 import { PreventConcurrentExecution } from '@common/decorators';
 import { getDefaultJobOptions } from '@modules/queue';
-import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
+import {
+    KoreaInvestmentRequestApiHelper,
+    KoreaInvestmentRequestApiType,
+} from '@app/modules/korea-investment-request-api/common';
 import {
     NewsCrawlerQueueType,
     NewsStrategy,
@@ -37,6 +40,9 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
         const queuesOptions = {
             [queueName]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+            [KoreaInvestmentRequestApiType.Additional]: {
                 defaultJobOptions: getDefaultJobOptions(),
             },
         };
@@ -75,6 +81,9 @@ export class NewsCrawlerSchedule implements OnModuleInit {
 
         const queuesOptions = {
             [queueName]: {
+                defaultJobOptions: getDefaultJobOptions(),
+            },
+            [KoreaInvestmentRequestApiType.Additional]: {
                 defaultJobOptions: getDefaultJobOptions(),
             },
         };

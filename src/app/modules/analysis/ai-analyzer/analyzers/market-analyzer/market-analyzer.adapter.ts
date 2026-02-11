@@ -155,14 +155,37 @@ export class MarketAnalyzerAdapter implements BaseAnalysisAdapter<MarketAnalysis
         };
     }
 
+    private async getNewsItems(limit: number = 100) {
+        const stockPlusNewsItems = await this.getNewsItemsByStockPlus(limit);
+        const googleBusinessNewsItems =
+            await this.getNewsItemsByGoogleBusiness(limit);
+
+        return [...stockPlusNewsItems, ...googleBusinessNewsItems].slice(
+            0,
+            limit,
+        );
+    }
+
     /**
      * StockPlus 최근 이슈 조회
      * @param limit
      * @private
      */
-    private async getNewsItems(limit: number = 100) {
+    private async getNewsItemsByStockPlus(limit: number = 100) {
         return this.newsService.getNewsListByCategory({
             category: NewsCategory.StockPlus,
+            limit,
+        });
+    }
+
+    /**
+     * Google Business 최근 뉴스 조회
+     * @param limit
+     * @private
+     */
+    private async getNewsItemsByGoogleBusiness(limit: number = 100) {
+        return this.newsService.getNewsListByCategory({
+            category: NewsCategory.GoogleBusiness,
             limit,
         });
     }

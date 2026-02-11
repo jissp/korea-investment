@@ -1,6 +1,7 @@
 import { sortBy, uniqBy } from 'lodash';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pipe } from '@common/types';
+import { removeTag } from '@common/utils';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
 import { News } from '@app/modules/repositories/news';
 import { formatTemplate } from '@app/common/domains';
@@ -71,10 +72,8 @@ export class NewsPromptTransformer implements Pipe<TransformerArgs, string> {
      */
     private normalizeNewsByNews(news: News): NormalizedNews {
         return {
-            title: this.removeTag(news.title),
-            description: news.description
-                ? this.removeTag(news.description)
-                : '',
+            title: removeTag(news.title),
+            description: news.description ? removeTag(news.description) : '',
             publishedAt: news.publishedAt.toISOString(),
         };
     }
@@ -86,8 +85,8 @@ export class NewsPromptTransformer implements Pipe<TransformerArgs, string> {
      */
     private normalizeNewsByNaverNews(news: NaverApiNewsItem): NormalizedNews {
         return {
-            title: this.removeTag(news.title),
-            description: this.removeTag(news.description),
+            title: removeTag(news.title),
+            description: removeTag(news.description),
             publishedAt: news.pubDate,
         };
     }
@@ -107,14 +106,5 @@ export class NewsPromptTransformer implements Pipe<TransformerArgs, string> {
         ).reverse();
 
         return uniqBy(sortedNewsItems, (newsItem) => newsItem.title);
-    }
-
-    /**
-     * B HTML 태그를 제거합니다.
-     * @param text
-     * @private
-     */
-    private removeTag(text: string) {
-        return text.replace('<b>', '').replace('</b>', '');
     }
 }

@@ -12,12 +12,14 @@ export enum NewsStrategy {
     Naver = 'Naver',
     KoreaInvestment = 'KoreaInvestment',
     StockPlus = 'StockPlus',
+    GoogleBusiness = 'GoogleBusiness',
 }
 
 export interface NewsStrategyPayloadMap {
     [NewsStrategy.Naver]: void;
     [NewsStrategy.KoreaInvestment]: DomesticStockQuotationsNewsTitleOutput[];
     [NewsStrategy.StockPlus]: void;
+    [NewsStrategy.GoogleBusiness]: void;
 }
 
 export type BaseStrategyPayload<T extends NewsStrategy> =

@@ -4,6 +4,7 @@ export enum NewsCategory {
     KoreaInvestment = 'KoreaInvestment',
     StockPlus = 'StockPlus',
     Naver = 'Naver',
+    GoogleBusiness = 'GoogleBusiness',
 }
 
 export type NewsDto = Omit<News, 'id' | 'createdAt' | 'updatedAt'>;
