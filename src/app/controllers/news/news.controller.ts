@@ -1,6 +1,7 @@
 import { ApiOkResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Controller, Get, Param } from '@nestjs/common';
 import { NewsService } from '@app/modules/app-services/news-service';
+import { NewsCategory } from '@app/modules/repositories/news';
 import {
     NewsByKeywordGroupResponse,
     NewsByStockResponse,
@@ -67,6 +68,31 @@ export class NewsController {
 
         return {
             data: newsByStock,
+        };
+    }
+
+    @ApiOperation({
+        summary: '카테고리별 뉴스 조회',
+    })
+    @ApiOkResponse({
+        type: NewsResponse,
+    })
+    @ApiParam({
+        name: 'category',
+        type: String,
+        enum: NewsCategory,
+        description: '뉴스 카테고리',
+    })
+    @Get('by-category/:category')
+    public async getNewsByCategory(
+        @Param('category') category: NewsCategory,
+    ): Promise<NewsResponse> {
+        const news = await this.newsService.getNewsByCategory({
+            category,
+        });
+
+        return {
+            data: news,
         };
     }
 }

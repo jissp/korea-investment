@@ -116,19 +116,19 @@ export class NewsService {
 
     /**
      * 특정 카테고리의 최근 뉴스 목록을 조회합니다.
-     * @param category
+     * @param categories
      * @param limit
      */
-    public async getNewsListByCategory({
-        category,
+    public async getNewsListByCategories({
+        categories,
         limit = 100,
     }: {
-        category: NewsCategory;
+        categories: NewsCategory[];
         limit?: number;
     }) {
         return this.newsRepository.find({
             where: {
-                category,
+                category: In(categories),
             },
             order: {
                 publishedAt: 'DESC',

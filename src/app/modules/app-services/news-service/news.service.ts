@@ -3,6 +3,7 @@ import { uniqueValues } from '@common/utils';
 import { getStockName } from '@common/domains';
 import {
     News,
+    NewsCategory,
     NewsService as NewsRepositoryService,
 } from '@app/modules/repositories/news';
 import { KeywordGroupService } from '@app/modules/repositories/keyword';
@@ -88,5 +89,23 @@ export class NewsService {
                 };
             }),
         );
+    }
+
+    /**
+     * 카테고리별 뉴스를 조회합니다.
+     * @param category
+     * @param limit
+     */
+    public async getNewsByCategory({
+        category,
+        limit = 100,
+    }: {
+        category: NewsCategory;
+        limit?: number;
+    }): Promise<News[]> {
+        return this.newsService.getNewsListByCategories({
+            categories: [category],
+            limit,
+        });
     }
 }
