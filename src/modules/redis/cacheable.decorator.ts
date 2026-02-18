@@ -9,7 +9,7 @@ import { RedisService } from './redis.service';
 const REDIS_CACHE_DECORATOR = Symbol.for('REDIS_CACHE_DECORATOR');
 
 export interface BaseRedisCacheOptions {
-    key: (...args: any) => string;
+    key: (this: any, ...args: any) => string;
 }
 
 type CacheOptions = BaseRedisCacheOptions & {
@@ -20,9 +20,15 @@ type CacheOptions = BaseRedisCacheOptions & {
 export class CacheableDecorator implements LazyDecorator<any, CacheOptions> {
     constructor(private readonly redisService: RedisService) {}
 
-    wrap({ method, metadata: options }: WrapParams<any, CacheOptions>) {
+    wrap({
+        instance,
+        method,
+        metadata: options,
+    }: WrapParams<any, CacheOptions>) {
         return async (...args: any) => {
-            const key = options.key(...args);
+            const key = this.isCallable(options.key)
+                ? options.key.bind(instance)(...args)
+                : options.key;
 
             let cachedValue = await this.redisService.get(key);
             if (!cachedValue) {
@@ -34,6 +40,10 @@ export class CacheableDecorator implements LazyDecorator<any, CacheOptions> {
 
             return cachedValue;
         };
+    }
+
+    private isCallable(callable: any): callable is CallableFunction {
+        return typeof callable === 'function';
     }
 }
 

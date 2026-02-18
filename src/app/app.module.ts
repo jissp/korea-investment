@@ -10,7 +10,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
-import { LoggerModule } from '@modules/logger';
+import { AopModule } from '@toss/nestjs-aop';
 import { RedisConfig, RedisModule } from '@modules/redis';
 import { QueueModule } from '@modules/queue';
 import { GeminiCliModule } from '@modules/gemini-cli';
@@ -47,10 +47,10 @@ import { KoreaInvestmentBeGateway } from './gateways';
 
 @Module({
     imports: [
+        AopModule,
         ConfigModule.forRoot({
             load: [configuration],
         }),
-        LoggerModule.forRoot(),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],

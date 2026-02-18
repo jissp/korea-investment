@@ -5,7 +5,7 @@ import {
     Injectable,
     Logger,
 } from '@nestjs/common';
-import { getRedisKey, RedisService } from '@modules/redis';
+import { Cacheable, getRedisKey } from '@modules/redis';
 import { KoreaInvestmentBaseHeader } from '@modules/korea-investment/common';
 import { KoreaInvestmentOauthClient } from '@modules/korea-investment/korea-investment-oauth-client';
 import {
@@ -13,15 +13,13 @@ import {
     KoreaInvestmentHelperProvider,
 } from './korea-investment-helper.types';
 
+const ACCESS_TOKEN_TTL = 600;
+
 @Injectable()
 export class KoreaInvestmentHelperService {
-    private readonly WEBSOCKET_TOKEN_TTL = 86400;
-    private readonly WEBSOCKET_TOKEN_TTL_BUFFER = 3600;
-
     private readonly logger = new Logger(KoreaInvestmentHelperService.name);
 
     constructor(
-        private readonly redisService: RedisService,
         private readonly oAuthClient: KoreaInvestmentOauthClient,
         @Inject(KoreaInvestmentHelperProvider.Config)
         private readonly config: KoreaInvestmentHelperConfig,
@@ -81,32 +79,22 @@ export class KoreaInvestmentHelperService {
     /**
      * 한국투자증권 API 액세스 토큰을 발급합니다.
      */
+    @Cacheable({
+        key: function (this: KoreaInvestmentHelperService) {
+            const credentialType = this.config.credentialType;
+
+            return getRedisKey('korea-investment', 'token', credentialType);
+        },
+        ttl: ACCESS_TOKEN_TTL,
+    })
     public async getToken() {
-        const credentialType = this.getCredentialType();
-        const redisKey = getRedisKey(
-            'korea-investment',
-            'token',
-            credentialType,
+        const { access_token } = await this.oAuthClient.getToken(
+            this.config.credential,
         );
-
-        const token = await this.redisService.get(redisKey);
-        if (token) {
-            return token;
-        }
-
-        const { access_token, access_token_token_expired } =
-            await this.oAuthClient.getToken(this.config.credential);
         if (!access_token) {
             this.logger.error('토큰 발급 실패');
             throw new BadRequestException('토큰 발급 실패');
         }
-        const expireSeconds = this.calculateTokenExpireSeconds(
-            access_token_token_expired,
-        );
-
-        await this.redisService.set(redisKey, access_token, {
-            seconds: expireSeconds - 60,
-        });
 
         return access_token;
     }
@@ -114,47 +102,15 @@ export class KoreaInvestmentHelperService {
     /**
      * 실시간 (웹소켓) 접속키를 응답합니다.
      */
+    @Cacheable({
+        key: () => getRedisKey('korea-investment', 'websocket-token'),
+        ttl: ACCESS_TOKEN_TTL,
+    })
     public async getWebSocketToken() {
-        const redisKey = getRedisKey('korea-investment', 'websocket-token');
-
-        const token = await this.redisService.get(redisKey);
-        if (token) {
-            return token;
-        }
-
         const { approval_key } = await this.oAuthClient.getWebSocketToken(
             this.config.credential,
         );
 
-        await this.redisService.set(redisKey, approval_key, {
-            seconds: this.WEBSOCKET_TOKEN_TTL - this.WEBSOCKET_TOKEN_TTL_BUFFER,
-        });
-
         return approval_key;
-    }
-
-    /**
-     * @param expirationDateString
-     * @private
-     */
-    private calculateTokenExpireSeconds(expirationDateString: string): number {
-        const expirationTime = new Date(expirationDateString).getTime();
-        const currentTime = new Date().getTime();
-
-        return Math.round((expirationTime - currentTime) / 1000);
-    }
-
-    /**
-     * 인증정보 타입을 반환합니다.
-     */
-    public getCredentialType() {
-        return this.config.credentialType;
-    }
-
-    /**
-     * 한국투자증권 API 인증 정보 설정을 응답합니다.
-     */
-    public getCredential() {
-        return this.config.credential;
     }
 }

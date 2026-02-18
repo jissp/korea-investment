@@ -3,6 +3,7 @@ import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { IConfiguration } from '@app/configuration';
 import { RedisAsyncConfig, RedisConfig, RedisConnection } from './redis.types';
+import { CacheableDecorator } from './cacheable.decorator';
 import { RedisService } from './redis.service';
 
 @Module({})
@@ -44,7 +45,7 @@ export class RedisModule {
             global: true,
             module: RedisModule,
             imports: [ConfigModule, ...(options.imports ?? [])],
-            providers: [...providers, RedisService],
+            providers: [...providers, RedisService, CacheableDecorator],
             exports: [RedisConnection],
         };
     }

@@ -18,6 +18,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Cache/Queue**: Redis + BullMQ
 - **WebSocket**: Socket.io (실시간 체결가 데이터)
 - **AI**: Google Gemini CLI (종목/시장 분석)
+- **News**: Google News RSS, Naver API 통합
+- **Authentication**: JWT 기반 인증
 - **Port**: 3100
 
 ---
@@ -127,6 +129,13 @@ NAVER_APP_SEARCH3_SECRET=
 GOOGLE_API_KEY=your_key
 ```
 
+**JWT 인증** - 필수
+```
+JWT_SECRET=your_secret_key
+JWT_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+```
+
 **기본 설정** - 선택
 ```
 PORT=3100                  # 기본값: 3100
@@ -209,6 +218,54 @@ POST /v1/stocks/005930/subscribe
    └─ WebSocket 클라이언트에게 'realtime-data' 브로드캐스트
 ```
 
+#### 4️⃣ Google News RSS 수집 및 카테고리별 뉴스 조회
+
+```
+POST /v1/news/categories/{category} (카테고리별 뉴스 조회)
+├─ NewsController.getNewsByCategory()
+├─ NewsService.getNewsByCategory()
+│  ├─ 1. GoogleRssService 또는 NaverApiService로 뉴스 수집
+│  ├─ 2. RssReaderService로 XML 파싱
+│  ├─ 3. XmlParserService로 RSS 피드 변환
+│  └─ 4. StockNews 테이블에 저장
+│
+└─ GET /v1/news/search
+   ├─ NewsController.searchNews()
+   └─ 키워드 기반 뉴스 검색 (Redis 캐싱)
+```
+
+**주요 모듈** (`src/modules/`):
+- `google-rss/`: Google News RSS 피드 수집
+- `rss-reader/`: RSS 피드 파싱
+- `xml-parser/`: XML → 구조화된 데이터 변환
+- `naver/`: Naver News API 클라이언트
+
+#### 5️⃣ JWT 인증 플로우
+
+```
+POST /v1/auth/login
+├─ AuthController.login()
+├─ AuthService.login()
+│  ├─ 사용자 검증 (Account 테이블)
+│  ├─ JWT Token 생성
+│  └─ Refresh Token Redis에 저장
+│
+└─ JSON 응답: { accessToken, refreshToken, expiresIn }
+
+GET /v1/protected-route (with Authorization header)
+├─ JwtGuard 검증
+│  ├─ Authorization: Bearer <accessToken> 파싱
+│  ├─ JWT 토큰 검증
+│  └─ req.user에 사용자 정보 주입
+├─ Controller 로직 실행
+└─ 200 응답
+```
+
+**주요 모듈** (`src/app/modules/auth/`):
+- `AuthService`: JWT 토큰 생성 및 검증
+- `JwtGuard`: 요청 인증 가드
+- `RefreshTokenStrategy`: Refresh Token 재발급 전략
+
 ### 모듈 구조
 
 ```
@@ -216,28 +273,46 @@ src/
 ├── app/
 │   ├── app.module.ts                 # 루트 모듈
 │   ├── configuration.ts              # 환경 설정 (ConfigModule)
-│   ├── controllers/                  # REST API (13개 컨트롤러)
+│   ├── controllers/                  # REST API (15+ 컨트롤러)
 │   ├── gateways/
 │   │   └── korea-investment-be.gateway.ts  # WebSocket Gateway
 │   └── modules/
-│       ├── ai-analyzer/              ⭐ AI 분석 (Adapter, Processor, Service)
-│       │   └── analyzers/
-│       │       ├── stock-analyzer/          # 종목 분석
-│       │       ├── market-analyzer/         # 시장 분석
-│       │       └── exhaustion-trace-analyzer/ # 고갈 분석
+│       ├── analysis/                 # AI 분석
+│       │   ├── ai-analyzer/          ⭐ AI 분석 (Adapter, Processor, Service)
+│       │   │   └── analyzers/
+│       │   │       ├── stock-analyzer/          # 종목 분석
+│       │   │       ├── market-analyzer/         # 시장 분석
+│       │   │       └── exhaustion-trace-analyzer/ # 고갈 분석
+│       │   └── analyzer/             # 분석 통합 로직
+│       ├── auth/                     ⭐ JWT 인증 (AuthService, Guards, Strategies)
+│       ├── app-services/             # 비즈니스 서비스
+│       │   ├── news-service/         # 뉴스 관련 서비스
+│       │   └── stock-investor/       # 투자자 정보 서비스
 │       ├── korea-investment-collector/ ⭐ 실시간 수집 (Socket, Listener, Processor)
-│       ├── crawlers/                  # 스케줄 크롤러 (@Cron)
-│       └── repositories/              # Data Access Layer (15+ 저장소)
+│       ├── korea-investment-request-api/ # 한국투자증권 Rate Limiting 관리
+│       ├── crawlers/                 # 스케줄 크롤러 (@Cron)
+│       │   ├── stock-crawler/        # 종목 정보 크롤링
+│       │   ├── stock-rank-crawler/   # 순위 정보 크롤링
+│       │   ├── news-crawler/         # 뉴스 크롤링
+│       │   └── korea-investment-crawler/ # 한국투자증권 API 크롤링
+│       └── repositories/             # Data Access Layer (18+ 저장소)
 ├── modules/
-│   ├── korea-investment/              # 한국투자증권 API 클라이언트
+│   ├── korea-investment/             # 한국투자증권 API 클라이언트
 │   │   ├── korea-investment-quotation-client/
-│   │   ├── korea-investment-web-socket/
-│   │   └── korea-investment-web-socket/pipes/ # 데이터 변환 파이프
-│   ├── gemini-cli/                    # Google Gemini CLI 래퍼
-│   ├── naver/                         # Naver 뉴스 API
-│   ├── queue/                         # BullMQ 관리
-│   └── redis/                         # Redis 서비스 (캐시, 락)
-└── common/                            # 공용 유틸리티, Guard, Transformer
+│   │   └── korea-investment-web-socket/
+│   ├── gemini-cli/                   # Google Gemini CLI 래퍼
+│   ├── google-rss/                   ⭐ Google News RSS 수집
+│   ├── rss-reader/                   ⭐ RSS 피드 파싱
+│   ├── xml-parser/                   ⭐ XML → 데이터 변환
+│   ├── naver/                        # Naver News API
+│   ├── queue/                        # BullMQ 관리
+│   ├── redis/                        # Redis 서비스 (캐시, 락)
+│   ├── slack/                        # Slack 통합 (알림 등)
+│   ├── logger/                       # 로깅 서비스
+│   ├── mcp-server/                   # MCP 서버 (LLM 통합)
+│   ├── metadata-scanner/             # 메타데이터 스캐닝
+│   └── stock-plus/                   # 주식 정보 확장
+└── common/                           # 공용 유틸리티, Guard, Transformer
 ```
 
 ---
@@ -404,6 +479,41 @@ GeminiCliService.requestSyncPrompt(
 // 결과: JSON 문자열 반환
 ```
 
+### Google News RSS
+
+```typescript
+GoogleRssService.fetchNews(query: string)
+  // Google News RSS 피드 URL로부터 뉴스 수집
+  // RssReaderService로 XML 파싱
+  // XmlParserService로 구조화된 데이터로 변환
+
+RssReaderService.parseRssFeed(feedUrl: string)
+  // RSS XML → 피드 객체로 변환
+
+XmlParserService.parse(xmlContent: string)
+  // 원본 XML → 정규화된 데이터 구조
+```
+
+### JWT 인증
+
+```typescript
+// 토큰 발급
+AuthService.login(username: string, password: string)
+  // JWT Access Token (만료: 15분)
+  // Refresh Token (Redis 저장, 만료: 7일)
+
+// 토큰 검증 (가드)
+@UseGuards(JwtGuard)
+@Get('/protected')
+async protectedRoute(@Req() req) {
+  const user = req.user; // JWT Payload
+}
+
+// 토큰 갱신
+AuthService.refreshAccessToken(refreshToken: string)
+  // 새로운 Access Token 발급
+```
+
 ---
 
 ## 데이터베이스
@@ -412,11 +522,14 @@ GeminiCliService.requestSyncPrompt(
 
 - `Stock`: 종목 (code, shortCode, name, marketType 등)
 - `StockDailyInvestor`: 일일 투자자 정보
-- `AiAnalysisReport`: AI 분석 결과 (title, content, reportType)
-- `News`: 뉴스 기본 정보
-- `StockNews`: 종목-뉴스 매핑
-- `Account`, `AccountStock`: 사용자 계정
-- `Keyword`, `KeywordNews`: 키워드 분석
+- `AiAnalysisReport`: AI 분석 결과 (title, content, reportType, reportTarget)
+- `News`: 뉴스 기본 정보 (title, description, link, pubDate, source)
+- `StockNews`: 종목-뉴스 매핑 (stock_id, news_id)
+- `Account`: 사용자 계정 (username, password_hash, email, role)
+- `AccountStock`: 사용자 관심 종목 (account_id, stock_id)
+- `Keyword`: 검색 키워드 (keyword, category)
+- `KeywordNews`: 키워드-뉴스 매핑 (keyword_id, news_id)
+- `NewsCategory`: 뉴스 카테고리 (name, description) - 최신 추가
 
 ### 마이그레이션
 
@@ -578,6 +691,23 @@ const mockService = {
   ```
 - HTTP Guard를 이용한 인증 에러 처리
 
+### 8. JWT 인증 추가 시
+
+- `AuthService` 구현: 토큰 발급 및 검증
+- `JwtGuard` 적용: `@UseGuards(JwtGuard)` 데코레이터로 라우트 보호
+- JWT 전략 등록: `JwtStrategy` 클래스로 JWT 검증 로직 정의
+- Refresh Token: Redis에 저장하여 토큰 갱신 지원
+- 환경변수: `JWT_SECRET`, `JWT_EXPIRATION`, `JWT_REFRESH_EXPIRATION` 설정
+
+### 9. 뉴스 관련 모듈 추가 시
+
+- `google-rss/`: Google News RSS 피드 수집
+- `rss-reader/`: RSS XML 파싱
+- `xml-parser/`: 구조화된 데이터로 변환
+- `NewsService`: 뉴스 조회 로직 통합
+- 카테고리별 조회: `NewsCategory` entity로 관리
+- 캐싱: Redis로 뉴스 데이터 캐싱 (TTL: 1시간)
+
 ---
 
 ## 트러블슈팅
@@ -634,18 +764,31 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 **`src/modules/`** - 기반 기술 / 외부 통합
 - `korea-investment/`: 한국투자증권 API 클라이언트
 - `gemini-cli/`: Google Gemini CLI 래퍼
+- `google-rss/`: Google News RSS 수집
+- `rss-reader/`: RSS 피드 파싱
+- `xml-parser/`: XML 데이터 변환
 - `naver/`: Naver API 클라이언트
 - `queue/`: BullMQ 큐 관리
 - `redis/`: Redis 서비스
+- `slack/`: Slack 통합
+- `logger/`: 로깅
+- `mcp-server/`: MCP 서버
+- `metadata-scanner/`: 메타데이터 스캐닝
+- `stock-plus/`: 주식 정보 확장
 
 ### 모듈 등록 순서
 
 1. **기반 모듈** (`src/modules/**`) → 다른 모듈에서 의존
-   - `QueueModule`, `RedisModule`, `KoreaInvestmentModule`, `GeminiCliModule`, `NaverModule`
+   - `LoggerModule`, `QueueModule`, `RedisModule`
+   - `KoreaInvestmentModule`, `GeminiCliModule`, `NaverModule`
+   - `GoogleRssModule`, `RssReaderModule`, `XmlParserModule`
+   - `SlackModule`, `McpServerModule`, `MetadataScannerModule`, `StockPlusModule`
 2. **저장소 모듈** (`RepositoryModule`) → 서비스에서 사용
-3. **비즈니스 모듈** (`src/app/modules/**`) → 최상위 비즈니스 로직
-   - `AnalysisModule`, `KoreaInvestmentCollectorModule`, `CrawlersModule`, 기타 비즈니스 로직
-4. **게이트웨이/컨트롤러** → 모든 서비스 준비 후 마지막
+3. **인증 모듈** (`AuthModule`) → 라우트 보호
+4. **비즈니스 모듈** (`src/app/modules/**`) → 최상위 비즈니스 로직
+   - `AnalysisModule`, `AppServiceModule`, `KoreaInvestmentCollectorModule`
+   - `KoreaInvestmentRequestApiModule`, `CrawlersModule`
+5. **게이트웨이/컨트롤러** → 모든 서비스 준비 후 마지막
 
 > **QueueExplorer 자동 감지**: `@OnQueueProcessor()` 데코레이터가 붙은 메서드는 자동으로 감지되며, 명시적 등록이 불필요합니다. BullMQ 큐 매니저가 런타임에 감지합니다.
 
@@ -671,8 +814,28 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 - [NestJS 공식 문서](https://docs.nestjs.com)
 - [TypeORM 문서](https://typeorm.io)
 - [BullMQ 문서](https://docs.bullmq.io)
+- [NestJS JWT](https://docs.nestjs.com/security/authentication)
+- [RSS 피드 명세](https://www.rssboard.org/)
 - 한국투자증권 API 문서 (내부)
 - Google Gemini API 문서
+
+## 최근 추가된 기능 (2026-02-11)
+
+### 1. Google News RSS 수집
+- **모듈**: `google-rss/`, `rss-reader/`, `xml-parser/`
+- **기능**: Google News RSS 피드 자동 수집 및 파싱
+- **통합**: NewsService에 통합되어 뉴스 조회 API 제공
+
+### 2. 카테고리별 뉴스 조회
+- **엔드포인트**: `GET /v1/news/categories/{category}`
+- **기능**: 카테고리별 뉴스 필터링 조회
+- **캐싱**: Redis를 활용한 성능 최적화
+
+### 3. JWT 인증
+- **모듈**: `auth/`
+- **기능**: JWT 기반 사용자 인증
+- **보호**: `@UseGuards(JwtGuard)` 데코레이터로 라우트 보호
+- **갱신**: Refresh Token으로 Access Token 자동 갱신
 
 ---
 
@@ -700,3 +863,24 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 - 네트워크 연결 상태 모니터링
 - 재연결 로직 구현 확인: `KoreaInvestmentCollectorProcessor`
 - 구독 메시지 형식 재확인 (H0UNCNT0 vs H0STCNT0)
+
+### JWT 토큰 검증 실패
+
+- JWT_SECRET 환경변수 설정 확인
+- 토큰 형식 확인: `Authorization: Bearer <token>`
+- 토큰 만료 확인: `JWT_EXPIRATION` 설정값 검토
+- 반드시 `JwtGuard`를 `@UseGuards(JwtGuard)` 데코레이터로 사용
+
+### Google RSS / RSS Reader 파싱 오류
+
+- XML 피드 URL 유효성 확인
+- RssReaderService 로그 확인: 파싱 단계별 오류
+- XmlParserService: 인코딩 문제 체크 (UTF-8)
+- Google News RSS URL 형식: `https://news.google.com/rss?q={query}&hl=ko`
+
+### 뉴스 크롤링 실패
+
+- 네트워크 연결 확인 (외부 API 접근)
+- NewsService 캐시 상태 확인: Redis TTL 만료
+- 크롤링 스케줄 확인: `@Cron` 데코레이터 설정
+- API Rate Limiting 확인: Naver API 일일 할당량
