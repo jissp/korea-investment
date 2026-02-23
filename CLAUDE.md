@@ -6,6 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # 필수 사항
 - Never switch to Plan mode unless I explicitly request it. Always prioritize Act mode for direct implementation.
+- Use Claude Code의 내장 Skills를 활용하면 더 효율적으로 작업할 수 있습니다:
+  - `/feature-planner`: 신규 기능을 Clean Architecture(UseCase Pattern) 기반으로 설계
+  - `/analyzer-project-architecture`: 프로젝트 아키텍처 구조 분석
+  - `/project-analyzer`: 프로젝트 전체 분석
+  - `/entity-to-sql`: Entity를 SQL문으로 변환
+
+---
+
+## 프로젝트 현재 상태
+
+**현재 브랜치**: `refact/clean-archtecture`
+**메인 브랜치**: `develop`
+**상태**: Clean Architecture (UseCase Pattern) 적용 중
+
+### 준비 중인 변경사항
+- AI 분석 엔터티 생성 및 SQL 변환 (`/entity-to-sql` skill 활용 가능)
+- XML Parser 기능 확장
+- 카테고리별 뉴스 조회 기능
+- 구조화된 프롬프트 설계
 
 ---
 
@@ -29,13 +48,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 개발 서버 실행
 
 ```bash
-# Watch 모드 (개발)
+# Watch 모드 (개발) - src/app/env/.env 자동 로드
 npm run start:dev
 
-# 일반 시작
+# 일반 시작 - src/app/env/.env 자동 로드
 npm start
 
-# 프로덕션 모드
+# 프로덕션 모드 - 루트 .env 파일 사용
 npm run start:prod
 ```
 
@@ -46,10 +65,7 @@ npm run start:prod
 npm run test
 
 # Watch 모드로 테스트
-npm test:watch
-
-# 테스트 커버리지
-npm run test:cov
+npm run test:watch
 
 # 특정 파일 테스트
 npm run test -- src/app/modules/repositories/__tests__/stock.service.spec.ts
@@ -223,7 +239,7 @@ POST /v1/stocks/005930/subscribe
 ```
 POST /v1/news/categories/{category} (카테고리별 뉴스 조회)
 ├─ NewsController.getNewsByCategory()
-├─ NewsService.getNewsByCategory()
+├─ NewsRepositoryService.getNewsByCategory()
 │  ├─ 1. GoogleRssService 또는 NaverApiService로 뉴스 수집
 │  ├─ 2. RssReaderService로 XML 파싱
 │  ├─ 3. XmlParserService로 RSS 피드 변환
@@ -266,54 +282,95 @@ GET /v1/protected-route (with Authorization header)
 - `JwtGuard`: 요청 인증 가드
 - `RefreshTokenStrategy`: Refresh Token 재발급 전략
 
-### 모듈 구조
+### 모듈 구조 (실제 프로젝트 구조)
 
 ```
 src/
 ├── app/
 │   ├── app.module.ts                 # 루트 모듈
 │   ├── configuration.ts              # 환경 설정 (ConfigModule)
-│   ├── controllers/                  # REST API (15+ 컨트롤러)
+│   ├── controllers/                  # REST API 컨트롤러
 │   ├── gateways/
 │   │   └── korea-investment-be.gateway.ts  # WebSocket Gateway
 │   └── modules/
-│       ├── analysis/                 # AI 분석
-│       │   ├── ai-analyzer/          ⭐ AI 분석 (Adapter, Processor, Service)
-│       │   │   └── analyzers/
-│       │   │       ├── stock-analyzer/          # 종목 분석
-│       │   │       ├── market-analyzer/         # 시장 분석
-│       │   │       └── exhaustion-trace-analyzer/ # 고갈 분석
+│       ├── analysis/                 ⭐ AI 분석 (Adapter, Processor, Service)
+│       │   ├── ai-analyzer/          # AI 분석 엔진 (Adapter Pattern)
+│       │   │   └── analyzers/        # 분석 유형별 구현
+│       │   │       ├── stock-analyzer/
+│       │   │       ├── market-analyzer/
+│       │   │       └── exhaustion-trace-analyzer/
 │       │   └── analyzer/             # 분석 통합 로직
-│       ├── auth/                     ⭐ JWT 인증 (AuthService, Guards, Strategies)
+│       │
+│       ├── auth/                     ⭐ JWT 인증
+│       │   └── (AuthService, JwtGuard, Strategies)
+│       │
 │       ├── app-services/             # 비즈니스 서비스
 │       │   ├── news-service/         # 뉴스 관련 서비스
 │       │   └── stock-investor/       # 투자자 정보 서비스
-│       ├── korea-investment-collector/ ⭐ 실시간 수집 (Socket, Listener, Processor)
-│       ├── korea-investment-request-api/ # 한국투자증권 Rate Limiting 관리
+│       │
+│       ├── korea-investment-collector/ ⭐ 실시간 수집 (Event-Driven)
+│       │   └── (Socket, Listener, Processor)
+│       │
+│       ├── korea-investment-request-api/ # Rate Limiting 관리 (Dual Queue)
+│       │
 │       ├── crawlers/                 # 스케줄 크롤러 (@Cron)
-│       │   ├── stock-crawler/        # 종목 정보 크롤링
-│       │   ├── stock-rank-crawler/   # 순위 정보 크롤링
-│       │   ├── news-crawler/         # 뉴스 크롤링
-│       │   └── korea-investment-crawler/ # 한국투자증권 API 크롤링
-│       └── repositories/             # Data Access Layer (18+ 저장소)
-├── modules/
+│       │   ├── stock-crawler/
+│       │   ├── stock-rank-crawler/
+│       │   ├── news-crawler/
+│       │   └── korea-investment-crawler/
+│       │
+│       ├── domain/                   ⭐ 도메인 모듈들 (UseCase Pattern)
+│       │   ├── stock/                # 종목 도메인
+│       │   ├── analysis/             # 분석 결과 도메인
+│       │   ├── news/                 # 뉴스 도메인
+│       │   ├── account/              # 계정 도메인
+│       │   ├── keyword/              # 키워드 도메인
+│       │   ├── favorite-stock/       # 관심 종목 도메인
+│       │   ├── stock-investor/       # 투자자 정보 도메인
+│       │   ├── theme/                # 테마 도메인
+│       │   ├── market/               # 시장 지수 도메인
+│       │   └── latest-stock-rank/    # 순위 도메인
+│       │
+│       └── repositories/             # Data Access Layer (TypeORM)
+│
+├── modules/                          # 기반 기술 & 외부 연동
 │   ├── korea-investment/             # 한국투자증권 API 클라이언트
-│   │   ├── korea-investment-quotation-client/
-│   │   └── korea-investment-web-socket/
+│   │   ├── korea-investment-quotation-client/  # REST API 클라이언트
+│   │   └── korea-investment-web-socket/        # WebSocket 클라이언트
+│   │
+│   ├── queue/                        # BullMQ 관리 (Job Flow)
+│   ├── redis/                        # Redis 서비스 (캐시, 분산 락)
+│   │
 │   ├── gemini-cli/                   # Google Gemini CLI 래퍼
+│   ├── naver/                        # Naver News API 클라이언트
+│   │
 │   ├── google-rss/                   ⭐ Google News RSS 수집
 │   ├── rss-reader/                   ⭐ RSS 피드 파싱
 │   ├── xml-parser/                   ⭐ XML → 데이터 변환
-│   ├── naver/                        # Naver News API
-│   ├── queue/                        # BullMQ 관리
-│   ├── redis/                        # Redis 서비스 (캐시, 락)
-│   ├── slack/                        # Slack 통합 (알림 등)
-│   ├── logger/                       # 로깅 서비스
-│   ├── mcp-server/                   # MCP 서버 (LLM 통합)
-│   ├── metadata-scanner/             # 메타데이터 스캐닝
+│   │
+│   ├── slack/                        # Slack 통합
+│   ├── mcp-server/                   # MCP 서버
+│   ├── metadata-scanner/             # 메타데이터 스캐닝 (데코레이터 감지)
 │   └── stock-plus/                   # 주식 정보 확장
-└── common/                           # 공용 유틸리티, Guard, Transformer
+│
+└── common/                           # 공용 유틸리티
+    ├── filters/                      # Global Exception Filter
+    ├── guards/                       # Global Guards
+    ├── pipes/                        # Global Pipes
+    ├── transformers/                 # 데이터 변환 유틸
+    └── middlewares/                  # 미들웨어
 ```
+
+### 핵심 변경사항 (Clean Architecture 적용)
+
+1. **Domain 모듈 구조 도입**
+   - `src/app/modules/domain/` 아래 각 도메인별 모듈 분리
+   - UseCase Pattern 기반으로 단일 책임 원칙 준수
+   - 도메인: Stock, Analysis, News, Account, Theme, Market 등
+
+2. **모듈 분류 개선**
+   - `src/app/modules/`: 비즈니스 로직 (도메인 + 기능)
+   - `src/modules/`: 기반 기술 (외부 API, 캐시, 큐 등)
 
 ---
 
@@ -704,7 +761,7 @@ const mockService = {
 - `google-rss/`: Google News RSS 피드 수집
 - `rss-reader/`: RSS XML 파싱
 - `xml-parser/`: 구조화된 데이터로 변환
-- `NewsService`: 뉴스 조회 로직 통합
+- `NewsRepositoryService`: 뉴스 조회 로직 통합
 - 카테고리별 조회: `NewsCategory` entity로 관리
 - 캐싱: Redis로 뉴스 데이터 캐싱 (TTL: 1시간)
 
@@ -755,42 +812,112 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 
 ### `src/app/modules/` vs `src/modules/`
 
-**`src/app/modules/`** - 비즈니스 로직
-- `ai-analyzer/`: AI 분석 관련
-- `korea-investment-collector/`: 한국투자증권 실시간 수집
-- `repositories/`: 데이터 접근 계층
-- `crawlers/`: 스케줄 크롤러
+**`src/app/modules/`** - 비즈니스 로직 & 도메인
+- **분석 관련**
+  - `analysis/`: AI 분석 엔진 (ai-analyzer, analyzer)
+- **실시간 수집**
+  - `korea-investment-collector/`: 한국투자증권 WebSocket 실시간 수집
+- **기능 & 서비스**
+  - `auth/`: JWT 인증 (AuthService, JwtGuard)
+  - `app-services/`: 뉴스/투자자 정보 서비스
+  - `korea-investment-request-api/`: 한국투자증권 API Rate Limiting
+  - `crawlers/`: 스케줄 크롤러 (@Cron)
+  - `repositories/`: Data Access Layer (TypeORM)
+- **도메인 모듈** (Clean Architecture - UseCase Pattern)
+  - `domain/stock/`: 종목 도메인
+  - `domain/analysis/`: 분석 결과 도메인
+  - `domain/news/`: 뉴스 도메인
+  - `domain/account/`: 계정 도메인
+  - `domain/keyword/`: 키워드 도메인
+  - `domain/favorite-stock/`: 관심 종목 도메인
+  - `domain/stock-investor/`: 투자자 정보 도메인
+  - `domain/theme/`: 테마 도메인
+  - `domain/market/`: 시장 지수 도메인
+  - `domain/latest-stock-rank/`: 순위 도메인
 
-**`src/modules/`** - 기반 기술 / 외부 통합
-- `korea-investment/`: 한국투자증권 API 클라이언트
-- `gemini-cli/`: Google Gemini CLI 래퍼
-- `google-rss/`: Google News RSS 수집
-- `rss-reader/`: RSS 피드 파싱
-- `xml-parser/`: XML 데이터 변환
-- `naver/`: Naver API 클라이언트
-- `queue/`: BullMQ 큐 관리
-- `redis/`: Redis 서비스
-- `slack/`: Slack 통합
-- `logger/`: 로깅
-- `mcp-server/`: MCP 서버
-- `metadata-scanner/`: 메타데이터 스캐닝
-- `stock-plus/`: 주식 정보 확장
+**`src/modules/`** - 기반 기술 & 외부 연동
+- **데이터베이스 & 캐싱**
+  - `redis/`: Redis 서비스 (캐시, 분산 락)
+  - `queue/`: BullMQ 관리 (비동기 Job 처리)
+- **외부 API 클라이언트**
+  - `korea-investment/`: 한국투자증권 API (REST, WebSocket)
+  - `naver/`: Naver News API
+  - `gemini-cli/`: Google Gemini CLI
+- **데이터 처리**
+  - `google-rss/`: Google News RSS 수집
+  - `rss-reader/`: RSS 피드 파싱
+  - `xml-parser/`: XML 데이터 변환
+- **부가 서비스**
+  - `slack/`: Slack 통합
+  - `mcp-server/`: MCP 서버
+  - `metadata-scanner/`: 메타데이터 스캐닝 (데코레이터 감지)
+  - `stock-plus/`: 주식 정보 확장
 
-### 모듈 등록 순서
+### 모듈 등록 순서 및 의존성 관계
 
-1. **기반 모듈** (`src/modules/**`) → 다른 모듈에서 의존
-   - `LoggerModule`, `QueueModule`, `RedisModule`
-   - `KoreaInvestmentModule`, `GeminiCliModule`, `NaverModule`
-   - `GoogleRssModule`, `RssReaderModule`, `XmlParserModule`
-   - `SlackModule`, `McpServerModule`, `MetadataScannerModule`, `StockPlusModule`
-2. **저장소 모듈** (`RepositoryModule`) → 서비스에서 사용
-3. **인증 모듈** (`AuthModule`) → 라우트 보호
-4. **비즈니스 모듈** (`src/app/modules/**`) → 최상위 비즈니스 로직
-   - `AnalysisModule`, `AppServiceModule`, `KoreaInvestmentCollectorModule`
-   - `KoreaInvestmentRequestApiModule`, `CrawlersModule`
-5. **게이트웨이/컨트롤러** → 모든 서비스 준비 후 마지막
+**모듈 로딩 순서** (app.module.ts의 imports 배열 순서):
 
-> **QueueExplorer 자동 감지**: `@OnQueueProcessor()` 데코레이터가 붙은 메서드는 자동으로 감지되며, 명시적 등록이 불필요합니다. BullMQ 큐 매니저가 런타임에 감지합니다.
+1. **설정 & 근본 프레임워크** (필수 먼저 로드)
+   - `AopModule` (AOP 지원)
+   - `ConfigModule` (환경 설정)
+   - `TypeOrmModule` (DB 연결)
+   - `RedisModule` (캐싱 & 분산 락)
+   - `QueueModule` (비동기 작업)
+   - `EventEmitterModule` (이벤트 기반 통신)
+
+2. **보안 & 스케줄링**
+   - `AuthModule` (JWT 인증, Guard)
+   - `ScheduleModule` (@Cron 스케줄러)
+
+3. **외부 API 클라이언트** (`src/modules/**`)
+   - `GeminiCliModule` (Gemini AI)
+   - `KoreaInvestmentCollectorModule` (실시간 WebSocket 수집)
+   - `KoreaInvestmentQuotationClientModule` (REST API - 현재가 조회)
+   - `KoreaInvestmentRankClientModule` (순위 정보 API)
+   - `SlackModule` (Slack 통합)
+   - `McpServerModule` (MCP 서버)
+
+4. **비즈니스 로직 - 핵심 모듈** (`src/app/modules/**`)
+   - `CrawlerModule` (스케줄 크롤러)
+   - `AiAnalyzerModule` (AI 분석 엔진)
+   - `RepositoryModule` (Data Access Layer)
+   - `KoreaInvestmentRequestApiModule` (Rate Limiting)
+   - `AnalyzerModule` (분석 통합 로직)
+
+5. **도메인 모듈** (Clean Architecture - UseCase Pattern)
+   - `StockModule` (종목)
+   - `FavoriteStockModule` (관심 종목)
+   - `StockInvestorModule` (투자자 정보)
+   - `NewsModule` (뉴스)
+   - `AnalysisModule` (분석 결과)
+   - `AccountModule` (계정)
+   - `KeywordModule` (키워드)
+   - `ThemeModule` (테마)
+   - `LatestStockRankModule` (순위)
+   - `MarketModule` (시장 지수)
+
+6. **게이트웨이 & 컨트롤러** (모든 모듈 로드 후)
+   - `KoreaInvestmentBeGateway` (WebSocket Gateway)
+   - `KeywordController`, `KeywordGroupController` (REST 컨트롤러)
+
+**의존성 흐름**:
+```
+Config/DB/Redis/Queue
+    ↓
+Auth/Schedule
+    ↓
+External APIs (Gemini, KoreaInvestment, Slack, MCP)
+    ↓
+Business Logic (Crawler, AiAnalyzer, Repository, RateLimit, Analyzer)
+    ↓
+Domain Modules (Stock, News, Analysis, Account, etc.)
+    ↓
+Gateways & Controllers
+```
+
+> **QueueExplorer 자동 감지**: `@OnQueueProcessor()` 데코레이터가 붙은 메서드는 런타임에 자동으로 감지되며, 명시적 등록이 불필요합니다. 모듈이 로드되는 순간 BullMQ가 자동으로 worker를 등록합니다.
+
+> **⚠️ 중요**: 모듈 등록 순서가 틀리면 런타임 에러(NullPointerException, DependencyNotFound)가 발생합니다. **항상 `app.module.ts`의 imports 배열 순서를 참고하세요**.
 
 ---
 
@@ -819,19 +946,25 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 - 한국투자증권 API 문서 (내부)
 - Google Gemini API 문서
 
-## 최근 추가된 기능 (2026-02-11)
+## 최근 추가된 기능 및 변경사항 (2026-02-23)
 
-### 1. Google News RSS 수집
+### 1. Clean Architecture 적용 (UseCase Pattern)
+- **브랜치**: `refact/clean-archtecture`
+- **패턴**: Clean Architecture의 UseCase 패턴 도입
+- **영향**: 엔터티 생성, API 설계 등에서 UseCase 패턴 기반으로 구조화
+- **정보**: `feature-planner` skill을 사용하면 신규 기능을 Clean Architecture 기반으로 자동 설계 가능
+
+### 2. Google News RSS 수집 (2026-02-11)
 - **모듈**: `google-rss/`, `rss-reader/`, `xml-parser/`
 - **기능**: Google News RSS 피드 자동 수집 및 파싱
 - **통합**: NewsService에 통합되어 뉴스 조회 API 제공
 
-### 2. 카테고리별 뉴스 조회
+### 3. 카테고리별 뉴스 조회 (2026-02-11)
 - **엔드포인트**: `GET /v1/news/categories/{category}`
 - **기능**: 카테고리별 뉴스 필터링 조회
 - **캐싱**: Redis를 활용한 성능 최적화
 
-### 3. JWT 인증
+### 4. JWT 인증 (2026-02-11)
 - **모듈**: `auth/`
 - **기능**: JWT 기반 사용자 인증
 - **보호**: `@UseGuards(JwtGuard)` 데코레이터로 라우트 보호
@@ -881,6 +1014,6 @@ echo "test" | gemini --model gemini-2.0-flash --output-format json
 ### 뉴스 크롤링 실패
 
 - 네트워크 연결 확인 (외부 API 접근)
-- NewsService 캐시 상태 확인: Redis TTL 만료
+- NewsRepositoryService 캐시 상태 확인: Redis TTL 만료
 - 크롤링 스케줄 확인: `@Cron` 데코레이터 설정
 - API Rate Limiting 확인: Naver API 일일 할당량

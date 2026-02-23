@@ -18,6 +18,12 @@ NestJS의 기본 아키텍처와 Clean Architecture 요소를 결합하여 엄�
     - **DTO**: `class-validator`를 이용한 입력값 검증 및 타입 정의. `dto/responses`, `dto/requests` 등으로 세분화합니다.
     - **Repository/Entity**: `@app/modules/repositories` 하위에 위치하며 데이터 접근 계층을 담당합니다.
     - **Config**: `ConfigService`를 통한 환경 변수 관리 (`src/app/configuration.ts` 참조).
+- **UseCase Pattern 컨벤션**
+    - **DTO 재사용 원칙**: HTTP 요청 DTO를 UseCase에서도 직접 사용
+        - ✅ DTO 재사용 (예: CreateKeywordBody 직접 import)
+        - ✅ DTO (Payload) 외 Path, Query가 존재하는 경우에는 Params 선언 가능
+        - ❌ 위 상황을 제외한 중복 정의 (예: CreateKeywordBody를 재사용해도 되는데 CreateKeywordParams 선언하는 행위)
+    - **이유**: 동일한 데이터 구조를 정의하는 것은 불필요한 중복, 검증은 컨트롤러 계층에서 완료됨
 
 ## 3. 설계 문서 작성 가이드 (Document)
 
