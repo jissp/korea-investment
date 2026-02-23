@@ -1,24 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { BaseUseCase } from '@app/common/types';
 import { KeywordService, KeywordType } from '@app/modules/repositories/keyword';
-
-interface CreateKeywordInput {
-    keyword: string;
-    keywordGroupId?: number;
-}
+import { CreateKeywordBody } from '../dto';
 
 @Injectable()
 export class CreateKeywordUseCase implements BaseUseCase<
-    CreateKeywordInput,
+    CreateKeywordBody,
     void
 > {
     constructor(private readonly keywordService: KeywordService) {}
 
-    async execute(input: CreateKeywordInput): Promise<void> {
+    async execute({
+        keyword,
+        keywordGroupId,
+    }: CreateKeywordBody): Promise<void> {
         await this.keywordService.createKeyword({
             type: KeywordType.Manual,
-            name: input.keyword,
-            keywordGroupId: input.keywordGroupId,
+            name: keyword,
+            keywordGroupId,
         });
     }
 }
