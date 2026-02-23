@@ -7,7 +7,7 @@ import { FavoriteStockModule } from './favorite-stock';
 import { KeywordModule } from './keyword';
 import { MarketIndexModule } from './market-index';
 import { MostViewedStockModule } from './most-viewed-stock';
-import { NewsModule } from './news';
+import { NewsRepositoryModule } from './news-repository';
 import { StockModule } from './stock';
 import { StockInvestorModule } from './stock-investor';
 import { TradingVolumeRankModule } from './trading-volume-rank';
@@ -22,7 +22,7 @@ const repositoryModules = [
     KeywordModule,
     MarketIndexModule,
     MostViewedStockModule,
-    NewsModule,
+    NewsRepositoryModule,
     StockModule,
     StockInvestorModule,
     TradingVolumeRankModule,

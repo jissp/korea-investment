@@ -1,6 +1,6 @@
 import { Pipe } from '@common/types';
 import { DomesticStockQuotationsIntstockMultPriceOutput } from '@modules/korea-investment/common';
-import { StockPriceDto } from '@app/controllers/stocks/dto/responses/get-stock-prices.response';
+import { StockPriceDto } from '@app/modules/domain/stock/dto/responses/get-stock-prices.response';
 
 interface TransformerArgs {
     output: DomesticStockQuotationsIntstockMultPriceOutput;

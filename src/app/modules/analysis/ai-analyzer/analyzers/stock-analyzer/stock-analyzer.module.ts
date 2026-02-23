@@ -4,7 +4,7 @@ import { GeminiCliModule } from '@modules/gemini-cli';
 import { NaverApiModule } from '@modules/naver/naver-api';
 import { KoreaInvestmentQuotationClientModule } from '@modules/korea-investment/korea-investment-quotation-client';
 import { StockModule } from '@app/modules/repositories/stock';
-import { NewsModule } from '@app/modules/repositories/news';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { AccountModule } from '@app/modules/repositories/account';
 import {
     NewsPromptTransformer,
@@ -30,7 +30,7 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         NaverApiModule,
         KoreaInvestmentQuotationClientModule,
         StockModule,
-        NewsModule,
+        NewsRepositoryModule,
         AccountModule,
     ],
     providers: [

@@ -2,7 +2,10 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { removeTag } from '@common/utils';
 import { GoogleRssItem, GoogleRssService } from '@modules/google-rss';
-import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+import {
+    NewsCategory,
+    NewsDto,
+} from '@app/modules/repositories/news-repository';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,

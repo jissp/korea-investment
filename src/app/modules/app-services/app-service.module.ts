@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { NewsServiceModule } from './news-service';
 import { StockInvestorModule } from './stock-investor';
 
-const serviceModules = [NewsServiceModule, StockInvestorModule];
+const serviceModules = [StockInvestorModule];
 
 @Module({
     imports: [...serviceModules],

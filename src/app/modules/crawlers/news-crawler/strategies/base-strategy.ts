@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { NewsDto } from '@app/modules/repositories/news';
+import { NewsDto } from '@app/modules/repositories/news-repository';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,

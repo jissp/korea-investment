@@ -3,7 +3,7 @@ import { QueueModule } from '@modules/queue';
 import { GeminiCliModule } from '@modules/gemini-cli';
 import { MarketIndexModule } from '@app/modules/repositories/market-index';
 import { StockModule } from '@app/modules/repositories/stock';
-import { NewsModule } from '@app/modules/repositories/news';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { NewsPromptTransformer } from '@app/modules/analysis/ai-analyzer/common';
 import {
     GlobalIndexTransformer,
@@ -25,7 +25,7 @@ const flowProviders = QueueModule.getFlowProviders(flowTypes);
         GeminiCliModule,
         MarketIndexModule,
         StockModule,
-        NewsModule,
+        NewsRepositoryModule,
     ],
     providers: [
         GlobalMacroTransformer,

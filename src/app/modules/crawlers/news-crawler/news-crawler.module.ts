@@ -4,7 +4,7 @@ import { StockPlusModule } from '@modules/stock-plus';
 import { NaverApiModule } from '@modules/naver/naver-api';
 import { GoogleRssModule } from '@modules/google-rss';
 import { KoreaInvestmentAdditionalRequestApiModule } from '@app/modules/korea-investment-request-api/korea-investment-additional-request-api';
-import { NewsModule } from '@app/modules/repositories/news';
+import { NewsRepositoryModule } from '@app/modules/repositories/news-repository';
 import { FavoriteStockModule } from '@app/modules/repositories/favorite-stock';
 import { KeywordModule } from '@app/modules/repositories/keyword';
 import {
@@ -45,7 +45,7 @@ const strategies = [
         NaverApiModule,
         GoogleRssModule,
         StockPlusModule,
-        NewsModule,
+        NewsRepositoryModule,
         FavoriteStockModule,
         KeywordModule,
     ],

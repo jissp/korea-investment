@@ -25,24 +25,18 @@ import { KoreaInvestmentCollectorModule } from '@app/modules/korea-investment-co
 import { AnalyzerModule } from '@app/modules/analysis/analyzer';
 import { AiAnalyzerModule } from '@app/modules/analysis/ai-analyzer';
 import { CrawlerModule } from '@app/modules/crawlers';
-import { AppServiceModule } from '@app/modules/app-services';
 import { RepositoryModule } from '@app/modules/repositories';
+import { StockModule } from '@app/modules/domain/stock';
+import { FavoriteStockModule } from '@app/modules/domain/favorite-stock';
+import { StockInvestorModule } from '@app/modules/domain/stock-investor';
+import { AnalysisModule } from '@app/modules/domain/analysis';
+import { AccountModule } from '@app/modules/domain/account';
+import { ThemeModule } from '@app/modules/domain/theme';
+import { LatestStockRankModule } from '@app/modules/domain/latest-stock-rank';
+import { MarketModule } from '@app/modules/domain/market';
+import { NewsModule } from '@app/modules/domain/news';
+import { KeywordModule } from '@app/modules/domain/keyword';
 import configuration, { IConfiguration } from './configuration';
-import {
-    AccountController,
-    AccountStockController,
-    AnalysisController,
-    FavoriteStockController,
-    KeywordController,
-    KeywordGroupController,
-    LatestStockRankController,
-    MarketController,
-    MarketIndexController,
-    NewsController,
-    StockController,
-    StockInvestorController,
-    ThemeController,
-} from './controllers';
 import { KoreaInvestmentBeGateway } from './gateways';
 
 @Module({
@@ -108,26 +102,21 @@ import { KoreaInvestmentBeGateway } from './gateways';
         }),
         CrawlerModule,
         AiAnalyzerModule,
-        AppServiceModule,
         RepositoryModule,
         KoreaInvestmentRequestApiModule,
         AnalyzerModule,
+        StockModule,
+        FavoriteStockModule,
+        StockInvestorModule,
+        NewsModule,
+        AnalysisModule,
+        AccountModule,
+        ThemeModule,
+        LatestStockRankModule,
+        MarketModule,
+        KeywordModule,
     ],
-    controllers: [
-        MarketController,
-        MarketIndexController,
-        AccountController,
-        AccountStockController,
-        FavoriteStockController,
-        StockController,
-        StockInvestorController,
-        KeywordController,
-        KeywordGroupController,
-        ThemeController,
-        NewsController,
-        LatestStockRankController,
-        AnalysisController,
-    ],
+    controllers: [],
     providers: [KoreaInvestmentBeGateway],
 })
 export class AppModule implements NestModule {

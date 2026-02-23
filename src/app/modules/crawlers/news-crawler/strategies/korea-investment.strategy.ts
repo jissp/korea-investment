@@ -7,7 +7,10 @@ import {
 } from '@common/utils';
 import { DomesticStockQuotationsNewsTitleOutput } from '@modules/korea-investment/common';
 import { KoreaInvestmentRequestApiHelper } from '@app/modules/korea-investment-request-api/common';
-import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+import {
+    NewsCategory,
+    NewsDto,
+} from '@app/modules/repositories/news-repository';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,

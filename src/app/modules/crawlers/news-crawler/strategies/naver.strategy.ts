@@ -8,7 +8,10 @@ import {
     NaverAppName,
 } from '@modules/naver/naver-api';
 import { KeywordService } from '@app/modules/repositories/keyword';
-import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+import {
+    NewsCategory,
+    NewsDto,
+} from '@app/modules/repositories/news-repository';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,

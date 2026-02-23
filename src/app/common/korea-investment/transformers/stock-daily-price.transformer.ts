@@ -1,7 +1,7 @@
 import { Pipe } from '@common/types';
 import { toDateByKoreaInvestmentYmd } from '@common/utils';
 import { DomesticStockInquireDailyPriceOutput } from '@modules/korea-investment/common';
-import { StockDailyPriceDto } from '@app/controllers/stocks/dto/responses/get-stock-daily-prices.response';
+import { StockDailyPriceDto } from '@app/modules/domain/stock/dto/responses/get-stock-daily-prices.response';
 
 interface TransformerArgs {
     output: DomesticStockInquireDailyPriceOutput;

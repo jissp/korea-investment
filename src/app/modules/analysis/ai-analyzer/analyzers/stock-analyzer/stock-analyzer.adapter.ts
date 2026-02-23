@@ -1,6 +1,8 @@
 import { chunk } from 'lodash';
+import { Repository } from 'typeorm';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { uniqueValues } from '@common/utils';
 import { getMarketDivCodeByIsNextTrade, getStockName } from '@common/domains';
 import { GeminiCliModel } from '@modules/gemini-cli';
@@ -12,7 +14,7 @@ import {
 import { DomesticStockQuotationsInquireInvestorOutput } from '@modules/korea-investment/common';
 import { KoreaInvestmentQuotationClient } from '@modules/korea-investment/korea-investment-quotation-client';
 import { Stock, StockService } from '@app/modules/repositories/stock';
-import { NewsService, StockNews } from '@app/modules/repositories/news';
+import { StockNews } from '@app/modules/repositories/news-repository';
 import {
     AiAnalyzerQueueType,
     BaseAnalysisAdapter,
@@ -43,10 +45,11 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
         private readonly naverApiClientFactory: NaverApiClientFactory,
         private readonly koreaInvestmentQuotationClient: KoreaInvestmentQuotationClient,
         private readonly stockService: StockService,
-        private readonly newsService: NewsService,
         private readonly newsPromptTransformer: NewsPromptTransformer,
         private readonly stockIssuePromptTransformer: StockIssuePromptTransformer,
         private readonly riggedStockIssuePromptTransformer: RiggedStockIssuePromptTransformer,
+        @InjectRepository(StockNews)
+        private readonly stockNewsRepository: Repository<StockNews>,
     ) {}
 
     /**
@@ -66,9 +69,11 @@ export class StockAnalyzerAdapter implements BaseAnalysisAdapter<StockAnalysisDa
                     stock.isNextTrade,
                 ),
             }),
-            this.newsService.getStockNewsList({
-                stockCode,
-                limit: 30,
+            this.stockNewsRepository.find({
+                where: {
+                    stockCode,
+                },
+                take: 30,
             }),
         ]);
 

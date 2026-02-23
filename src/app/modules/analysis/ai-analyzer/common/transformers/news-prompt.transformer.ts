@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pipe } from '@common/types';
 import { removeTag } from '@common/utils';
 import { NaverApiNewsItem } from '@modules/naver/naver-api';
-import { News } from '@app/modules/repositories/news';
+import { News } from '@app/modules/repositories/news-repository';
 import { formatTemplate } from '@app/common/domains';
 import { NEWS_PROMPT_TEMPLATE } from '../prompts';
 

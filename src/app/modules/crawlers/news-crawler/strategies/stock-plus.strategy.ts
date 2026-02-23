@@ -5,7 +5,10 @@ import {
     StockPlusClient,
     StockPlusNews,
 } from '@modules/stock-plus';
-import { NewsCategory, NewsDto } from '@app/modules/repositories/news';
+import {
+    NewsCategory,
+    NewsDto,
+} from '@app/modules/repositories/news-repository';
 import {
     NewsStrategy,
     RequestCrawlingNewsJobPayload,

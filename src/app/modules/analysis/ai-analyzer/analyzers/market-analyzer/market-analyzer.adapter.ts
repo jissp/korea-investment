@@ -1,12 +1,10 @@
+import { In, Repository } from 'typeorm';
 import { FlowChildJob } from 'bullmq/dist/esm/interfaces/flow-job';
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { GeminiCliModel } from '@modules/gemini-cli';
 import { MarketType } from '@app/common/types';
-import {
-    News,
-    NewsCategory,
-    NewsService,
-} from '@app/modules/repositories/news';
+import { News, NewsCategory } from '@app/modules/repositories/news-repository';
 import {
     MarketIndex,
     MarketIndexService,
@@ -32,10 +30,11 @@ export class MarketAnalyzerAdapter implements BaseAnalysisAdapter<MarketAnalysis
 
     constructor(
         private readonly marketIndexService: MarketIndexService,
-        private readonly newsService: NewsService,
         private readonly globalIndexTransformer: GlobalIndexTransformer,
         private readonly globalMacroTransformer: GlobalMacroTransformer,
         private readonly newsPromptTransformer: NewsPromptTransformer,
+        @InjectRepository(News)
+        private readonly newsRepository: Repository<News>,
     ) {}
 
     /**
@@ -160,9 +159,14 @@ export class MarketAnalyzerAdapter implements BaseAnalysisAdapter<MarketAnalysis
      * @private
      */
     private async getNewsItems(limit: number = 100) {
-        return this.newsService.getNewsListByCategories({
-            categories: [NewsCategory.StockPlus, NewsCategory.GoogleBusiness],
-            limit,
+        return this.newsRepository.find({
+            where: {
+                category: In([
+                    NewsCategory.StockPlus,
+                    NewsCategory.GoogleBusiness,
+                ]),
+            },
+            take: limit,
         });
     }
 }
